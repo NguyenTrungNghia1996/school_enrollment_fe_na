@@ -1,7 +1,7 @@
 <template>
   <a-form :model="form" layout="vertical" autocomplete="off" @finish="handleLogin">
     <a-form-item :label="compact ? undefined : 'Tài khoản'" name="username" :rules="[{ required: true, message: 'Tên đăng nhập là bắt buộc' }]">
-      <a-input v-model:value="form.username" :placeholder="compact ? 'Địa chỉ email' : 'Nhập tài khoản của bạn'" size="large">
+      <a-input v-model:value="form.username" :placeholder="compact ? 'Địa chỉ email' : 'Nhập tài khoản của bạn'">
         <template #prefix>
           <Icon v-if="!compact" name="ant-design:user-outlined" class="text-gray-400" />
         </template>
@@ -9,7 +9,7 @@
     </a-form-item>
 
     <a-form-item :label="compact ? undefined : 'Mật khẩu'" name="password" :rules="[{ required: true, message: 'Mật khẩu là bắt buộc' }]">
-      <a-input-password v-model:value="form.password" placeholder="Nhập mật khẩu" size="large">
+      <a-input-password v-model:value="form.password" placeholder="Nhập mật khẩu">
         <template #prefix>
           <Icon v-if="!compact" name="ant-design:lock-outlined" class="text-gray-400" />
         </template>
@@ -21,7 +21,7 @@
     </div>
 
     <a-form-item :class="compact ? 'mb-0 mt-6' : 'mb-0'">
-      <a-button type="primary" html-type="submit" size="large" block :loading="loading">Đăng nhập</a-button>
+      <a-button type="primary" html-type="submit" block :loading="loading">Đăng nhập</a-button>
     </a-form-item>
   </a-form>
 </template>

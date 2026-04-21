@@ -1,12 +1,12 @@
 <template>
-  <div class="relative w-full overflow-hidden pb-12">
-    <div class="pointer-events-none absolute -left-[10%] -top-[10%] h-[500px] w-[500px] rounded-full bg-[#173b84]/10 mix-blend-multiply blur-[100px]"></div>
+  <div class="relative w-full overflow-hidden pb-5">
+    <!-- <div class="pointer-events-none absolute -left-[10%] -top-[10%] h-[500px] w-[500px] rounded-full bg-[#173b84]/10 mix-blend-multiply blur-[100px]"></div>
     <div class="pointer-events-none absolute -bottom-[10%] -right-[10%] h-[600px] w-[600px] rounded-full bg-[#43a846]/10 mix-blend-multiply blur-[120px]"></div>
-    <div class="pointer-events-none absolute left-[40%] top-[20%] h-[300px] w-[300px] rounded-full bg-[#eef4ff]/50 mix-blend-multiply blur-[80px]"></div>
+    <div class="pointer-events-none absolute left-[40%] top-[20%] h-[300px] w-[300px] rounded-full bg-[#eef4ff]/50 mix-blend-multiply blur-[80px]"></div> -->
 
     <div class="relative z-10 flex flex-col pt-8">
       <div class="w-full px-4 lg:px-8 2xl:px-12">
-        <div class="grid flex-1 grid-cols-1 gap-12 lg:grid-cols-[1fr_420px] xl:grid-cols-[1fr_480px]">
+        <div class="flex flex-col gap-12">
           <section class="flex flex-col">
             <div class="flex-1 rounded-3xl border border-white bg-white/60 p-6 shadow-[0_8px_30px_rgba(0,0,0,0.04)] backdrop-blur-3xl md:p-8">
               <nav class="mb-8 flex space-x-2 rounded-xl bg-slate-200/50 p-1 backdrop-blur-sm">
@@ -17,7 +17,7 @@
               </nav>
 
               <div class="flex flex-1 flex-col transition-all duration-500">
-                <div v-if="activeTab === 'exams'" class="grid gap-6 sm:grid-cols-2">
+                <div v-if="activeTab === 'exams'" class="grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
                   <article v-for="exam in exams" :key="exam.title" class="group relative flex flex-col justify-between overflow-hidden rounded-2xl bg-white p-6 shadow-sm ring-1 ring-slate-200 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:ring-[#173b84]/30">
                     <div class="absolute left-0 top-0 h-full w-1 origin-top scale-y-0 transform bg-gradient-to-b from-[#173b84] to-[#ed1b2f] transition-transform duration-300 group-hover:scale-y-100"></div>
 
@@ -64,42 +64,6 @@
               </div>
             </div>
           </section>
-
-          <aside class="relative flex w-full flex-col">
-            <div class="sticky top-[150px] z-10 overflow-hidden rounded-3xl bg-white p-8 shadow-[0_20px_50px_rgba(23,59,132,0.08)] ring-1 ring-slate-200/60 lg:p-10">
-              <div class="pointer-events-none absolute right-0 top-0 rounded-bl-full bg-gradient-to-br from-[#173b84]/5 to-transparent p-32"></div>
-
-              <div class="relative z-10 mb-8 text-center">
-                <div class="mx-auto mb-6 flex h-16 w-16 transform items-center justify-center rounded-2xl bg-gradient-to-tr from-[#173b84] to-[#0a1e42] text-white shadow-lg shadow-[#173b84]/20 transition-transform hover:-rotate-3">
-                  <Icon name="lucide:shield-check" class="text-3xl" />
-                </div>
-                <h2 class="text-3xl font-extrabold uppercase tracking-tight text-[#071f41]">{{ authTitle }}</h2>
-                <p class="mx-auto mt-3 max-w-[280px] text-sm leading-relaxed text-slate-500">Truy cập hệ thống quản lý hồ sơ đăng ký và theo dõi thông tin thi.</p>
-              </div>
-
-              <div class="relative z-10 min-h-[300px]">
-                <transition name="fade" mode="out-in">
-                  <UserLoginForm v-if="authMode === 'login'" :key="'login'" compact @authenticated="handleAuthenticated" />
-                  <UserRegisterForm v-else :key="'register'" @registered="handleRegistered" />
-                </transition>
-              </div>
-
-              <div class="relative z-10 mt-8 flex items-center justify-between text-sm">
-                <div class="h-px flex-1 bg-slate-200"></div>
-                <span class="px-4 text-xs font-semibold uppercase tracking-wider text-slate-400">Hoặc</span>
-                <div class="h-px flex-1 bg-slate-200"></div>
-              </div>
-
-              <div class="relative z-10 mt-6 grid grid-cols-1 gap-4">
-                <a-button size="large" block @click="authMode = authMode === 'login' ? 'register' : 'login'">
-                  {{ authMode === "login" ? "Tạo tài khoản mới" : "Đã có tài khoản? Đăng nhập" }}
-                </a-button>
-                <div class="pt-2 text-center">
-                  <a-button v-if="authMode === 'login'" type="link">Quên mật khẩu?</a-button>
-                </div>
-              </div>
-            </div>
-          </aside>
         </div>
       </div>
     </div>
@@ -115,7 +79,6 @@ definePageMeta({
 type TabKey = "exams" | "notifications" | "support";
 
 const activeTab = ref<TabKey>("exams");
-const authMode = ref<"login" | "register">("login");
 const unitStore = useUnitStore();
 
 const tabs: { key: TabKey; label: string; icon: string }[] = [
@@ -143,12 +106,18 @@ const exams = [
     start: "20/03/2026 00:00:00",
     end: "18/04/2026 23:59:00",
   },
-];
-
-const stats = [
-  { label: "Đợt thi", value: exams.length },
-  { label: "Đang mở", value: 0 },
-  { label: "Hỗ trợ", value: "24/7" },
+  {
+    title: "Kỳ thi SPT năm 2026",
+    status: "Sắp mở",
+    start: "15/03/2026 14:00:00",
+    end: "15/04/2026 23:59:00",
+  },
+  {
+    title: "Học sinh giỏi cấp trường ĐHSP Hà Nội năm 2026",
+    status: "Sắp mở",
+    start: "20/03/2026 00:00:00",
+    end: "18/04/2026 23:59:00",
+  },
 ];
 
 const inactiveContent = {
@@ -165,14 +134,4 @@ const inactiveContent = {
 } as const;
 
 const activeContent = computed(() => inactiveContent[activeTab.value as keyof typeof inactiveContent] || inactiveContent.notifications);
-const authTitle = computed(() => (authMode.value === "login" ? "Đăng nhập" : "Đăng ký"));
-
-const handleAuthenticated = () => {
-  message.success("Bạn đã đăng nhập thành công");
-};
-
-const handleRegistered = (username: string) => {
-  authMode.value = "login";
-  message.info(`Tài khoản ${username} đã sẵn sàng đăng nhập`);
-};
 </script>
