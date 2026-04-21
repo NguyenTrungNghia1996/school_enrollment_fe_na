@@ -11,6 +11,7 @@
 
       <UserFooter />
     </div>
+    <UserAuthModal />
   </div>
 </template>
 

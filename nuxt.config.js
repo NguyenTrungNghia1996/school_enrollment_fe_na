@@ -4,14 +4,14 @@ export default defineNuxtConfig({
   devtools: { enabled: true },
   app: {
     head: {
-      titleTemplate: "%s - Nuxt4",
-      title: "Nuxt4 - Template",
+      titleTemplate: "%s - Trường THCS Giảng Võ",
+      title: "Trường THCS Giảng Võ",
       link: [
         {
           rel: "stylesheet",
           href: "https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap",
         },
-        // { rel: "icon", type: "image/x-icon", href: "/logo.png" },
+        { rel: "icon", type: "image/x-icon", href: "/images/logo.png" },
       ],
     },
   },

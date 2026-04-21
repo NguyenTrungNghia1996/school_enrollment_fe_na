@@ -3,6 +3,10 @@ import { defineStore } from "pinia";
 export const useUserStore = defineStore("user", {
   state: () => ({
     user: {},
+    authModal: {
+      isOpen: false,
+      mode: "login",
+    },
   }),
 
   actions: {
@@ -11,6 +15,17 @@ export const useUserStore = defineStore("user", {
     },
     logout() {
       this.user = {};
+    },
+    openLogin() {
+      this.authModal.isOpen = true;
+      this.authModal.mode = "login";
+    },
+    openRegister() {
+      this.authModal.isOpen = true;
+      this.authModal.mode = "register";
+    },
+    closeAuthModal() {
+      this.authModal.isOpen = false;
     },
   },
 

@@ -35,8 +35,20 @@
 </template>
 
 <script setup>
-const isOpen = defineModel("open", { default: false });
-const authMode = ref("login");
+const userStore = useUserStore();
+
+const isOpen = computed({
+  get: () => userStore.authModal.isOpen,
+  set: (val) => {
+    if (!val) userStore.closeAuthModal();
+  },
+});
+
+const authMode = computed({
+  get: () => userStore.authModal.mode,
+  set: (val) => (userStore.authModal.mode = val),
+});
+
 const authTitle = computed(() => (authMode.value === "login" ? "Đăng nhập" : "Đăng ký"));
 </script>
 

@@ -7,7 +7,7 @@
 
       <div class="flex items-center gap-4">
         <template v-if="!userStore.token">
-          <a-button type="primary" class="flex h-10 items-center gap-2 rounded-xl bg-[#173b84] px-6 font-bold shadow-lg shadow-[#173b84]/20 transition-all hover:scale-105 hover:bg-[#0a1e42]" @click="showLogin = true">
+          <a-button type="primary" class="flex h-10 items-center gap-2 rounded-xl bg-[#173b84] px-6 font-bold shadow-lg shadow-[#173b84]/20 transition-all hover:scale-105 hover:bg-[#0a1e42]" @click="userStore.openLogin()">
             <Icon name="lucide:user" />
             ĐĂNG NHẬP
           </a-button>
@@ -42,14 +42,13 @@
       </div>
     </div>
 
-    <UserAuthModal v-model:open="showLogin" />
+    <!-- Global Modal -->
   </header>
 </template>
 
 <script setup>
 const unitStore = useUnitStore();
 const userStore = useUserStore();
-const showLogin = ref(false);
 
 const handleLogout = () => {
   userStore.logout();
