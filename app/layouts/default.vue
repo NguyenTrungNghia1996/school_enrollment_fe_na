@@ -1,19 +1,17 @@
 <template>
-  <div class="flex h-screen w-full flex-col overflow-auto bg-gray-200">
-    <div class="h-14">
-      <!-- <AdminHeader /> -->
-    </div>
-    <div class="flex min-h-[calc(100vh-60px)] w-full flex-1 overflow-hidden">
-      <!-- <AdminMenu /> -->
-      <div class="flex flex-1 flex-col overflow-hidden">
-        <div class="sticky top-0 z-10 bg-white">
-          BaseBreadcrumb
-          <!-- <BaseBreadcrumb /> -->
-        </div>
-        <div class="flex-1 overflow-y-auto p-2">
+  <div class="min-h-screen bg-slate-50 text-slate-900">
+    <UserHeader />
+
+    <div class="flex min-h-screen flex-col pt-[100px]">
+      <main class="flex-1">
+        <div class="w-full">
           <slot />
         </div>
-      </div>
+      </main>
+
+      <UserFooter />
     </div>
   </div>
 </template>
+
+<script setup></script>

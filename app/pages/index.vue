@@ -71,11 +71,6 @@
 </template>
 
 <script setup>
-definePageMeta({
-  layout: "user",
-  fullWidth: true,
-});
-
 const activeTab = ref("exams");
 const unitStore = useUnitStore();
 
