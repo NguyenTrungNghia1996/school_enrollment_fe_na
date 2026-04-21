@@ -39,9 +39,7 @@
 </template>
 
 <script setup>
-const emit = defineEmits(["registered"]);
-
-const { auth } = useApi();
+const { authUser } = useApi();
 const loading = ref(false);
 
 const form = reactive({
@@ -56,7 +54,7 @@ const handleRegister = async () => {
   loading.value = true;
 
   try {
-    const { data, error } = await auth.register({ body: { ...form } });
+    const { data, error } = await authUser.register({ body: { ...form } });
 
     if (error.value || data.value?.status !== "success") {
       throw new Error(error.value?.data?.message || data.value?.message || "Đăng ký thất bại");

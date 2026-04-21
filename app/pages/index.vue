@@ -1,8 +1,8 @@
 <template>
   <div class="relative w-full overflow-hidden pb-5">
-    <!-- <div class="pointer-events-none absolute -left-[10%] -top-[10%] h-[500px] w-[500px] rounded-full bg-[#173b84]/10 mix-blend-multiply blur-[100px]"></div>
+    <div class="pointer-events-none absolute -left-[10%] -top-[10%] h-[500px] w-[500px] rounded-full bg-[#173b84]/10 mix-blend-multiply blur-[100px]"></div>
     <div class="pointer-events-none absolute -bottom-[10%] -right-[10%] h-[600px] w-[600px] rounded-full bg-[#43a846]/10 mix-blend-multiply blur-[120px]"></div>
-    <div class="pointer-events-none absolute left-[40%] top-[20%] h-[300px] w-[300px] rounded-full bg-[#eef4ff]/50 mix-blend-multiply blur-[80px]"></div> -->
+    <div class="pointer-events-none absolute left-[40%] top-[20%] h-[300px] w-[300px] rounded-full bg-[#eef4ff]/50 mix-blend-multiply blur-[80px]"></div>
 
     <div class="relative z-10 flex flex-col pt-8">
       <div class="w-full px-4 lg:px-8 2xl:px-12">
