@@ -8,8 +8,8 @@
       <div class="w-full px-4 lg:px-8 2xl:px-12">
         <div class="flex flex-col gap-12">
           <section class="flex flex-col">
-            <div class="flex-1 rounded-3xl border border-white bg-white/60 p-6 shadow-[0_8px_30px_rgba(0,0,0,0.04)] backdrop-blur-3xl md:p-8">
-              <nav class="mb-8 flex space-x-2 rounded-xl bg-slate-200/50 p-1 backdrop-blur-sm">
+            <div class="flex-1 rounded-xl border border-white bg-white/60 p-6 shadow-[0_8px_30px_rgba(0,0,0,0.04)] backdrop-blur-3xl md:p-8">
+              <nav class="mb-8 flex space-x-2 rounded-lg bg-slate-200/50 p-1 backdrop-blur-sm">
                 <button v-for="tab in tabs" :key="tab.key" type="button" class="flex flex-1 items-center justify-center gap-2 rounded-lg px-4 py-3 text-sm font-semibold transition-all duration-300" :class="activeTab === tab.key ? 'bg-white text-[#173b84] shadow-sm' : 'text-slate-500 hover:bg-slate-50/50 hover:text-slate-800'" @click="activeTab = tab.key">
                   <Icon :name="tab.icon" class="text-lg" />
                   <span class="hidden sm:inline">{{ tab.label }}</span>
@@ -18,7 +18,7 @@
 
               <div class="flex flex-1 flex-col transition-all duration-500">
                 <div v-if="activeTab === 'exams'" class="grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
-                  <article v-for="exam in exams" :key="exam.title" class="group relative flex flex-col justify-between overflow-hidden rounded-2xl bg-white p-6 shadow-sm ring-1 ring-slate-200 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:ring-[#173b84]/30">
+                  <article v-for="exam in exams" :key="exam.title" class="group relative flex flex-col justify-between overflow-hidden rounded-xl bg-white p-6 shadow-sm ring-1 ring-slate-200 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:ring-[#173b84]/30">
                     <div class="absolute left-0 top-0 h-full w-1 origin-top scale-y-0 transform bg-gradient-to-b from-[#173b84] to-[#ed1b2f] transition-transform duration-300 group-hover:scale-y-100"></div>
 
                     <div>
