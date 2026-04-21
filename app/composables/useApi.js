@@ -10,5 +10,10 @@ export const useApi = () => {
         return request.post("/api/v1/auth/login", options ?? {});
       },
     },
+    authAdmin: {
+      login(options) {
+        return request.post("/api/v1/auth/admin/login", options ?? {});
+      },
+    },
   };
 };
