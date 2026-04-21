@@ -1,6 +1,6 @@
 stages:
   - push_registry
-  - push_dockerhub
+  # - push_dockerhub
   - cleanup
   - deploy
 
@@ -56,30 +56,30 @@ docker-build-and-push-gitlab:
       docker push $IMAGE_NAME:$TAG_BRANCH
       docker push $IMAGE_NAME:$TAG_CACHE
 
-docker-push-dockerhub:
-  stage: push_dockerhub
-  image: docker:latest
-  needs: ["docker-build-and-push-gitlab"]
-  rules:
-    - if: '$CI_COMMIT_BRANCH == "deploy"'
-      when: on_success
-  before_script:
-    - echo "$CI_REGISTRY_PASSWORD" | docker login -u "$CI_REGISTRY_USER" --password-stdin $CI_REGISTRY
-    - echo "$DOCKER_HUB_TOKEN" | docker login -u "$DOCKER_HUB_USERNAME" --password-stdin
-  script:
-    - |
-      TAG_LATEST="latest"
-      TAG_BRANCH="$CI_COMMIT_REF_NAME-$CI_PIPELINE_ID"
+# docker-push-dockerhub:
+#   stage: push_dockerhub
+#   image: docker:latest
+#   needs: ["docker-build-and-push-gitlab"]
+#   rules:
+#     - if: '$CI_COMMIT_BRANCH == "deploy"'
+#       when: on_success
+#   before_script:
+#     - echo "$CI_REGISTRY_PASSWORD" | docker login -u "$CI_REGISTRY_USER" --password-stdin $CI_REGISTRY
+#     - echo "$DOCKER_HUB_TOKEN" | docker login -u "$DOCKER_HUB_USERNAME" --password-stdin
+#   script:
+#     - |
+#       TAG_LATEST="latest"
+#       TAG_BRANCH="$CI_COMMIT_REF_NAME-$CI_PIPELINE_ID"
 
-      echo "Pulling from GitLab Registry..."
-      docker pull $IMAGE_NAME:$TAG_LATEST
+#       echo "Pulling from GitLab Registry..."
+#       docker pull $IMAGE_NAME:$TAG_LATEST
 
-      echo "Tagging and Pushing to Docker Hub..."
-      docker tag $IMAGE_NAME:$TAG_LATEST $DOCKER_HUB_USERNAME/$DOCKER_HUB_REPO:$TAG_LATEST
-      docker tag $IMAGE_NAME:$TAG_LATEST $DOCKER_HUB_USERNAME/$DOCKER_HUB_REPO:$TAG_BRANCH
+#       echo "Tagging and Pushing to Docker Hub..."
+#       docker tag $IMAGE_NAME:$TAG_LATEST $DOCKER_HUB_USERNAME/$DOCKER_HUB_REPO:$TAG_LATEST
+#       docker tag $IMAGE_NAME:$TAG_LATEST $DOCKER_HUB_USERNAME/$DOCKER_HUB_REPO:$TAG_BRANCH
 
-      docker push $DOCKER_HUB_USERNAME/$DOCKER_HUB_REPO:$TAG_LATEST
-      docker push $DOCKER_HUB_USERNAME/$DOCKER_HUB_REPO:$TAG_BRANCH
+#       docker push $DOCKER_HUB_USERNAME/$DOCKER_HUB_REPO:$TAG_LATEST
+#       docker push $DOCKER_HUB_USERNAME/$DOCKER_HUB_REPO:$TAG_BRANCH
 
 docker-cleanup:
   stage: cleanup
