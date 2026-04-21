@@ -4,7 +4,7 @@
 
     <div class="flex min-h-screen flex-col pt-[100px]">
       <main class="flex-1">
-        <div :class="contentClass">
+        <div class="w-full">
           <slot />
         </div>
       </main>
@@ -14,14 +14,4 @@
   </div>
 </template>
 
-<script setup lang="ts">
-const route = useRoute();
-
-const contentClass = computed(() => {
-  if (route.meta.fullWidth) {
-    return "w-full";
-  }
-
-  return "mx-auto w-full max-w-7xl px-4 py-6 sm:px-6 lg:px-8";
-});
-</script>
+<script setup></script>

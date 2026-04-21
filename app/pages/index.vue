@@ -79,8 +79,8 @@
 
               <div class="relative z-10 min-h-[300px]">
                 <transition name="fade" mode="out-in">
-                  <AuthLoginForm v-if="authMode === 'login'" :key="'login'" compact @authenticated="handleAuthenticated" />
-                  <AuthRegisterForm v-else :key="'register'" @registered="handleRegistered" />
+                  <UserLoginForm v-if="authMode === 'login'" :key="'login'" compact @authenticated="handleAuthenticated" />
+                  <UserRegisterForm v-else :key="'register'" @registered="handleRegistered" />
                 </transition>
               </div>
 
