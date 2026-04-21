@@ -1,19 +1,13 @@
-// composables/useRequest.ts
+// composables/useRequest.js
 import { useJwt } from "@vueuse/integrations/useJwt";
-import type { FetchContext, FetchResponse } from "ofetch";
-import type { UseFetchOptions } from "#app";
-import type { ApiResponse } from "@/types/api";
 
 export class Request {
-  private baseURL: string;
-
   constructor() {
     const config = useRuntimeConfig();
-
     this.baseURL = config.public.baseURL;
   }
 
-  private isTokenValid(token: string) {
+  isTokenValid(token) {
     const { payload } = useJwt(token);
     const exp = payload.value?.exp;
     const expTime = typeof exp === "string" ? Number(exp) : exp;
@@ -24,11 +18,11 @@ export class Request {
   // =========================
   // HANDLERS CHUNG
   // =========================
-  private handlers() {
+  handlers() {
     const userStore = useUserStore();
 
     return {
-      onRequest: (ctx: FetchContext) => {
+      onRequest: (ctx) => {
         const token = userStore.token;
 
         if (!token) return;
@@ -46,11 +40,11 @@ export class Request {
         ctx.options.headers = headers;
       },
 
-      onResponse(ctx: { response: FetchResponse<ApiResponse<any>> }) {
+      onResponse(ctx) {
         return ctx.response._data;
       },
 
-      async onResponseError(ctx: { response: FetchResponse<ApiResponse<any>> }) {
+      async onResponseError(ctx) {
         if (ctx.response.status === 401) {
           message.info("Phiên đăng nhập đã hết hạn");
           userStore.logout();
@@ -63,10 +57,10 @@ export class Request {
   }
 
   // =========================
-  // REQUEST GỐC (TYPED)
+  // REQUEST GỐC
   // =========================
-  request<T>(url: string, options: UseFetchOptions<ApiResponse<T>> = {}) {
-    return useFetch<ApiResponse<T>>(url, {
+  request(url, options = {}) {
+    return useFetch(url, {
       baseURL: this.baseURL,
       ...options,
       ...this.handlers(),
@@ -74,38 +68,38 @@ export class Request {
   }
 
   // =========================
-  // METHODS (FIXED METHOD TYPE)
+  // METHODS
   // =========================
-  get<T>(url: string, options?: UseFetchOptions<ApiResponse<T>>) {
-    return this.request<T>(url, {
+  get(url, options) {
+    return this.request(url, {
       method: "GET",
       ...options,
     });
   }
 
-  post<T>(url: string, options?: UseFetchOptions<ApiResponse<T>>) {
-    return this.request<T>(url, {
+  post(url, options) {
+    return this.request(url, {
       method: "POST",
       ...options,
     });
   }
 
-  put<T>(url: string, options?: UseFetchOptions<ApiResponse<T>>) {
-    return this.request<T>(url, {
+  put(url, options) {
+    return this.request(url, {
       method: "PUT",
       ...options,
     });
   }
 
-  patch<T>(url: string, options?: UseFetchOptions<ApiResponse<T>>) {
-    return this.request<T>(url, {
+  patch(url, options) {
+    return this.request(url, {
       method: "PATCH",
       ...options,
     });
   }
 
-  delete<T>(url: string, options?: UseFetchOptions<ApiResponse<T>>) {
-    return this.request<T>(url, {
+  delete(url, options) {
+    return this.request(url, {
       method: "DELETE",
       ...options,
     });

@@ -9,7 +9,7 @@ export const useCounterStore = defineStore("counter", {
     doubleCount: (state) => state.count * 2,
   },
   actions: {
-    setCount(value: number) {
+    setCount(value) {
       this.count = value;
       this.touch();
     },

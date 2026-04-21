@@ -1,28 +1,3 @@
-import { Request } from "./useRequest";
-
-type RequestOptions = {
-  params?: Record<string, any>;
-  body?: any;
-  key?: string;
-};
-
-export type RegisterPayload = {
-  username: string;
-  password: string;
-  email: string;
-  phone_number: string;
-  full_name: string;
-};
-
-export type LoginPayload = {
-  username: string;
-  password: string;
-};
-
-export type LoginResponse = {
-  access_token: string;
-};
-
 export const useApi = () => {
   const request = new Request();
 
@@ -50,11 +25,11 @@ export const useApi = () => {
     unitMe: useCrudApi("/unit/unit_me"),
 
     auth: {
-      register(options?: RequestOptions) {
-        return request.post<unknown>("/api/v1/auth/register", options ?? {});
+      register(options) {
+        return request.post("/api/v1/auth/register", options ?? {});
       },
-      login(options?: RequestOptions) {
-        return request.post<LoginResponse>("/api/v1/auth/login", options ?? {});
+      login(options) {
+        return request.post("/api/v1/auth/login", options ?? {});
       },
     },
   };

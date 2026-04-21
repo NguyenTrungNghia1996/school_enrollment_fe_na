@@ -26,16 +26,15 @@
   </a-form>
 </template>
 
-<script setup lang="ts">
-import type { LoginPayload } from "@/composables/useApi";
+<script setup>
+const props = defineProps({
+  compact: {
+    type: Boolean,
+    default: false,
+  },
+});
 
-defineProps<{
-  compact?: boolean;
-}>();
-
-const emit = defineEmits<{
-  authenticated: [];
-}>();
+const emit = defineEmits(["authenticated"]);
 
 const { auth } = useApi();
 const { rememberMe, saveCredentials, getCredentials, clearCredentials } = useAuth();
@@ -43,7 +42,7 @@ const userStore = useUserStore();
 const savedCredentials = getCredentials();
 const loading = ref(false);
 
-const form = reactive<LoginPayload>({
+const form = reactive({
   username: savedCredentials?.username || "",
   password: savedCredentials?.password || "",
 });
@@ -76,7 +75,7 @@ const handleLogin = async () => {
 
     message.success(data.value.message || "Đăng nhập thành công");
     emit("authenticated");
-  } catch (error: any) {
+  } catch (error) {
     message.error(error?.message || "Đăng nhập thất bại");
   } finally {
     loading.value = false;

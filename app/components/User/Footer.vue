@@ -52,7 +52,7 @@
   </footer>
 </template>
 
-<script setup lang="ts">
+<script setup>
 const unitStore = useUnitStore();
 const currentYear = new Date().getFullYear();
 </script>

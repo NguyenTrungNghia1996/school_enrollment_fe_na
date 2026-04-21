@@ -1,16 +1,12 @@
 import { defineStore } from "pinia";
 
-type UserState = {
-  user: Record<string, any>;
-};
-
 export const useUserStore = defineStore("user", {
-  state: (): UserState => ({
+  state: () => ({
     user: {},
   }),
 
   actions: {
-    setUser(value: Record<string, any>) {
+    setUser(value) {
       this.user = value || {};
     },
     logout() {

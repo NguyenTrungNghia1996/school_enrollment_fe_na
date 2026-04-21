@@ -5,7 +5,7 @@
         <div class="mx-auto mb-6 flex h-16 w-16 transform items-center justify-center rounded-2xl bg-gradient-to-tr from-[#173b84] to-[#0a1e42] text-white shadow-lg shadow-[#173b84]/20 transition-transform">
           <Icon name="lucide:shield-check" class="text-3xl" />
         </div>
-        <h2 class="text-3xl font-extrabold uppercase tracking-tight text-[#071f41]">{{ authTitle }}</h2>
+        <h2 class="text-2xl font-extrabold uppercase tracking-tight text-[#071f41]">{{ authTitle }}</h2>
         <p class="mx-auto mt-3 max-w-[280px] text-sm leading-relaxed text-slate-500">Truy cập hệ thống quản lý hồ sơ đăng ký và theo dõi thông tin thi.</p>
       </div>
 
@@ -34,9 +34,9 @@
   </a-modal>
 </template>
 
-<script setup lang="ts">
-const isOpen = defineModel<boolean>("open", { default: false });
-const authMode = ref<"login" | "register">("login");
+<script setup>
+const isOpen = defineModel("open", { default: false });
+const authMode = ref("login");
 
 const authTitle = computed(() => (authMode.value === "login" ? "Đăng nhập" : "Đăng ký"));
 
@@ -44,7 +44,7 @@ const handleAuthenticated = () => {
   isOpen.value = false;
 };
 
-const handleRegistered = (username: string) => {
+const handleRegistered = username => {
   authMode.value = "login";
   message.info(`Tài khoản ${username} đã sẵn sàng đăng nhập`);
 };

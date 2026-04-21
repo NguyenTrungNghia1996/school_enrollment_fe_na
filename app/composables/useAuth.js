@@ -1,15 +1,14 @@
 import CryptoJS from "crypto-js";
-import { useCookie } from "#app";
 
 const ENCRYPTION_KEY = process.env.NUXT_ENCRYPTION_KEY || "your-secret-key";
 
 export const useAuth = () => {
-  const rememberMe = useCookie<boolean>("rememberMe", {
+  const rememberMe = useCookie("rememberMe", {
     default: () => false,
     maxAge: 60 * 60 * 24 * 30, // 30 ngày
   });
 
-  const saveCredentials = (username: string, password: string) => {
+  const saveCredentials = (username, password) => {
     const encryptedPassword = CryptoJS.AES.encrypt(password, ENCRYPTION_KEY).toString();
 
     const usernameCookie = useCookie("username", {

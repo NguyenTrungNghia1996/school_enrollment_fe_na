@@ -38,17 +38,13 @@
   </a-form>
 </template>
 
-<script setup lang="ts">
-import type { RegisterPayload } from "@/composables/useApi";
-
-const emit = defineEmits<{
-  registered: [username: string];
-}>();
+<script setup>
+const emit = defineEmits(["registered"]);
 
 const { auth } = useApi();
 const loading = ref(false);
 
-const form = reactive<RegisterPayload>({
+const form = reactive({
   username: "",
   password: "",
   email: "",
@@ -76,7 +72,7 @@ const handleRegister = async () => {
       phone_number: "",
       full_name: "",
     });
-  } catch (error: any) {
+  } catch (error) {
     message.error(error?.message || "Đăng ký thất bại");
   } finally {
     loading.value = false;

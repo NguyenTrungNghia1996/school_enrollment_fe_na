@@ -10,7 +10,7 @@
           <section class="flex flex-col">
             <div class="flex-1 rounded-3xl border border-white bg-white/60 p-6 shadow-[0_8px_30px_rgba(0,0,0,0.04)] backdrop-blur-3xl md:p-8">
               <nav class="mb-8 flex space-x-2 rounded-xl bg-slate-200/50 p-1 backdrop-blur-sm">
-                <button v-for="tab in tabs" :key="tab.key" type="button" class="flex flex-1 items-center justify-center gap-2 rounded-lg px-4 py-3 text-sm font-semibold transition-all duration-300" :class="activeTab === tab.key ? 'bg-white text-[#173b84] shadow-sm' : 'text-slate-500 hover:bg-slate-50/50 hover:text-slate-800'" @click="activeTab = tab.key as TabKey">
+                <button v-for="tab in tabs" :key="tab.key" type="button" class="flex flex-1 items-center justify-center gap-2 rounded-lg px-4 py-3 text-sm font-semibold transition-all duration-300" :class="activeTab === tab.key ? 'bg-white text-[#173b84] shadow-sm' : 'text-slate-500 hover:bg-slate-50/50 hover:text-slate-800'" @click="activeTab = tab.key">
                   <Icon :name="tab.icon" class="text-lg" />
                   <span class="hidden sm:inline">{{ tab.label }}</span>
                 </button>
@@ -70,18 +70,16 @@
   </div>
 </template>
 
-<script setup lang="ts">
+<script setup>
 definePageMeta({
   layout: "user",
   fullWidth: true,
 });
 
-type TabKey = "exams" | "notifications" | "support";
-
-const activeTab = ref<TabKey>("exams");
+const activeTab = ref("exams");
 const unitStore = useUnitStore();
 
-const tabs: { key: TabKey; label: string; icon: string }[] = [
+const tabs = [
   { key: "exams", label: "Đợt khảo thí", icon: "ant-design:read-outlined" },
   { key: "notifications", label: "Thông báo", icon: "ant-design:notification-outlined" },
   { key: "support", label: "Phản hồi - Hỗ trợ", icon: "ant-design:message-outlined" },
@@ -131,7 +129,7 @@ const inactiveContent = {
     title: "Phản hồi - Hỗ trợ",
     description: "Gửi yêu cầu hỗ trợ hoặc theo dõi phản hồi từ trung tâm.",
   },
-} as const;
+};
 
-const activeContent = computed(() => inactiveContent[activeTab.value as keyof typeof inactiveContent] || inactiveContent.notifications);
+const activeContent = computed(() => inactiveContent[activeTab.value] || inactiveContent.notifications);
 </script>

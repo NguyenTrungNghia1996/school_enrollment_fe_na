@@ -46,7 +46,7 @@
   </header>
 </template>
 
-<script setup lang="ts">
+<script setup>
 const unitStore = useUnitStore();
 const userStore = useUserStore();
 const showLogin = ref(false);

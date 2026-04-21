@@ -1,19 +1,7 @@
 import { defineStore } from "pinia";
 
-type LoadingState = {
-  title: string;
-  description: string;
-  isActive: boolean;
-  showLogo: boolean;
-  transparent: boolean;
-};
-
-type SettingState = {
-  loading: LoadingState;
-};
-
 export const useSettingStore = defineStore("setting", {
-  state: (): SettingState => ({
+  state: () => ({
     loading: {
       title: "Đang xử lý",
       description: "Vui lòng chờ trong giây lát...",
@@ -23,10 +11,10 @@ export const useSettingStore = defineStore("setting", {
     },
   }),
   actions: {
-    setLoading(value: boolean) {
+    setLoading(value) {
       this.loading.isActive = value;
     },
-    setDetailLoading(value: LoadingState) {
+    setDetailLoading(value) {
       this.loading = value;
     },
   },

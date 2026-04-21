@@ -1,15 +1,6 @@
 import { defineStore } from "pinia";
 
-export type UnitInfo = {
-  name: string;
-  address: string;
-  email: string;
-  phone: string;
-  logo: string;
-  logo_full: string;
-};
-
-const DEFAULT_UNIT: UnitInfo = {
+const DEFAULT_UNIT = {
   name: "TRƯỜNG TRUNG HỌC CƠ SỞ GIẢNG VÕ",
   address: "1 Trần Huy Liệu, Phường Giảng Võ, TP. Hà Nội",
   email: "c2giangvo-bd@hanoiedu.vn",
@@ -18,17 +9,13 @@ const DEFAULT_UNIT: UnitInfo = {
   logo_full: "/images/logo_full.png",
 };
 
-type UnitState = {
-  unit: UnitInfo;
-};
-
 export const useUnitStore = defineStore("unit", {
-  state: (): UnitState => ({
+  state: () => ({
     unit: { ...DEFAULT_UNIT },
   }),
 
   actions: {
-    setUnit(data?: Partial<UnitInfo> | null) {
+    setUnit(data) {
       this.unit = {
         ...DEFAULT_UNIT,
         ...(data ?? {}),

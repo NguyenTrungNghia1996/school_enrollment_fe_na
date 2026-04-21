@@ -9,6 +9,7 @@ dayjs.extend(relativeTime);
 dayjs.extend(utc);
 dayjs.extend(timezone);
 dayjs.tz.setDefault("Asia/Ho_Chi_Minh");
+
 export default defineNuxtPlugin(() => {
   return {
     provide: {

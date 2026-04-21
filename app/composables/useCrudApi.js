@@ -1,43 +1,35 @@
-import { Request } from "./useRequest";
-
-type RequestOptions = {
-  params?: Record<string, any>;
-  body?: any;
-  key?: string;
-};
-
-export const useCrudApi = (endpoint: string) => {
+export const useCrudApi = (endpoint) => {
   const request = new Request();
 
   return {
-    get(options?: RequestOptions) {
+    get(options) {
       return request.get(endpoint, options ?? {});
     },
-    getByRest(id: string | number, options?: RequestOptions) {
+    getByRest(id, options) {
       return request.get(`${endpoint}/${id}`, options ?? {});
     },
-    post(options?: RequestOptions) {
+    post(options) {
       return request.post(endpoint, options ?? {});
     },
-    postByRest(id: string | number, options?: RequestOptions) {
+    postByRest(id, options) {
       return request.post(`${endpoint}/${id}`, options ?? {});
     },
-    put(options?: RequestOptions) {
+    put(options) {
       return request.put(endpoint, options ?? {});
     },
-    putByRest(id: string | number, options?: RequestOptions) {
+    putByRest(id, options) {
       return request.put(`${endpoint}/${id}`, options ?? {});
     },
-    patch(options?: RequestOptions) {
+    patch(options) {
       return request.patch(endpoint, options ?? {});
     },
-    patchByRest(id: string | number, options?: RequestOptions) {
+    patchByRest(id, options) {
       return request.patch(`${endpoint}/${id}`, options ?? {});
     },
-    delete(options?: RequestOptions) {
+    delete(options) {
       return request.delete(endpoint, options ?? {});
     },
-    deleteByRest(id: string | number, options?: RequestOptions) {
+    deleteByRest(id, options) {
       return request.delete(`${endpoint}/${id}`, options ?? {});
     },
   };
