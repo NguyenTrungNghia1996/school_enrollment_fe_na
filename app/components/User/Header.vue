@@ -7,8 +7,10 @@
 
       <div class="flex items-center gap-4">
         <template v-if="!userStore.token">
-          <a-button type="primary" class="flex h-10 items-center gap-2 rounded-xl bg-primary px-6 font-bold shadow-lg shadow-primary/20 transition-all hover:scale-105 hover:bg-primary/90" @click="userStore.openLogin()">
-            <Icon name="lucide:user" />
+          <a-button type="primary" class="bg-primary shadow-primary/20 hover:bg-primary/90 flex h-10 items-center justify-center gap-2 rounded-lg px-6 text-sm font-bold shadow-md" @click="userStore.openLogin()">
+            <!-- <template #icon>
+              <UserOutlined />
+            </template> -->
             ĐĂNG NHẬP
           </a-button>
         </template>
@@ -31,8 +33,8 @@
                   Thông tin cá nhân
                 </a-menu-item>
                 <a-menu-divider />
-                <a-menu-item key="logout" class="rounded-lg py-3 text-error hover:bg-error/5" @click="handleLogout">
-                  <template #icon><Icon name="lucide:log-out" class="text-lg text-error" /></template>
+                <a-menu-item key="logout" class="text-error hover:bg-error/5 rounded-lg py-3" @click="handleLogout">
+                  <template #icon><Icon name="lucide:log-out" class="text-error text-lg" /></template>
                   Đăng xuất
                 </a-menu-item>
               </a-menu>
