@@ -1,10 +1,7 @@
 <template>
   <Teleport to="body">
     <Transition name="fade">
-      <div
-        v-if="loading"
-        class="fixed inset-0 z-[9999] flex h-screen w-full flex-col items-center justify-center"
-        :class="backgroundClass">
+      <div v-if="loading" class="fixed inset-0 z-[9999] flex h-screen w-full flex-col items-center justify-center" :class="backgroundClass">
         <!-- Logo đặt riêng ở phần trên -->
         <div v-if="showLogo" class="logo-container mb-8">
           <img :src="unitStore.logo" :class="['mx-auto', logoClass]" alt="Logo" />

@@ -8,7 +8,7 @@
           <img :src="unitStore.logoFull || unitStore.logo" alt="Logo" class="h-16 w-auto" />
           <p class="max-w-md text-sm leading-relaxed">Hệ thống tuyển sinh trực tuyến của {{ unitStore.name }}. Chúng tôi cam kết mang lại quy trình đăng ký minh bạch, nhanh chóng và chính xác cho mọi thí sinh.</p>
           <div class="flex gap-4">
-            <a v-for="social in socials" :key="social.icon" href="#" class="flex h-10 w-10 items-center justify-center rounded-full bg-white/5 transition-colors hover:bg-blue-600 hover:text-white">
+            <a v-for="social in socials" :key="social.icon" href="#" class="flex h-10 w-10 items-center justify-center rounded-full bg-white/5 transition-colors hover:bg-primary hover:text-white">
               <Icon :name="social.icon" class="text-xl" />
             </a>
           </div>
@@ -29,7 +29,7 @@
           <h3 class="mb-6 text-sm font-bold uppercase tracking-widest text-white">Liên hệ</h3>
           <ul class="space-y-4 text-sm">
             <li class="flex items-start gap-3">
-              <Icon name="lucide:map-pin" class="mt-1 shrink-0 text-blue-400" />
+              <Icon name="lucide:map-pin" class="mt-1 shrink-0 text-primary" />
               <span>{{ unitStore.address }}</span>
             </li>
             <li class="flex items-center gap-3">

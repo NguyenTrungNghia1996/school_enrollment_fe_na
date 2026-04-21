@@ -7,7 +7,7 @@
 
       <div class="flex items-center gap-4">
         <template v-if="!userStore.token">
-          <a-button type="primary" class="flex h-10 items-center gap-2 rounded-xl bg-[#173b84] px-6 font-bold shadow-lg shadow-[#173b84]/20 transition-all hover:scale-105 hover:bg-[#0a1e42]" @click="userStore.openLogin()">
+          <a-button type="primary" class="flex h-10 items-center gap-2 rounded-xl bg-primary px-6 font-bold shadow-lg shadow-primary/20 transition-all hover:scale-105 hover:bg-primary/90" @click="userStore.openLogin()">
             <Icon name="lucide:user" />
             ĐĂNG NHẬP
           </a-button>
@@ -15,11 +15,11 @@
         <template v-else>
           <a-dropdown :trigger="['click']" placement="bottomRight">
             <div class="flex cursor-pointer items-center gap-3 rounded-2xl bg-slate-100/50 p-2 pr-4 transition-colors hover:bg-slate-100">
-              <a-avatar :src="userStore.image_url" size="large" class="bg-[#173b84]">
+              <a-avatar :src="userStore.image_url" size="large" class="bg-primary">
                 {{ userStore.name?.charAt(0).toUpperCase() }}
               </a-avatar>
               <div class="hidden sm:block">
-                <p class="text-sm font-bold text-[#071f41]">{{ userStore.name }}</p>
+                <p class="text-sm font-bold text-gray-900">{{ userStore.name }}</p>
                 <p class="text-[10px] uppercase tracking-wider text-slate-500">Thí sinh</p>
               </div>
               <Icon name="lucide:chevron-down" class="text-slate-400" />
@@ -31,8 +31,8 @@
                   Thông tin cá nhân
                 </a-menu-item>
                 <a-menu-divider />
-                <a-menu-item key="logout" class="rounded-lg py-3 text-red-500 hover:bg-red-50" @click="handleLogout">
-                  <template #icon><Icon name="lucide:log-out" class="text-lg text-red-500" /></template>
+                <a-menu-item key="logout" class="rounded-lg py-3 text-error hover:bg-error/5" @click="handleLogout">
+                  <template #icon><Icon name="lucide:log-out" class="text-lg text-error" /></template>
                   Đăng xuất
                 </a-menu-item>
               </a-menu>

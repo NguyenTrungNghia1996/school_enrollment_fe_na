@@ -2,10 +2,10 @@
   <a-modal v-model:open="isOpen" :footer="null" :width="450" :centered="true" :destroy-on-close="true" class="auth-modal">
     <div class="">
       <div class="mb-4 text-center">
-        <div class="mx-auto mb-3 flex h-16 w-16 transform items-center justify-center rounded-2xl bg-gradient-to-tr from-[#173b84] to-[#0a1e42] text-white shadow-lg shadow-[#173b84]/20 transition-transform">
+        <div class="from-primary to-primary/80 shadow-primary/20 mx-auto mb-3 flex h-16 w-16 transform items-center justify-center rounded-2xl bg-gradient-to-tr text-white shadow-lg transition-transform">
           <Icon name="lucide:shield-check" class="text-4xl" />
         </div>
-        <h2 class="text-2xl font-extrabold uppercase tracking-tight text-[#071f41]">{{ authTitle }}</h2>
+        <h2 class="text-2xl font-extrabold uppercase tracking-tight text-gray-900">{{ authTitle }}</h2>
         <p class="mx-auto mt-3 max-w-[280px] text-sm leading-relaxed text-slate-500">Truy cập hệ thống quản lý hồ sơ đăng ký và theo dõi thông tin thi.</p>
       </div>
 
@@ -39,14 +39,14 @@ const userStore = useUserStore();
 
 const isOpen = computed({
   get: () => userStore.authModal.isOpen,
-  set: (val) => {
+  set: val => {
     if (!val) userStore.closeAuthModal();
   },
 });
 
 const authMode = computed({
   get: () => userStore.authModal.mode,
-  set: (val) => (userStore.authModal.mode = val),
+  set: val => (userStore.authModal.mode = val),
 });
 
 const authTitle = computed(() => (authMode.value === "login" ? "Đăng nhập" : "Đăng ký"));
@@ -55,7 +55,7 @@ const authTitle = computed(() => (authMode.value === "login" ? "Đăng nhập" :
 <style scoped>
 .fade-enter-active,
 .fade-leave-active {
-  transition: opacity 0.5s ease;
+  transition: opacity 0.5s ease-in;
 }
 
 .fade-enter-from,

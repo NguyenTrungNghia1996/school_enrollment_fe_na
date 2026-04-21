@@ -1,7 +1,7 @@
 <template>
   <div class="flex h-full w-full items-center justify-between border-b border-gray-700 bg-gray-900 px-6">
     <div class="flex items-center">
-      <img :src="unitStore.logo" alt="Logo" class="h-16 cursor-pointer rounded-xl p-2 transition-all duration-300 ease-out hover:scale-105 hover:shadow-xl hover:shadow-blue-500/20 active:scale-95 active:shadow-none" @click="() => navigateTo(`/dashboard`)" />
+      <img :src="unitStore.logo" alt="Logo" class="h-16 cursor-pointer rounded-xl p-2 transition-all duration-300 ease-out hover:scale-105 hover:shadow-xl hover:shadow-primary/20 active:scale-95 active:shadow-none" @click="() => navigateTo(`/dashboard`)" />
     </div>
     <div class="flex items-center">
       <a-dropdown>
@@ -19,8 +19,8 @@
 
             <!-- Avatar -->
             <div class="relative">
-              <a-avatar v-if="adminStore.image_url" :src="adminStore.image_url" class="h-9 w-9 transition-all duration-300 ease-out group-hover:scale-110 group-hover:ring-2 group-hover:ring-blue-400" />
-              <a-avatar v-else class="h-9 w-9 bg-gray-600 transition-all duration-300 ease-out group-hover:scale-110 group-hover:ring-2 group-hover:ring-blue-400" :style="{ verticalAlign: 'middle' }" style="background-color: #8e8e8e">
+              <a-avatar v-if="adminStore.image_url" :src="adminStore.image_url" class="h-9 w-9 transition-all duration-300 ease-out group-hover:scale-110 group-hover:ring-2 group-hover:ring-primary" />
+              <a-avatar v-else class="h-9 w-9 bg-gray-600 transition-all duration-300 ease-out group-hover:scale-110 group-hover:ring-2 group-hover:ring-primary" :style="{ verticalAlign: 'middle' }" style="background-color: #8e8e8e">
                 <template #icon>
                   <UserOutlined class="text-gray-300" />
                 </template>
@@ -44,7 +44,7 @@
             </a-menu-item> -->
             <a-menu-item key="logout" class="text-gray-600 hover:bg-gray-700/50 hover:text-white" @click="signOut">
               <div class="flex items-center gap-2">
-                <LogoutOutlined class="text-red-400" />
+                <LogoutOutlined class="text-error" />
                 <span>Đăng xuất</span>
               </div>
             </a-menu-item>

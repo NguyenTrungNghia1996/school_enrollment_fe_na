@@ -1,20 +1,8 @@
 <template>
   <a-extract-style>
     <a-config-provider :locale="locale" :theme="theme">
-      <BaseLoading
-        :loading="loading"
-        title="Đang tải dữ liệu"
-        description="Dữ liệu đang được xử lý..."
-        :transparent="false"
-        :show-logo="true"
-        logo-class="w-20 h-20" />
-      <BaseLoading
-        :loading="settingStore.isLoading"
-        :title="settingStore.loading.title"
-        :description="settingStore.loading.description"
-        :transparent="settingStore.loading.transparent"
-        :show-logo="settingStore.loading.showLogo"
-        logo-class="w-20 h-20" />
+      <BaseLoading :loading="loading" title="Đang tải dữ liệu" description="Dữ liệu đang được xử lý..." :transparent="false" :show-logo="true" logo-class="w-20 h-24" />
+      <BaseLoading :loading="settingStore.isLoading" :title="settingStore.loading.title" :description="settingStore.loading.description" :transparent="settingStore.loading.transparent" :show-logo="settingStore.loading.showLogo" logo-class="w-20 h-24" />
       <NuxtLayout>
         <NuxtPage />
       </NuxtLayout>
@@ -35,14 +23,15 @@ nuxtApp.hook("page:start", () => {
 nuxtApp.hook("page:finish", () => {
   loading.value = false;
 });
-const theme = ref({});
-// const theme = ref({
-//   token: {
-//     colorPrimary: "#0057A0", // Màu xanh dương đậm trong logo – làm màu chủ đạo
-//     colorSuccess: "#7AC943", // Màu xanh lá logo – dùng cho thành công (Success)
-//     colorWarning: "#F59E0B", // Vàng cam nhẹ – cảnh báo nhưng vẫn hài hòa với logo
-//     colorError: "#DC2626", // Đỏ đậm hiện đại – phù hợp cho trạng thái lỗi
-//     colorInfo: "#0284C7",
-//   },
-// });
+const theme = ref({
+  token: {
+    colorPrimary: "#0057A0", // Màu xanh dương đậm – màu chủ đạo
+    colorSuccess: "#7AC943", // Màu xanh lá – dùng cho thành công
+    colorWarning: "#F59E0B", // Màu vàng cam – cảnh báo
+    colorError: "#DC2626", // Màu đỏ – trạng thái lỗi
+    colorInfo: "#0057A0",
+    borderRadius: 8, // Bo góc đồng nhất cho các component (nút, input, card)
+    fontFamily: "Roboto, sans-serif",
+  },
+});
 </script>
