@@ -26,13 +26,13 @@ export default defineNuxtRouteMiddleware(async to => {
   //     if (!isPublicRoute) return navigateTo("/login");
   //     return;
   //   }
-  //   const tasks = [];
-  //   if (!settingStore.menu?.length) tasks.push(loadMenu());
-  //   if (!settingStore.menuPermissions?.length) tasks.push(loadPermissions());
-  //   if (tasks.length) await Promise.all(tasks);
-  //   if (typeof setPermissions === "function" && settingStore.menuPermissions?.length) {
-  //     setPermissions(settingStore.menuPermissions);
-  //   }
+  // const tasks = [];
+  // if (!settingStore.menu?.length) tasks.push(loadMenu());
+  // if (!settingStore.menuPermissions?.length) tasks.push(loadPermissions());
+  // if (tasks.length) await Promise.all(tasks);
+  // if (typeof setPermissions === "function" && settingStore.menuPermissions?.length) {
+  //   setPermissions(settingStore.menuPermissions);
+  // }
   // } catch (e) {
   //   const message = e?.message || e?.data?.message || e?.toString();
   //   console.error("[auth.middleware] unexpected error:", message);
