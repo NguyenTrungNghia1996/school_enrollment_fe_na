@@ -12,17 +12,18 @@
       <div class="min-h-[200px]">
         <transition name="fade" mode="out-in">
           <UserLoginForm v-if="authMode === 'login'" :key="'login'" />
-          <UserRegisterForm v-else :key="'register'" />
+          <UserActivationForm v-else-if="authMode === 'activate'" :key="'activate'" :username="activationUsername" @activated="onActivated" @switch-to-login="authMode = 'login'" />
+          <UserRegisterForm v-else :key="'register'" @registered="onRegistered" />
         </transition>
       </div>
 
-      <div class="mb-4 mt-4 flex items-center justify-between text-sm">
+      <div class="mb-4 mt-4 flex items-center justify-between text-sm" v-if="authMode !== 'activate'">
         <div class="h-px flex-1 bg-slate-200"></div>
         <span class="px-4 text-xs font-semibold uppercase tracking-wider text-slate-400">Hoặc</span>
         <div class="h-px flex-1 bg-slate-200"></div>
       </div>
 
-      <div class="grid grid-cols-1 gap-4">
+      <div class="grid grid-cols-1 gap-4" v-if="authMode !== 'activate'">
         <a-button block @click="authMode = authMode === 'login' ? 'register' : 'login'">
           {{ authMode === "login" ? "Tạo tài khoản mới" : "Đã có tài khoản? Đăng nhập" }}
         </a-button>
@@ -35,6 +36,8 @@
 </template>
 
 <script setup>
+import { ref, computed } from "vue";
+
 const userStore = useUserStore();
 
 const isOpen = computed({
@@ -49,7 +52,27 @@ const authMode = computed({
   set: val => (userStore.authModal.mode = val),
 });
 
-const authTitle = computed(() => (authMode.value === "login" ? "Đăng nhập" : "Đăng ký"));
+
+const activationUsername = computed({
+  get: () => userStore.authModal.activationUsername,
+  set: val => (userStore.authModal.activationUsername = val),
+});
+
+const onRegistered = (username) => {
+  activationUsername.value = username;
+  authMode.value = "activate";
+};
+
+const onActivated = () => {
+  authMode.value = "login";
+  activationUsername.value = "";
+};
+
+const authTitle = computed(() => {
+  if (authMode.value === "login") return "Đăng nhập";
+  if (authMode.value === "activate") return "Kích hoạt tài khoản";
+  return "Đăng ký";
+});
 </script>
 
 <style scoped>

@@ -9,6 +9,12 @@ export const useApi = () => {
       login(options) {
         return request.post("/api/v1/auth/login", options ?? {});
       },
+      activate(options) {
+        return request.post("/api/v1/auth/activate", options ?? {});
+      },
+      resendActivation(options) {
+        return request.post("/api/v1/auth/resend-activation", options ?? {});
+      },
     },
     authAdmin: {
       login(options) {

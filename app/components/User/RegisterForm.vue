@@ -39,6 +39,7 @@
 </template>
 
 <script setup>
+const emit = defineEmits(["registered"]);
 const { authUser } = useApi();
 const loading = ref(false);
 

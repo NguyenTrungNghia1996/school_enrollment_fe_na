@@ -6,6 +6,7 @@ export const useUserStore = defineStore("user", {
     authModal: {
       isOpen: false,
       mode: "login",
+      activationUsername: "",
     },
   }),
 
