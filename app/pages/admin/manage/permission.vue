@@ -205,7 +205,7 @@ const handleCancel = () => {
 
 const deleteItem = async id => {
   try {
-    const { data } = await adminRoles.delete(id);
+    const { data } = await adminRoles.delete({ params: { id: id } });
     if (data.value?.success) {
       message.success(data.value?.message || "Đã xóa");
       await fetchData({ ...param.value });
