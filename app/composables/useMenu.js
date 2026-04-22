@@ -24,7 +24,7 @@ export const useMenu = () => {
         key: item.keyCode || item.key,
         url: item.url,
         icon: item.icon,
-        permissionBit: item.permissonBit ?? item.permissionBit ?? 0,
+        permissionBit: item.permissionBit ?? 0,
         stt: item.stt ?? 0,
         children: [],
       });
