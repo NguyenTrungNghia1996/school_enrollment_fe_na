@@ -36,7 +36,7 @@ export default defineNuxtConfig({
   runtimeConfig: {
     encryptionKey: process.env.NUXT_ENCRYPTION_KEY || "default-strong-key-32-chars-123456",
     public: {
-      baseURL: process.env.NUXT_PUBLIC_BASE_URL || "https://api.testtkb.nguyenanh-est.com",
+      baseURL: process.env.NUXT_PUBLIC_BASE_URL || "http://163.223.13.95:7001",
       superAdminName: process.env.NUXT_PUBLIC_SUPER_ADMIN_NAME || "Super Admin",
       superAdminSubdomain: process.env.NUXT_PUBLIC_SUPER_ADMIN_SUBDOMAIN || "sa",
       superAdminLogoUrl: process.env.NUXT_PUBLIC_SUPER_ADMIN_LOGO_URL || "https://cdn.nghia196.io.vn/admin/0bb442c5-ef40-494f-ab72-a694a7cf642b-logo.png",
