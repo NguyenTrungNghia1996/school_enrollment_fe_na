@@ -6,6 +6,7 @@ export const useUserStore = defineStore("user", {
     authModal: {
       isOpen: false,
       mode: "login",
+      activationUsername: "",
     },
   }),
 
@@ -36,7 +37,5 @@ export const useUserStore = defineStore("user", {
     image_url: state => state.user?.user?.image_url ?? "",
   },
 
-  persist: {
-    storage: piniaPluginPersistedstate.cookies(),
-  },
+  persist: true,
 });
