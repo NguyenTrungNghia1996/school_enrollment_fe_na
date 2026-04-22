@@ -19,12 +19,13 @@ export const useApi = () => {
     },
     authAdmin: {
       login(options) {
-        return adminRequest.post("/api/users/login", options ?? {});
+        return adminRequest.post("/api/admin/login", options ?? {});
       },
       permission(options) {
-        return adminRequest.get("/api/users/permission", options ?? {});
+        return adminRequest.get("/api/admin/permission", options ?? {});
       },
     },
-    adminMenus: useCrudApiAdmin("/api/menus"),
+    adminMenus: useCrudApiAdmin("/api/admin/menus"),
+    adminRoles: useCrudApiAdmin("/api/admin/roles"),
   };
 };

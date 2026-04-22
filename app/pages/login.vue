@@ -97,8 +97,7 @@ const handleLogin = async values => {
         password: values.password,
       },
     });
-
-    if (error.value || data.value?.status !== "success") {
+    if (error.value || !data.value?.success) {
       const errorMsg = error.value?.data?.message || data.value?.message || "Thông tin đăng nhập không chính xác.";
       message.error(errorMsg);
       return;
@@ -111,8 +110,8 @@ const handleLogin = async values => {
       } else {
         clearCredentials();
       }
-      await loadPermissions();
       await loadMenu();
+      // await loadPermissions();
       message.success(data.value.message || "Chào mừng bạn trở lại hệ thống!");
       await navigateTo("/admin");
     }

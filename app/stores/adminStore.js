@@ -27,10 +27,11 @@ export const useAdminStore = defineStore("admin", {
   },
 
   getters: {
-    token: state => state.admin?.token ?? state.admin?.access_token ?? null,
-    name: state => state.admin?.item?.hoten ?? state.admin?.user?.name ?? state.admin?.name ?? "Admin",
-    role: state => state.admin?.user?.role?.name ?? state.admin?.role ?? "Admin",
-    image_url: state => state.admin?.user?.image_url ?? state.admin?.image_url ?? null,
+    token: state => state.admin?.token ?? null,
+    name: state => state.admin?.name ?? "",
+    role: state => state.admin?.name ?? "",
+    isSuperAdmin: state => state.admin?.isSuperAdmin ?? false,
+    image_url: state => state.admin?.image_url ?? null,
     menuItems: state => state.menu,
     menuPermissions: state => state.permissions,
   },
