@@ -59,6 +59,6 @@ const unitStore = useUnitStore();
 const adminStore = useAdminStore();
 const signOut = () => {
   adminStore.logout();
-  navigateTo("/");
+  navigateTo("/login");
 };
 </script>
