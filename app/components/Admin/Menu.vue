@@ -1,5 +1,5 @@
 <template>
-  <div class="h-full flex flex-col">
+  <div class="flex h-full flex-col">
     <ClientOnly>
       <a-layout class="flex-1 overflow-y-auto">
         <a-layout-sider theme="light" width="250px" v-model:collapsed="collapsed" :collapsible="true" collapsed-width="50">
@@ -8,7 +8,7 @@
               <a-input v-model:value="searchQuery" placeholder="Tìm kiếm menu..." allow-clear @focus="expandSidebar" />
             </template>
             <template v-else>
-              <div class="w-full flex justify-center cursor-pointer" @click="expandSidebar">
+              <div class="flex w-full cursor-pointer justify-center" @click="expandSidebar">
                 <Icon name="ant-design:search-outlined" class="text-lg" />
               </div>
             </template>
@@ -36,7 +36,7 @@
               </a-menu-item>
             </template>
           </a-menu>
-           <div class="pb-10"></div>
+          <div class="pb-10"></div>
         </a-layout-sider>
       </a-layout>
     </ClientOnly>
@@ -44,7 +44,6 @@
 </template>
 
 <script setup>
-const settingStore = useSettingStore();
 import { useMenu } from "~/composables/useMenu";
 import { useRouter } from "vue-router";
 import { useBreakpoints, breakpointsTailwind } from "@vueuse/core";

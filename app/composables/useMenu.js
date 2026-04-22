@@ -3,7 +3,7 @@ import { useApi } from "~/composables/useApi";
 import { computed } from "vue";
 
 export const useMenu = () => {
-  const { authAdmin } = useApi();
+  const { adminMenus } = useApi();
   const adminStore = useAdminStore();
   const settingStore = useSettingStore();
 
@@ -69,7 +69,7 @@ export const useMenu = () => {
 
   const loadMenu = async () => {
     try {
-      const { data } = await authAdmin.menus();
+      const { data } = await adminMenus.get();
       if (data.value?.status === "success") {
         const tree = buildTree(data.value.data.items);
         adminStore.setMenu(tree);

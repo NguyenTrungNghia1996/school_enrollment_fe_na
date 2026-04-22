@@ -21,12 +21,10 @@ export const useApi = () => {
       login(options) {
         return adminRequest.post("/api/users/login", options ?? {});
       },
-      menus(options) {
-        return adminRequest.get("/api/menus", options ?? {});
-      },
       permission(options) {
         return adminRequest.get("/api/users/permission", options ?? {});
       },
     },
+    adminMenus: useCrudApiAdmin("/api/menus"),
   };
 };
