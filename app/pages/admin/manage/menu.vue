@@ -78,7 +78,6 @@ const adminStore = useAdminStore();
 const { adminMenus } = useApi();
 
 // --- Trạng thái hiển thị ---
-const searchText = ref("");
 const visible = ref(false);
 const confirmLoading = ref(false);
 const isEdit = ref(false);
@@ -87,9 +86,28 @@ const currentParentId = ref(null);
 
 // --- Dữ liệu & biểu mẫu ---
 const formRef = ref();
-const dataSource = ref([]);
-const nestedMenuData = ref([]);
-const menuOptions = ref([]);
+const param = ref({ search: "" });
+
+const {
+  data: menuResponse,
+  refresh: refreshMenus,
+  pending: loading,
+} = await adminMenus.get({
+  params: param,
+  key: "admin-menus",
+});
+
+const dataSource = computed(() => {
+  if (!menuResponse.value?.success) return [];
+  return menuResponse.value.data.items.map(item => ({
+    ...item,
+    key: item.keyCode || item.key,
+    parentId: item.parentId === 0 || item.parentId === null || item.parent_Id === null ? 0 : (item.parentId ?? item.parent_Id),
+  }));
+});
+
+const nestedMenuData = computed(() => buildNestedMenu(dataSource.value));
+const menuOptions = computed(() => buildMenuOptions(dataSource.value));
 
 const formState = reactive({
   id: null,
@@ -115,9 +133,6 @@ const columns = [
   { title: "Icon", dataIndex: "icon", key: "icon", width: 100, ellipsis: true },
   { title: "Thao tác", key: "action", align: "center", fixed: "right", width: 160 },
 ];
-
-const loading = ref(false);
-const param = ref({ search: "" });
 
 // --- Phân trang (dự phòng nếu thêm sau) ---
 const pagination = reactive({
@@ -241,7 +256,7 @@ const handleOk = async () => {
     if (data.value?.success) {
       message.success(isEdit.value ? "Cập nhật thành công" : "Thêm mới thành công");
       visible.value = false;
-      await fetchData({ ...param.value });
+      await refreshMenus();
     } else {
       message.error(data.value?.message || (isEdit.value ? "Cập nhật thất bại" : "Thêm mới thất bại"));
     }
@@ -270,7 +285,7 @@ const deleteItem = async id => {
 
     if (data.value?.success) {
       message.success("Xóa thành công");
-      await fetchData({ ...param.value });
+      await refreshMenus();
     } else {
       message.error(data.value?.message || "Xóa thất bại");
     }
@@ -285,41 +300,8 @@ const deleteItem = async id => {
 //   await fetchData({ ...param.value })
 // }
 
-// // 📌 Đặt lại tìm kiếm
-// const resetSearch = async () => {
-//   searchText.value = ''
-//   param.value.search = ''
-//   await fetchData({ ...param.value })
-// }
-
-// 📌 Gọi API lấy dữ liệu menu
-const fetchData = async p => {
-  try {
-    loading.value = true;
-    const { data, error } = await adminMenus.get({ params: p });
-    if (error.value) {
-      message.error(error.value.data?.message || "Lỗi khi tải danh sách menu");
-      return;
-    }
-    if (data.value?.success) {
-      dataSource.value = data.value.data.items.map(item => ({
-        ...item,
-        key: item.keyCode || item.key,
-        parentId: item.parentId === 0 || item.parentId === null || item.parent_Id === null ? 0 : (item.parentId ?? item.parent_Id),
-      }));
-      nestedMenuData.value = buildNestedMenu(dataSource.value);
-      menuOptions.value = buildMenuOptions(dataSource.value);
-      pagination.total = data.value.data.total || 0;
-    }
-  } catch (e) {
-    message.error("Lỗi khi tải menu");
-  } finally {
-    loading.value = false;
-  }
-};
-
 // 🚀 Khởi tạo dữ liệu khi vào trang
-await fetchData({ ...param.value });
+// (Tự động thực hiện bởi useFetch top-level)
 </script>
 
 <style scoped>

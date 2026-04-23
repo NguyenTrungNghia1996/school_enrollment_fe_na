@@ -1,7 +1,7 @@
 <template>
   <div class="flex h-full w-full items-center justify-between border-b border-gray-700 bg-gray-900 px-6">
     <div class="flex items-center">
-      <img :src="unitStore.logo" alt="Logo" class="h-16 cursor-pointer rounded-xl p-2 transition-all duration-300 ease-out hover:scale-105 hover:shadow-xl hover:shadow-primary/20 active:scale-95 active:shadow-none" @click="() => navigateTo(`/admin/dashboard`)" />
+      <img :src="unitStore.logo" alt="Logo" class="h-16 cursor-pointer rounded-xl p-2 transition-all duration-300 ease-out hover:scale-105 hover:shadow-xl hover:shadow-primary/20 active:scale-95 active:shadow-none" @click="() => navigateTo(`/admin`)" />
     </div>
     <div class="flex items-center">
       <a-dropdown>

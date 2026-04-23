@@ -1,5 +1,5 @@
 <template>
-  <a-table :columns="menuColumns" :data-source="flatMenuData" size="small" bordered :pagination="false" :scroll="{ y: '60vh' }">
+  <a-table :columns="menuColumns" :data-source="flatMenuData" size="small" bordered :pagination="false" :scroll="{ y: '60vh' }" :loading="loading">
     <template #bodyCell="{ column, record }">
       <template v-if="column.dataIndex === 'permission' && record.permissionBit !== undefined">
         <a-radio-group size="small" option-type="button" button-style="solid" :value="getPermission(record.key, record.permissionBit)" @change="e => setPermission(record.key, record.permissionBit, e.target.value)">
@@ -31,24 +31,33 @@ const props = defineProps({
 
 const emit = defineEmits(['update:modelValue'])
 
-// Dữ liệu phẳng từ API
-const flatData = ref([])
-const flatMenuData = ref([])
-const menuPermissions = reactive({})
+const {
+  data: menuResponse,
+  refresh: refreshMenus,
+  pending: loading,
+} = await adminMenus.get();
 
-// Load dữ liệu menu
-const fetchData = async () => {
-  try {
-    const { data } = await adminMenus.get()
-    if (data.value?.success) {
-      flatData.value = data.value.data.items
-      flatMenuData.value = buildMenuWithLevel(flatData.value)
-      initMenuPermissions(flatData.value, props.modelValue)
-    }
-  } catch (e) {
-    message.error('Lỗi khi tải menu')
+// Dữ liệu phẳng từ API
+const flatData = computed(() => {
+  if (menuResponse.value?.success) {
+    return menuResponse.value.data.items || [];
   }
-}
+  return [];
+});
+
+const flatMenuData = computed(() => buildMenuWithLevel(flatData.value));
+const menuPermissions = reactive({});
+
+// Khởi tạo menuPermissions khi dữ liệu menu hoặc modelValue thay đổi
+watch(
+  [flatData, () => props.modelValue],
+  ([newFlatData, newModelValue]) => {
+    if (newFlatData && newFlatData.length > 0) {
+      initMenuPermissions(newFlatData, newModelValue);
+    }
+  },
+  { immediate: true, deep: true },
+);
 
 // Chuyển flat list thành nested structure với level
 function buildMenuWithLevel(data, parentId = 0, level = 0) {
@@ -192,7 +201,6 @@ const permissionList = computed(() => {
 })
 
 // Khởi tạo component
-fetchData()
 </script>
 
 <style scoped>

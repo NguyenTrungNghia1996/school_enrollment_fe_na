@@ -77,7 +77,6 @@ const breakpoints = useBreakpoints(breakpointsTailwind);
 const isMobile = breakpoints.smaller("md");
 const modalWidth = computed(() => (isMobile.value ? "95vw" : 1000));
 const searchText = ref("");
-const loading = ref(false);
 const visible = ref(false);
 const confirmLoading = ref(false);
 const isEdit = ref(false);
@@ -115,29 +114,36 @@ const rules = reactive({
 });
 
 const param = ref({ PageIndex: 1, PageSize: 10, search: "" });
-const dataSource = ref([]);
 
-const fetchData = async p => {
-  try {
-    loading.value = true;
-    const { data } = await adminRoles.get({ params: p });
-    if (data.value?.success) {
-      dataSource.value = data.value.data.items || [];
-      pagination.total = data.value.data.total || 0;
+const {
+  data: roleResponse,
+  refresh: refreshRoles,
+  pending: loading,
+} = await adminRoles.get({
+  params: param,
+  key: "admin-roles",
+});
+
+const dataSource = computed(() => {
+  if (!roleResponse.value?.success) return [];
+  return roleResponse.value.data.items || [];
+});
+
+watch(
+  () => roleResponse.value,
+  newVal => {
+    if (newVal?.success) {
+      pagination.total = newVal.data.total || 0;
     }
-  } catch (err) {
-    message.error("Không thể tải dữ liệu");
-  } finally {
-    loading.value = false;
-  }
-};
+  },
+  { immediate: true },
+);
 
 const handleTableChange = async pag => {
   pagination.current = pag.current;
   pagination.pageSize = pag.pageSize;
   param.value.PageIndex = pag.current;
   param.value.PageSize = pag.pageSize;
-  await fetchData({ ...param.value });
 };
 
 const handleSearch = async () => {
@@ -149,7 +155,6 @@ const handleSearch = async () => {
   }
   param.value.PageIndex = 1;
   pagination.current = 1;
-  await fetchData({ ...param.value });
 };
 
 const showModal = async () => {
@@ -187,7 +192,6 @@ const handleOk = async () => {
 
     if (res.data.value?.success) {
       message.success(res.data.value?.message || "Thành công");
-      await fetchData({ ...param.value });
       visible.value = false;
       formRef.value.resetFields();
     } else {
@@ -197,7 +201,7 @@ const handleOk = async () => {
     message.error(err.message || "Lỗi khi lưu thông tin");
   } finally {
     await loadPermissions();
-    await fetchData({ ...param.value });
+    await refreshRoles();
     confirmLoading.value = false;
   }
 };
@@ -212,7 +216,7 @@ const deleteItem = async id => {
     const { data } = await adminRoles.delete({ params: { id: id } });
     if (data.value?.success) {
       message.success(data.value?.message || "Đã xóa");
-      await fetchData({ ...param.value });
+      await refreshRoles();
     } else {
       message.error(data.value?.message || "Không thể xóa");
     }
@@ -227,10 +231,7 @@ const resetForm = async () => {
   param.value = { PageIndex: 1, PageSize: 10, search: "" };
   pagination.current = 1;
   pagination.pageSize = 10;
-  await fetchData({ ...param.value });
 };
-
-await fetchData({ ...param.value });
 </script>
 <style scoped>
 /* Thêm style cho modal */
