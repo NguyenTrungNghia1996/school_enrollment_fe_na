@@ -71,7 +71,8 @@ const { loadPermissions } = usePermissions();
 const unitStore = useUnitStore();
 const adminStore = useAdminStore();
 const { authAdmin } = useApi();
-const { rememberMe, saveCredentials, getCredentials, clearCredentials } = useAuth();
+const { getRememberMe, saveCredentials, getCredentials, clearCredentials } = useAuth();
+const rememberMe = getRememberMe("admin");
 
 const form = reactive({
   username: "",
@@ -81,7 +82,7 @@ const form = reactive({
 const loading = ref(false);
 
 onMounted(() => {
-  const saved = getCredentials();
+  const saved = getCredentials("admin");
   if (saved) {
     form.username = saved.username;
     form.password = saved.password;
@@ -106,9 +107,9 @@ const handleLogin = async values => {
     if (data.value && data.value.data) {
       adminStore.setAdmin(data.value.data);
       if (rememberMe.value) {
-        saveCredentials(values.username, values.password);
+        saveCredentials(values.username, values.password, "admin");
       } else {
-        clearCredentials();
+        clearCredentials("admin");
       }
       await loadMenu();
       await loadPermissions();

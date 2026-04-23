@@ -29,9 +29,10 @@
 <script setup>
 const { authUser } = useApi();
 const emit = defineEmits(["authenticated"]);
-const { rememberMe, saveCredentials, getCredentials, clearCredentials } = useAuth();
+const { getRememberMe, saveCredentials, getCredentials, clearCredentials } = useAuth();
+const rememberMe = getRememberMe("user");
 const userStore = useUserStore();
-const savedCredentials = getCredentials();
+const savedCredentials = getCredentials("user");
 const loading = ref(false);
 
 const form = reactive({
@@ -41,7 +42,7 @@ const form = reactive({
 
 watch(rememberMe, () => {
   if (!rememberMe.value) {
-    clearCredentials();
+    clearCredentials("user");
   }
 });
 
@@ -58,7 +59,7 @@ const handleLogin = async () => {
     }
 
     if (rememberMe.value) {
-      saveCredentials(form.username, form.password);
+      saveCredentials(form.username, form.password, "user");
     }
     userStore.setUser(data.value.data);
     message.success(data.value.message || "Đăng nhập thành công");
