@@ -49,23 +49,19 @@ const handleLogin = async () => {
 
   try {
     const { data, error } = await authUser.login({ body: { ...form } });
+    console.log("data login: ", data.value);
+    console.log("error login: ", error.value);
 
-    if (error.value || data.value?.status !== "success" || !data.value.data?.access_token) {
+    if (error.value || !data.value?.success) {
       throw new Error(error.value?.data?.message || data.value?.message || "Đăng nhập thất bại");
     }
 
     if (rememberMe.value) {
       saveCredentials(form.username, form.password);
     }
-
-    userStore.setUser({
-      ...data.value.data,
-      token: data.value.data.access_token,
-      username: form.username,
-    });
-
+    userStore.setUser(data.value.data);
     message.success(data.value.message || "Đăng nhập thành công");
-    emit("authenticated");
+    // emit("authenticated");
   } catch (error) {
     message.error(error?.message || "Đăng nhập thất bại");
   } finally {

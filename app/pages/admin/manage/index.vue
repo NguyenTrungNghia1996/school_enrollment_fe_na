@@ -133,8 +133,6 @@ const dataSource = computed(() => {
   if (!adminResponse.value?.success) return [];
   return adminResponse.value.data.items || [];
 });
-
-console.log(adminResponse.value);
 watch(
   () => adminResponse.value,
   newVal => {
