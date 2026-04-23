@@ -1,9 +1,9 @@
 <template>
   <div class="min-h-full bg-white p-2 md:p-4">
     <div class="mb-4 flex flex-col items-start justify-between gap-2 md:flex-row md:items-center">
-      <a-input-search v-model:value="searchText" placeholder="Tìm kiếm Nhóm quyền..." enter-button @search="handleSearch" class="w-full md:w-1/3" />
+      <a-input-search v-model:value="searchText" placeholder="Tìm kiếm Nhóm quyền..." enter-button @search="handleSearch" class="w-full" />
       <a-button @click="resetForm" class="w-full md:w-auto">Đặt lại</a-button>
-      <a-button type="primary" @click="showModal" class="w-full md:w-auto" :disabled="!settingStore.currentPermission">Thêm mới</a-button>
+      <a-button type="primary" @click="showModal" class="w-full md:w-auto" :disabled="!adminStore.currentPermission">Thêm mới</a-button>
     </div>
 
     <ClientOnly class="overflow-x-auto">
@@ -12,20 +12,20 @@
           <template v-if="column.key === 'stt'">
             {{ (pagination.current - 1) * pagination.pageSize + index + 1 }}
           </template>
-          <template v-if="column.key === 'mota'">
-            <span v-if="record.mota">{{ record.mota }}</span>
+          <template v-if="column.key === 'description'">
+            <span v-if="record.description">{{ record.description }}</span>
             <span v-else class="text-gray-400">Trống</span>
           </template>
           <template v-if="column.key === 'action'">
             <div class="flex justify-center">
               <div class="space-x-2 md:flex">
-                <a-button type="link" size="small" @click="editItem(record.id)" :disabled="!settingStore.currentPermission">
+                <a-button type="link" size="small" @click="editItem(record.id)" :disabled="!adminStore.currentPermission">
                   <template #icon>
                     <EditOutlined />
                   </template>
                 </a-button>
                 <a-popconfirm title="Bạn chắc chắn muốn xóa?" ok-text="Đồng ý" cancel-text="Hủy" @confirm="deleteItem(record.id)">
-                  <a-button type="link" danger size="small" :disabled="!settingStore.currentPermission">
+                  <a-button type="link" danger size="small" :disabled="!adminStore.currentPermission">
                     <template #icon>
                       <DeleteOutlined />
                     </template>
@@ -41,12 +41,12 @@
     <a-modal v-model:open="visible" :title="isEdit ? 'Chỉnh sửa Nhóm quyền' : 'Thêm mới Nhóm quyền'" @cancel="handleCancel" :width="modalWidth" :bodyStyle="{ maxHeight: '70vh', overflowY: 'auto' }">
       <div class="grid grid-cols-1 gap-2 md:grid-cols-2">
         <a-form ref="formRef" :model="formState" layout="vertical">
-          <a-form-item label="Tên Nhóm quyền" name="ten" :label-col="{ span: 24 }" :wrapper-col="{ span: 24 }" :rules="rules.ten">
-            <a-input v-model:value="formState.ten" placeholder="Nhập tên Nhóm quyền" :maxlength="50" show-count />
+          <a-form-item label="Tên Nhóm quyền" name="name" :label-col="{ span: 24 }" :wrapper-col="{ span: 24 }" :rules="rules.name">
+            <a-input v-model:value="formState.name" placeholder="Nhập tên Nhóm quyền" :maxlength="50" show-count />
           </a-form-item>
 
-          <a-form-item label="Mô tả" name="mota" :label-col="{ span: 24 }" :wrapper-col="{ span: 24 }">
-            <a-textarea v-model:value="formState.mota" :rows="4" placeholder="Nhập mô tả (nếu có)" :maxlength="250" show-count />
+          <a-form-item label="Mô tả" name="description" :label-col="{ span: 24 }" :wrapper-col="{ span: 24 }">
+            <a-textarea v-model:value="formState.description" :rows="4" placeholder="Nhập mô tả (nếu có)" :maxlength="250" show-count />
           </a-form-item>
         </a-form>
         <AdminPermissionEditor v-model="formState.permission" />
@@ -65,7 +65,10 @@
 </template>
 
 <script setup>
-const settingStore = useSettingStore();
+definePageMeta({
+  layout: "admin",
+});
+const adminStore = useAdminStore();
 const { loadPermissions } = usePermissions();
 import { useBreakpoints, breakpointsTailwind } from "@vueuse/core";
 const { adminRoles } = useApi();
@@ -91,20 +94,20 @@ const pagination = reactive({
 
 const columns = [
   { title: "STT", key: "stt", width: 50, align: "center" },
-  { title: "Tên Nhóm quyền", dataIndex: "ten", key: "ten", ellipsis: true },
-  { title: "Mô tả", dataIndex: "mota", key: "mota", ellipsis: true },
+  { title: "Tên Nhóm quyền", dataIndex: "name", key: "name", ellipsis: true },
+  { title: "Mô tả", dataIndex: "description", key: "description", ellipsis: true },
   { title: "Thao tác", key: "action", width: 80, align: "center", fixed: "right" },
 ];
 
 const formState = reactive({
   id: null,
-  ten: "",
-  mota: "",
+  name: "",
+  description: "",
   permission: [],
 });
 
 const rules = reactive({
-  ten: [
+  name: [
     { required: true, message: "Vui lòng nhập tên Nhóm quyền", trigger: "blur" },
     { min: 2, message: "Tên phải có ít nhất 2 ký tự", trigger: "blur" },
     { max: 50, message: "Tên nhiều nhất 50 ký tự", trigger: "blur" },
@@ -151,7 +154,7 @@ const handleSearch = async () => {
 
 const showModal = async () => {
   isEdit.value = false;
-  Object.assign(formState, { id: null, ten: "", mota: "", permission: [] });
+  Object.assign(formState, { id: null, name: "", description: "", permission: [] });
   visible.value = true;
 };
 
@@ -175,11 +178,11 @@ const handleOk = async () => {
 
     let res;
     if (isEdit.value) {
-      res = await adminRoles.put(formState);
+      res = await adminRoles.put({ body: formState });
     } else {
       const payload = { ...formState };
       delete payload.id;
-      res = await adminRoles.post(payload);
+      res = await adminRoles.post({ body: payload });
     }
 
     if (res.data.value?.success) {
@@ -194,6 +197,7 @@ const handleOk = async () => {
     message.error(err.message || "Lỗi khi lưu thông tin");
   } finally {
     await loadPermissions();
+    await fetchData({ ...param.value });
     confirmLoading.value = false;
   }
 };

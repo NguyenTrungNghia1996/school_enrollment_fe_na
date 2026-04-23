@@ -60,14 +60,13 @@ export const usePermissions = () => {
   ];
   const loadPermissions = async () => {
     try {
-      const { data } = await authAdmin.permission();
-
-      if (data.value?.success) {
-        const permission = res?.value?.data?.permission;
-        adminStore.setPermissions(permission);
-      } else {
-        console.warn("Không có dữ liệu permission trả về");
-      }
+      // const { data } = await authAdmin.permission();
+      // if (data.value?.success) {
+      //   const permission = res?.value?.data?.permission;
+      //   adminStore.setPermissions(permission);
+      // } else {
+      //   console.warn("Không có dữ liệu permission trả về");
+      // }
     } catch (error) {
       console.error("Lỗi loadPermissions:", error);
     }
