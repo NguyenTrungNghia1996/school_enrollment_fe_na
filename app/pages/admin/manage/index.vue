@@ -133,7 +133,6 @@ const dataSource = computed(() => {
   if (!adminResponse.value?.success) return [];
   return adminResponse.value.data.items || [];
 });
-
 watch(
   () => adminResponse.value,
   newVal => {
@@ -185,7 +184,7 @@ const editItem = async id => {
         phoneNumber: detail.phoneNumber,
         position: detail.position,
         active: detail.active,
-        idRoles: Array.isArray(detail.roles) ? detail.roles.map(r => r.id) : (detail.idRoles || []),
+        idRoles: Array.isArray(detail.roles) ? detail.roles.map(r => r.id) : detail.idRoles || [],
       });
       visible.value = true;
     }

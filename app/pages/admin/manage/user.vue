@@ -50,11 +50,17 @@
         <a-form-item label="Trạng thái" name="active">
           <a-switch v-model:checked="formState.active" checked-children="Hoạt động" un-checked-children="Khóa" />
         </a-form-item>
-        
-        <div v-if="isEdit" class="mt-4 p-3 bg-gray-50 rounded text-xs text-gray-500">
-          <p><strong>Username:</strong> {{ formState.username }}</p>
-          <p v-if="formState.name"><strong>Họ tên:</strong> {{ formState.name }}</p>
-          <p class="mt-1 text-amber-600 italic">* Hiện tại hệ thống chỉ cho phép cập nhật trạng thái hoạt động của người dùng.</p>
+
+        <div v-if="isEdit" class="mt-4 rounded bg-gray-50 p-3 text-xs text-gray-500">
+          <p>
+            <strong>Username:</strong>
+            {{ formState.username }}
+          </p>
+          <p v-if="formState.name">
+            <strong>Họ tên:</strong>
+            {{ formState.name }}
+          </p>
+          <p class="mt-1 italic text-amber-600">* Hiện tại hệ thống chỉ cho phép cập nhật trạng thái hoạt động của người dùng.</p>
         </div>
       </a-form>
     </a-modal>
@@ -128,7 +134,7 @@ watch(
   () => userResponse.value,
   newVal => {
     if (newVal?.success) {
-      pagination.total = newVal.data.total || (newVal.data.items?.length > 0 ? newVal.data.items[0].total : 0);
+      pagination.total = newVal.data.total || 0;
     }
   },
   { immediate: true },

@@ -8,7 +8,7 @@ export const useApi = () => {
         return request.post("/api/v1/auth/register", options ?? {});
       },
       login(options) {
-        return request.post("/api/v1/auth/login", options ?? {});
+        return request.post("/api/users/login", options ?? {});
       },
       activate(options) {
         return request.post("/api/v1/auth/activate", options ?? {});
@@ -29,5 +29,7 @@ export const useApi = () => {
     adminRoles: useCrudApiAdmin("/api/admin/roles"),
     adminManage: useCrudApiAdmin("/api/admin"),
     adminUser: useCrudApiAdmin("/api/users"),
+    adminSubject: useCrudApiAdmin("/api/subject"),
+    adminEnrollment: useCrudApiAdmin("/api/exam"),
   };
 };
