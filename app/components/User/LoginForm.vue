@@ -28,6 +28,7 @@
 
 <script setup>
 const { authUser } = useApi();
+const emit = defineEmits(["authenticated"]);
 const { rememberMe, saveCredentials, getCredentials, clearCredentials } = useAuth();
 const userStore = useUserStore();
 const savedCredentials = getCredentials();
@@ -61,7 +62,7 @@ const handleLogin = async () => {
     }
     userStore.setUser(data.value.data);
     message.success(data.value.message || "Đăng nhập thành công");
-    // emit("authenticated");
+    emit("authenticated");
   } catch (error) {
     message.error(error?.message || "Đăng nhập thất bại");
   } finally {

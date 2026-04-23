@@ -11,7 +11,7 @@
 
       <div class="min-h-[200px]">
         <transition name="fade" mode="out-in">
-          <UserLoginForm v-if="authMode === 'login'" :key="'login'" />
+          <UserLoginForm v-if="authMode === 'login'" :key="'login'" @authenticated="onAuthenticated" />
           <UserActivationForm v-else-if="authMode === 'activate'" :key="'activate'" :username="activationUsername" @activated="onActivated" @switch-to-login="authMode = 'login'" />
           <UserRegisterForm v-else :key="'register'" @registered="onRegistered" />
         </transition>
@@ -61,6 +61,10 @@ const activationUsername = computed({
 const onRegistered = (username) => {
   activationUsername.value = username;
   authMode.value = "activate";
+};
+
+const onAuthenticated = () => {
+  userStore.closeAuthModal();
 };
 
 const onActivated = () => {
