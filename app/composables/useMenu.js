@@ -1,4 +1,3 @@
-import { useSettingStore } from "~/stores/settingStore";
 import { useApi } from "~/composables/useApi";
 import { computed } from "vue";
 
@@ -77,7 +76,6 @@ export const useMenu = () => {
     try {
       const { data } = await adminMenus.get();
       if (data.value?.success) {
-        console.log(data.value.data.items);
         const tree = buildTree(data.value.data.items);
         adminStore.setMenu(tree);
         return tree;
@@ -94,5 +92,5 @@ export const useMenu = () => {
     return filterMenu(adminStore.menu);
   });
 
-  return { loadMenu, visibleMenu };
+  return { loadMenu, visibleMenu, buildTree };
 };

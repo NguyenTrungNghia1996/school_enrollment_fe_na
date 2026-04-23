@@ -76,7 +76,7 @@ definePageMeta({
 });
 const adminStore = useAdminStore();
 const { adminMenus } = useApi();
-
+const { buildTree } = useMenu();
 // --- Trạng thái hiển thị ---
 const visible = ref(false);
 const confirmLoading = ref(false);
@@ -99,6 +99,8 @@ const {
 
 const dataSource = computed(() => {
   if (!menuResponse.value?.success) return [];
+  const nested = buildTree(menuResponse.value.data.items);
+  adminStore.setMenu(nested);
   return menuResponse.value.data.items.map(item => ({
     ...item,
     key: item.keyCode || item.key,
