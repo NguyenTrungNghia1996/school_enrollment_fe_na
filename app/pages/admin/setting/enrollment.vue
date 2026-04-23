@@ -40,7 +40,7 @@
     </ClientOnly>
 
     <a-modal v-model:open="visible" :title="isEdit ? 'Chỉnh sửa kỳ tuyển sinh' : 'Thêm mới kỳ tuyển sinh'" @cancel="handleCancel" :width="700" :confirm-loading="confirmLoading" @ok="handleOk" centered>
-      <a-form ref="formRef" :model="formState" :rules="rules" layout="vertical" class="mt-4 max-h-[70vh] overflow-y-auto pr-2">
+      <a-form ref="formRef" :model="formState" :rules="rules" layout="vertical" class="mt-4 max-h-[70vh] overflow-y-auto pr-2" @submit.prevent>
         <div class="grid grid-cols-1 gap-x-4 md:grid-cols-2">
           <a-form-item label="Tên kỳ tuyển sinh" name="examName" class="md:col-span-2">
             <a-input v-model:value="formState.examName" placeholder="Nhập tên kỳ tuyển sinh" />
@@ -69,7 +69,7 @@
           <div class="md:col-span-2 mt-2">
             <div class="flex items-center justify-between mb-2">
               <span class="font-medium text-gray-700">Hồ sơ yêu cầu</span>
-              <a-button type="dashed" size="small" @click="addDocument">
+              <a-button type="dashed" size="small" @click="addDocument" html-type="button">
                 <template #icon><PlusOutlined /></template>
                 Thêm hồ sơ
               </a-button>
@@ -88,7 +88,7 @@
                 <a-checkbox v-model:checked="doc.isRequired" class="text-xs">Bắt buộc</a-checkbox>
               </div>
 
-              <a-button type="text" danger size="small" @click="removeDocument(index)" class="opacity-0 group-hover:opacity-100 transition-opacity">
+              <a-button type="text" danger size="small" @click="removeDocument(index)" class="opacity-0 group-hover:opacity-100 transition-opacity" html-type="button">
                 <template #icon><DeleteOutlined /></template>
               </a-button>
             </div>
@@ -221,8 +221,8 @@ const editItem = async id => {
         examType: detail.examType,
         fee: detail.fee,
         quantity: detail.quantity,
-        subjectIds: detail.subjectIds || [],
-        documents: detail.documents || [],
+        subjectIds: detail.subjectIds ? [...detail.subjectIds] : [],
+        documents: detail.documents ? JSON.parse(JSON.stringify(detail.documents)) : [],
       });
       visible.value = true;
     }
