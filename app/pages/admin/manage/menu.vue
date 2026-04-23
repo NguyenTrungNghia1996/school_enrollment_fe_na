@@ -2,7 +2,7 @@
   <div class="min-h-full rounded bg-white p-4 shadow">
     <!-- 🧭 Thanh công cụ tìm kiếm & thêm mới -->
     <div class="mb-6 flex flex-col items-end justify-end gap-2 md:flex-row md:items-center">
-      <a-button type="primary" @click="showModal(null)" class="w-full md:w-auto" :disabled="!settingStore.currentPermission">Thêm mới</a-button>
+      <a-button type="primary" @click="showModal(null)" class="w-full md:w-auto" :disabled="!adminStore.currentPermission">Thêm mới</a-button>
     </div>
 
     <!-- 📋 Bảng danh sách menu -->
@@ -16,18 +16,18 @@
         <template v-if="column.key === 'action'">
           <div class="flex justify-center gap-2">
             <a-tooltip title="Thêm menu con" v-if="getDepth(record) < 2">
-              <a-button type="link" size="small" @click="showModal(record.id)" :disabled="!settingStore.currentPermission">
+              <a-button type="link" size="small" @click="showModal(record.id)" :disabled="!adminStore.currentPermission">
                 <FolderAddOutlined />
               </a-button>
             </a-tooltip>
             <a-tooltip title="Sửa">
-              <a-button type="link" size="small" @click="editItem(record)" :disabled="!settingStore.currentPermission">
+              <a-button type="link" size="small" @click="editItem(record)" :disabled="!adminStore.currentPermission">
                 <EditOutlined />
               </a-button>
             </a-tooltip>
             <a-popconfirm title="Bạn chắc chắn muốn xóa?" ok-text="Đồng ý" cancel-text="Hủy" @confirm="deleteItem(record.id)">
               <a-tooltip title="Xóa">
-                <a-button type="link" danger size="small" :disabled="!settingStore.currentPermission">
+                <a-button type="link" danger size="small" :disabled="!adminStore.currentPermission">
                   <DeleteOutlined />
                 </a-button>
               </a-tooltip>
@@ -71,11 +71,13 @@
 </template>
 
 <script setup>
-const settingStore = useSettingStore();
+definePageMeta({
+  layout: "admin",
+});
+const adminStore = useAdminStore();
 const { adminMenus } = useApi();
 
 // --- Trạng thái hiển thị ---
-const searchText = ref("");
 const visible = ref(false);
 const confirmLoading = ref(false);
 const isEdit = ref(false);
@@ -84,9 +86,28 @@ const currentParentId = ref(null);
 
 // --- Dữ liệu & biểu mẫu ---
 const formRef = ref();
-const dataSource = ref([]);
-const nestedMenuData = ref([]);
-const menuOptions = ref([]);
+const param = ref({ search: "" });
+
+const {
+  data: menuResponse,
+  refresh: refreshMenus,
+  pending: loading,
+} = await adminMenus.get({
+  params: param,
+  key: "admin-menus",
+});
+
+const dataSource = computed(() => {
+  if (!menuResponse.value?.success) return [];
+  return menuResponse.value.data.items.map(item => ({
+    ...item,
+    key: item.keyCode || item.key,
+    parentId: item.parentId === 0 || item.parentId === null || item.parent_Id === null ? 0 : (item.parentId ?? item.parent_Id),
+  }));
+});
+
+const nestedMenuData = computed(() => buildNestedMenu(dataSource.value));
+const menuOptions = computed(() => buildMenuOptions(dataSource.value));
 
 const formState = reactive({
   id: null,
@@ -112,9 +133,6 @@ const columns = [
   { title: "Icon", dataIndex: "icon", key: "icon", width: 100, ellipsis: true },
   { title: "Thao tác", key: "action", align: "center", fixed: "right", width: 160 },
 ];
-
-const loading = ref(false);
-const param = ref({ search: "" });
 
 // --- Phân trang (dự phòng nếu thêm sau) ---
 const pagination = reactive({
@@ -221,18 +239,27 @@ const handleOk = async () => {
       ...formState,
       keyCode: formState.key,
     };
-
+    console.log(payload);
+    let res;
     if (isEdit.value) {
-      await adminMenus.put(payload);
-      message.success("Cập nhật thành công");
+      res = await adminMenus.put({ body: payload });
     } else {
       delete payload.id;
-      await adminMenus.post(payload);
-      message.success("Thêm mới thành công");
+      res = await adminMenus.post({ body: payload });
+    }
+    const { data, error } = res;
+    if (error.value) {
+      message.error(error.value.data?.message || "Lỗi hệ thống");
+      return;
     }
 
-    visible.value = false;
-    await fetchData({ ...param.value });
+    if (data.value?.success) {
+      message.success(isEdit.value ? "Cập nhật thành công" : "Thêm mới thành công");
+      visible.value = false;
+      await refreshMenus();
+    } else {
+      message.error(data.value?.message || (isEdit.value ? "Cập nhật thất bại" : "Thêm mới thất bại"));
+    }
   } catch (err) {
     message.error(err.message || "Lỗi khi lưu menu");
   } finally {
@@ -249,12 +276,18 @@ const handleCancel = () => {
 // 📌 Xóa menu
 const deleteItem = async id => {
   try {
-    const { data } = await adminMenus.delete({ params: { id: id } });
+    const { data, error } = await adminMenus.delete({ params: { id: id } });
+
+    if (error.value) {
+      message.error(error.value.data?.message || "Lỗi hệ thống khi xóa");
+      return;
+    }
+
     if (data.value?.success) {
       message.success("Xóa thành công");
-      await fetchData({ ...param.value });
+      await refreshMenus();
     } else {
-      message.error(data.value?.message || "Có lỗi xảy ra");
+      message.error(data.value?.message || "Xóa thất bại");
     }
   } catch {
     message.error("Lỗi khi xóa");
@@ -267,37 +300,8 @@ const deleteItem = async id => {
 //   await fetchData({ ...param.value })
 // }
 
-// // 📌 Đặt lại tìm kiếm
-// const resetSearch = async () => {
-//   searchText.value = ''
-//   param.value.search = ''
-//   await fetchData({ ...param.value })
-// }
-
-// 📌 Gọi API lấy dữ liệu menu
-const fetchData = async p => {
-  try {
-    loading.value = true;
-    const { data } = await adminMenus.get({ params: p });
-    if (data.value?.success) {
-      dataSource.value = data.value.data.items.map(item => ({
-        ...item,
-        key: item.keyCode || item.key,
-        parentId: item.parentId === 0 || item.parentId === null || item.parent_Id === null ? 0 : (item.parentId ?? item.parent_Id),
-      }));
-      nestedMenuData.value = buildNestedMenu(dataSource.value);
-      menuOptions.value = buildMenuOptions(dataSource.value);
-      pagination.total = data.value.data.total || 0;
-    }
-  } catch (e) {
-    message.error("Lỗi khi tải menu");
-  } finally {
-    loading.value = false;
-  }
-};
-
 // 🚀 Khởi tạo dữ liệu khi vào trang
-await fetchData({ ...param.value });
+// (Tự động thực hiện bởi useFetch top-level)
 </script>
 
 <style scoped>

@@ -5,7 +5,7 @@ export const useAdminStore = defineStore("admin", {
     admin: {},
     menu: [],
     permissions: [],
-    currentPermission: 0,
+    current_permission: 0,
   }),
 
   actions: {
@@ -22,7 +22,7 @@ export const useAdminStore = defineStore("admin", {
       this.permissions = value;
     },
     setCurrentPermission(value) {
-      this.currentPermission = value;
+      this.current_permission = value;
     },
   },
 
@@ -34,6 +34,11 @@ export const useAdminStore = defineStore("admin", {
     image_url: state => state.admin?.image_url ?? null,
     menuItems: state => state.menu,
     menuPermissions: state => state.permissions,
+    currentPermission: state => {
+      if (state.admin?.isSuperAdmin) return true;
+      const PERMISSION_STATE = { NO_ACCESS: 0, VIEW: 1, EDIT: 2 };
+      return state.current_permission === PERMISSION_STATE.EDIT;
+    },
   },
 
   persist: true,

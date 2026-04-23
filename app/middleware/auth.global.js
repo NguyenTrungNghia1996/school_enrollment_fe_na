@@ -5,6 +5,7 @@ export default defineNuxtRouteMiddleware(async to => {
   const userStore = useUserStore();
 
   const publicRoutes = ["/login", "/", "/activate"]; // Thêm các route công khai tại đây
+  const publicStartWithRoutes = ["/test/"];
   const isPublicRoute = publicRoutes.includes(to.path);
   const isAdminRoute = to.path.startsWith("/admin");
   const isUserRoute = to.path.startsWith("/user");

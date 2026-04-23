@@ -27,5 +27,7 @@ export const useApi = () => {
     },
     adminMenus: useCrudApiAdmin("/api/admin/menus"),
     adminRoles: useCrudApiAdmin("/api/admin/roles"),
+    adminManage: useCrudApiAdmin("/api/admin"),
+    adminUser: useCrudApiAdmin("/api/users"),
   };
 };

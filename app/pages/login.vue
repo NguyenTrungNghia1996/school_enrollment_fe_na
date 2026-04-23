@@ -111,7 +111,7 @@ const handleLogin = async values => {
         clearCredentials();
       }
       await loadMenu();
-      // await loadPermissions();
+      await loadPermissions();
       message.success(data.value.message || "Chào mừng bạn trở lại hệ thống!");
       await navigateTo("/admin");
     }
