@@ -33,6 +33,7 @@ export const useApi = () => {
     examUser: {
       ...useCrudApiUser("/api/exam"),
     },
+    applicationUser: useCrudApiUser("/api/application"),
     authAdmin: {
       login(options) {
         return adminRequest.post("/api/admin/login", options ?? {});
