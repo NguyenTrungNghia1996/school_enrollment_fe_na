@@ -1,6 +1,6 @@
 <template>
   <a-form :model="form" layout="vertical" autocomplete="off" @finish="handleLogin">
-    <a-form-item label="Tài khoản" name="username" :rules="[{ required: true, message: 'Tên đăng nhập là bắt buộc' }]">
+    <a-form-item label="Email" name="username" :rules="[{ required: true, message: 'Tên đăng nhập là bắt buộc' }]">
       <a-input v-model:value="form.username" placeholder="Nhập tài khoản của bạn">
         <template #prefix>
           <Icon name="ant-design:user-outlined" class="text-gray-400" />
@@ -18,6 +18,7 @@
 
     <div class="mb-4 flex items-center justify-between gap-3">
       <a-checkbox v-model:checked="rememberMe">Ghi nhớ đăng nhập</a-checkbox>
+      <a-button type="link" class="!px-0" @click="emit('forgot-password', form.username)">Quên mật khẩu?</a-button>
     </div>
 
     <a-form-item>
@@ -28,7 +29,7 @@
 
 <script setup>
 const { authUser } = useApi();
-const emit = defineEmits(["authenticated"]);
+const emit = defineEmits(["authenticated", "forgot-password"]);
 const { getRememberMe, saveCredentials, getCredentials, clearCredentials } = useAuth();
 const rememberMe = getRememberMe("user");
 const userStore = useUserStore();
@@ -51,8 +52,6 @@ const handleLogin = async () => {
 
   try {
     const { data, error } = await authUser.login({ body: { ...form } });
-    console.log("data login: ", data.value);
-    console.log("error login: ", error.value);
 
     if (error.value || !data.value?.success) {
       throw new Error(error.value?.data?.message || data.value?.message || "Đăng nhập thất bại");

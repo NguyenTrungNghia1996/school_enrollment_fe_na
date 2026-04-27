@@ -5,10 +5,16 @@ export const useApi = () => {
   return {
     authUser: {
       register(options) {
-        return userRequest.post("/api/v1/auth/register", options ?? {});
+        return userRequest.post("/api/users/register", options ?? {});
       },
       login(options) {
         return userRequest.post("/api/users/login", options ?? {});
+      },
+      changePassword(options) {
+        return userRequest.post("/api/users/changePassword", options ?? {});
+      },
+      forgotPassword(options) {
+        return userRequest.post("/api/users/forgotPassword", options ?? {});
       },
       activate(options) {
         return userRequest.post("/api/v1/auth/activate", options ?? {});
@@ -19,6 +25,7 @@ export const useApi = () => {
     },
     ethnicityUser: useCrudApiUser("/api/ethnicity"),
     provinceUser: useCrudApiUser("/api/province"),
+    communeUser: useCrudApiUser("/api/commune"),
     authAdmin: {
       login(options) {
         return adminRequest.post("/api/admin/login", options ?? {});
