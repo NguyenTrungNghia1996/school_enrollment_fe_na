@@ -50,13 +50,19 @@ export const useApi = () => {
     adminEnrollment: useCrudApiAdmin("/api/exam"),
     adminApplication: {
       get(options) {
-        return adminRequest.get("/api/application", options ?? {});
+        return adminRequest.get("/api/admin/application", options ?? {});
       },
       delete(options) {
-        return adminRequest.delete("/api/application", options ?? {});
+        return adminRequest.delete("/api/admin/application", options ?? {});
       },
       getById(options) {
-        return adminRequest.get("/api/application/detail", options ?? {});
+        return adminRequest.get("/api/admin/application/detail", options ?? {});
+      },
+      approve(options) {
+        return adminRequest.get("/api/admin/application/approve", options ?? {});
+      },
+      reject(options) {
+        return adminRequest.get("/api/admin/application/reject", options ?? {});
       },
     },
   };
