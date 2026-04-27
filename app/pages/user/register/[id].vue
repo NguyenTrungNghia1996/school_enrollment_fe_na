@@ -1,20 +1,6 @@
 <template>
   <div class="min-h-screen bg-slate-50 px-4 py-8 sm:px-6 lg:px-8">
     <div class="mx-auto max-w-7xl">
-      <div class="mb-6 flex flex-wrap items-center justify-between gap-3">
-        <a-button type="text" class="!px-0 text-slate-500" @click="goBack">
-          <template #icon>
-            <Icon name="lucide:arrow-left" />
-          </template>
-          Quay lại
-        </a-button>
-
-        <div class="text-sm text-slate-500">
-          Mã kỳ khảo thí:
-          <span class="font-semibold text-slate-700">#{{ examDetail?.id || "-" }}</span>
-        </div>
-      </div>
-
       <div v-if="loading" class="rounded-3xl bg-white px-6 py-16 text-center shadow-sm">
         <a-spin size="large" />
         <p class="mt-4 text-slate-500">Đang tải thông tin kỳ khảo thí...</p>
@@ -40,7 +26,6 @@
                   </span>
                 </div>
                 <h1 class="text-3xl font-extrabold tracking-tight text-slate-900">{{ examDetail.examName }}</h1>
-                <p class="mt-3 max-w-3xl text-sm leading-6 text-slate-500">Hoàn tất thông tin thí sinh, tải lên đúng hồ sơ yêu cầu và nộp đơn trong thời gian hệ thống đang mở.</p>
               </div>
 
               <div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-1">
@@ -532,7 +517,7 @@ const handleDocumentUpload = async (index, event) => {
     const uploadedFiles = await Promise.all(
       files.map(async file => {
         const result = await s3.upload(file, {
-          key: `applications/${examId.value}/${Date.now()}-${file.name}`,
+          key: `${Date.now()}-${file.name}`,
           contentType: file.type || "application/octet-stream",
         });
 
