@@ -3,6 +3,7 @@ export const useApi = () => {
   const adminRequest = new RequestAdmin();
 
   return {
+    s3: useS3Upload("/api/upload"),
     authUser: {
       register(options) {
         return userRequest.post("/api/users/register", options ?? {});
@@ -31,10 +32,8 @@ export const useApi = () => {
     communeUser: useCrudApiUser("/api/commune"),
     examUser: {
       ...useCrudApiUser("/api/exam"),
-      getDetail(options) {
-        return userRequest.get("/api/exam/detail", options ?? {});
-      },
     },
+    applicationUser: useCrudApiUser("/api/application"),
     authAdmin: {
       login(options) {
         return adminRequest.post("/api/admin/login", options ?? {});
