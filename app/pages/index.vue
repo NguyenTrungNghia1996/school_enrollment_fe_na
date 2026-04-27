@@ -292,8 +292,10 @@ const handleRegistration = exam => {
   if (!userStore.token) {
     message.warning("Bạn cần phàn đăng nhập để thực hiện thao tác này");
     userStore.openLogin();
+  } else if (exam.isClosed) {
+    message.warning("Kỳ khảo thí này hiện chưa mở hoặc đã kết thúc");
   } else {
-    message.info(`Đang chuyển tới trang đăng ký cho: ${exam.title}`);
+    navigateTo(`/user/register/${exam.id}`);
   }
 };
 

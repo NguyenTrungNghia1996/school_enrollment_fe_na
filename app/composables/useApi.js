@@ -29,7 +29,12 @@ export const useApi = () => {
     ethnicityUser: useCrudApiUser("/api/ethnicity"),
     provinceUser: useCrudApiUser("/api/province"),
     communeUser: useCrudApiUser("/api/commune"),
-    examUser: useCrudApiUser("/api/exam"),
+    examUser: {
+      ...useCrudApiUser("/api/exam"),
+      getDetail(options) {
+        return userRequest.get("/api/exam/detail", options ?? {});
+      },
+    },
     authAdmin: {
       login(options) {
         return adminRequest.post("/api/admin/login", options ?? {});
