@@ -11,7 +11,7 @@
         <h1 class="text-4xl font-extrabold tracking-tight sm:text-5xl lg:text-6xl">Cổng Thông Tin Tuyển Sinh Trực Tuyến</h1>
         <p class="mx-auto mt-6 max-w-2xl text-xl text-blue-100">Hệ thống quản lý hồ sơ đăng ký và theo dõi thông tin thi dành cho thí sinh và phụ huynh của {{ unitStore.name }}.</p>
         <div class="mt-10 flex justify-center gap-4">
-          <a-button type="primary" size="large" class="h-12 rounded-lg bg-primary px-8 font-bold hover:bg-primary/90" @click="handleCta">BẮT ĐẦU ĐĂNG KÝ</a-button>
+          <a-button v-if="!userStore.token" type="primary" size="large" class="h-12 rounded-lg bg-primary px-8 font-bold hover:bg-primary/90" @click="handleCta">BẮT ĐẦU ĐĂNG KÝ</a-button>
           <a-button ghost size="large" class="h-12 rounded-lg border-white px-8 font-bold hover:bg-white hover:text-[#071f41]">HƯỚNG DẪN THỦ TỤC</a-button>
         </div>
       </div>
@@ -29,14 +29,18 @@
                 <Icon name="lucide:book-open" class="text-primary" />
                 Các Đợt Khảo Thí Đang Mở
               </h2>
-              <a-button type="link" class="font-semibold text-primary">Xem tất cả</a-button>
+              <a-button v-if="showViewMoreButton" type="link" class="font-semibold text-primary" :loading="loading" @click="handleViewMore">Xem thêm</a-button>
             </div>
 
-            <div class="grid gap-6 md:grid-cols-2">
-              <article v-for="exam in exams" :key="exam.title" class="group relative flex flex-col justify-between rounded-xl border border-slate-200 bg-white p-6 transition-all duration-300 hover:border-primary/30 hover:shadow-xl">
+            <div v-if="examsExpanded" class="mb-6">
+              <a-input-search v-model:value="examSearchText" placeholder="Tìm kiếm kỳ khảo thí..." allow-clear @search="handleExamSearch" @change="onExamSearchChange" />
+            </div>
+
+            <div class="grid grid-cols-1 gap-6 md:grid-cols-3">
+              <article v-for="exam in exams" :key="exam.id" class="group relative flex flex-col justify-between rounded-xl border border-slate-200 bg-white p-6 transition-all duration-300 hover:border-primary/30 hover:shadow-xl">
                 <div>
                   <div class="mb-4">
-                    <span class="inline-flex items-center rounded-md bg-primary/10 px-2 py-1 text-xs font-bold uppercase tracking-wider text-primary ring-1 ring-inset ring-primary/10">
+                    <span class="inline-flex items-center rounded-md px-2 py-1 text-xs font-bold uppercase tracking-wider ring-1 ring-inset" :class="exam.badgeClass">
                       {{ exam.status }}
                     </span>
                   </div>
@@ -64,6 +68,21 @@
                   <a-button block type="primary" class="h-11 rounded-lg bg-primary font-bold hover:bg-primary/90" @click="handleRegistration(exam)">ĐĂNG KÝ NGAY</a-button>
                 </div>
               </article>
+            </div>
+
+            <div v-if="loading && !exams.length" class="py-10 text-center">
+              <a-spin size="large" />
+            </div>
+
+            <div v-if="!loading && !exams.length" class="rounded-2xl border border-dashed border-slate-300 bg-slate-50 px-6 py-10 text-center text-slate-500">Chưa có kỳ khảo thí nào để hiển thị.</div>
+
+            <div v-if="examsExpanded && examTotal > expandedPageSize" class="flex justify-center pt-8">
+              <a-pagination
+                v-model:current="pageIndex"
+                :total="examTotal"
+                :page-size="expandedPageSize"
+                :show-size-changer="false"
+                @change="handleExamPageChange" />
             </div>
           </section>
 
@@ -128,7 +147,7 @@
               </div>
               <div class="flex items-center justify-between">
                 <span class="font-medium text-slate-500">Đợt thi hiện tại</span>
-                <span class="text-xl font-bold text-primary">{{ exams.length }}</span>
+                <span class="text-xl font-bold text-primary">{{ examTotal }}</span>
               </div>
               <div class="flex items-center justify-between">
                 <span class="font-medium text-slate-500">Lượt truy cập</span>
@@ -143,29 +162,120 @@
 </template>
 
 <script setup>
+const { $dayjs } = useNuxtApp();
 const unitStore = useUnitStore();
 const userStore = useUserStore();
+const { examUser } = useApi();
 
-const exams = [
-  {
-    title: "Olympic Hóa Học và Khoa Học Tự Nhiên",
-    status: "Sắp mở",
-    start: "10/01/2026",
-    end: "08/02/2026",
-  },
-  {
-    title: "Kỳ thi Đánh giá năng lực SPT năm 2026",
-    status: "Đang mở",
-    start: "15/03/2026",
-    end: "15/04/2026",
-  },
-  {
-    title: "Học sinh giỏi cấp trường ĐHSP Hà Nội năm 2026",
-    status: "Đang mở",
-    start: "20/03/2026",
-    end: "18/04/2026",
-  },
-];
+const INITIAL_PAGE_SIZE = 3;
+const EXPANDED_PAGE_SIZE = 6;
+const exams = ref([]);
+const examTotal = ref(0);
+const pageIndex = ref(1);
+const loading = ref(false);
+const examsExpanded = ref(false);
+const examSearchText = ref("");
+const pageSize = computed(() => (examsExpanded.value ? EXPANDED_PAGE_SIZE : INITIAL_PAGE_SIZE));
+const expandedPageSize = computed(() => EXPANDED_PAGE_SIZE);
+const showViewMoreButton = computed(() => !examsExpanded.value && examTotal.value > INITIAL_PAGE_SIZE);
+
+const getExamStatus = exam => {
+  const now = $dayjs();
+  const startDate = $dayjs(exam.startDate);
+  const endDate = $dayjs(exam.endDate);
+
+  if (now.isBefore(startDate)) {
+    return {
+      label: "Sắp mở",
+      badgeClass: "bg-sky-50 text-sky-700 ring-sky-200",
+    };
+  }
+
+  if (now.isAfter(endDate)) {
+    return {
+      label: "Đã đóng",
+      badgeClass: "bg-slate-100 text-slate-600 ring-slate-200",
+    };
+  }
+
+  return {
+    label: "Đang mở",
+    badgeClass: "bg-primary/10 text-primary ring-primary/10",
+  };
+};
+
+const mapExamItem = exam => {
+  const status = getExamStatus(exam);
+
+  return {
+    id: exam.id,
+    title: exam.examName,
+    start: $dayjs(exam.startDate).format("DD/MM/YYYY"),
+    end: $dayjs(exam.endDate).format("DD/MM/YYYY"),
+    status: status.label,
+    badgeClass: status.badgeClass,
+    raw: exam,
+  };
+};
+
+const fetchExams = async () => {
+  loading.value = true;
+
+  try {
+    const { data, error } = await examUser.get({
+      query: {
+        pageIndex: pageIndex.value,
+        pageSize: pageSize.value,
+        search: examSearchText.value.trim(),
+      },
+    });
+
+    if (error.value || data.value?.success === false) {
+      throw new Error(error.value?.data?.message || data.value?.message || "Không tải được danh sách kỳ khảo thí");
+    }
+
+    const items = Array.isArray(data.value?.data?.items) ? data.value.data.items : [];
+    exams.value = items.map(mapExamItem);
+    examTotal.value = Number(data.value?.data?.total || 0);
+  } catch (error) {
+    exams.value = [];
+    examTotal.value = 0;
+    message.error(error?.message || "Không tải được danh sách kỳ khảo thí");
+  } finally {
+    loading.value = false;
+  }
+};
+
+const resetExamList = async () => {
+  pageIndex.value = 1;
+  await fetchExams();
+};
+
+const handleViewMore = async () => {
+  examsExpanded.value = true;
+  pageIndex.value = 1;
+  await fetchExams();
+};
+
+const handleExamSearch = async value => {
+  examSearchText.value = (value || "").trim();
+  await resetExamList();
+};
+
+const onExamSearchChange = async event => {
+  const value = event?.target?.value || "";
+  if (value) return;
+
+  examSearchText.value = "";
+  await resetExamList();
+};
+
+const handleExamPageChange = async page => {
+  pageIndex.value = page;
+  await fetchExams();
+};
+
+await fetchExams();
 
 const handleRegistration = exam => {
   if (!userStore.token) {
