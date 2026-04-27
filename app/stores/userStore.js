@@ -7,6 +7,7 @@ export const useUserStore = defineStore("user", {
       isOpen: false,
       mode: "login",
       activationUsername: "",
+      forgotPasswordEmail: "",
     },
   }),
 
@@ -24,6 +25,15 @@ export const useUserStore = defineStore("user", {
     openRegister() {
       this.authModal.isOpen = true;
       this.authModal.mode = "register";
+    },
+    openForgotPassword(email = "") {
+      this.authModal.isOpen = true;
+      this.authModal.mode = "forgot-password";
+      this.authModal.forgotPasswordEmail = email;
+    },
+    openChangePassword() {
+      this.authModal.isOpen = true;
+      this.authModal.mode = "change-password";
     },
     closeAuthModal() {
       this.authModal.isOpen = false;

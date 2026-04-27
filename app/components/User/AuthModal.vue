@@ -11,32 +11,31 @@
 
       <div class="min-h-[200px]">
         <transition name="fade" mode="out-in">
-          <UserLoginForm v-if="authMode === 'login'" :key="'login'" @authenticated="onAuthenticated" />
+          <UserLoginForm v-if="authMode === 'login'" :key="'login'" @authenticated="onAuthenticated" @forgot-password="onForgotPassword" />
+          <UserForgotPasswordForm v-else-if="authMode === 'forgot-password'" :key="'forgot-password'" :initial-email="forgotPasswordEmail" @submitted="onForgotPasswordSubmitted" @switch-to-login="authMode = 'login'" />
+          <UserChangePasswordForm v-else-if="authMode === 'change-password'" :key="'change-password'" @changed="onChangedPassword" />
           <UserActivationForm v-else-if="authMode === 'activate'" :key="'activate'" :username="activationUsername" @activated="onActivated" @switch-to-login="authMode = 'login'" />
           <UserRegisterForm v-else :key="'register'" @registered="onRegistered" />
         </transition>
       </div>
 
-      <div class="mb-4 mt-4 flex items-center justify-between text-sm" v-if="authMode !== 'activate'">
+      <div class="mb-4 mt-4 flex items-center justify-between text-sm" v-if="showDivider">
         <div class="h-px flex-1 bg-slate-200"></div>
         <span class="px-4 text-xs font-semibold uppercase tracking-wider text-slate-400">Hoặc</span>
         <div class="h-px flex-1 bg-slate-200"></div>
       </div>
 
-      <div class="grid grid-cols-1 gap-4" v-if="authMode !== 'activate'">
-        <a-button block @click="authMode = authMode === 'login' ? 'register' : 'login'">
+      <div class="grid grid-cols-1 gap-4" v-if="showActions">
+        <a-button block @click="handleSwitchAuthMode">
           {{ authMode === "login" ? "Tạo tài khoản mới" : "Đã có tài khoản? Đăng nhập" }}
         </a-button>
-        <div class="pt-2 text-center">
-          <a-button v-if="authMode === 'login'" type="link">Quên mật khẩu?</a-button>
-        </div>
       </div>
     </div>
   </a-modal>
 </template>
 
 <script setup>
-import { ref, computed } from "vue";
+import { computed } from "vue";
 
 const userStore = useUserStore();
 
@@ -52,18 +51,36 @@ const authMode = computed({
   set: val => (userStore.authModal.mode = val),
 });
 
-
 const activationUsername = computed({
   get: () => userStore.authModal.activationUsername,
   set: val => (userStore.authModal.activationUsername = val),
 });
 
+const forgotPasswordEmail = computed({
+  get: () => userStore.authModal.forgotPasswordEmail,
+  set: val => (userStore.authModal.forgotPasswordEmail = val),
+});
+
 const onRegistered = (username) => {
   activationUsername.value = username;
-  authMode.value = "activate";
+  forgotPasswordEmail.value = username;
+  authMode.value = "login";
 };
 
 const onAuthenticated = () => {
+  userStore.closeAuthModal();
+};
+
+const onForgotPassword = (email) => {
+  forgotPasswordEmail.value = email || "";
+  authMode.value = "forgot-password";
+};
+
+const onForgotPasswordSubmitted = (email) => {
+  forgotPasswordEmail.value = email || "";
+};
+
+const onChangedPassword = () => {
   userStore.closeAuthModal();
 };
 
@@ -72,8 +89,18 @@ const onActivated = () => {
   activationUsername.value = "";
 };
 
+const showDivider = computed(() => !["activate", "change-password"].includes(authMode.value));
+
+const showActions = computed(() => ["login", "register", "forgot-password"].includes(authMode.value));
+
+const handleSwitchAuthMode = () => {
+  authMode.value = authMode.value === "login" ? "register" : "login";
+};
+
 const authTitle = computed(() => {
   if (authMode.value === "login") return "Đăng nhập";
+  if (authMode.value === "forgot-password") return "Quên mật khẩu";
+  if (authMode.value === "change-password") return "Đổi mật khẩu";
   if (authMode.value === "activate") return "Kích hoạt tài khoản";
   return "Đăng ký";
 });

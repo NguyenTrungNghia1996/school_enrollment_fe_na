@@ -1,25 +1,13 @@
 <template>
   <a-form :model="form" layout="vertical" autocomplete="off" @finish="handleRegister">
-    <a-form-item label="Họ và tên" name="full_name" :rules="[{ required: true, message: 'Vui lòng nhập họ và tên!' }]">
-      <a-input v-model:value="form.full_name" placeholder="Nhập họ và tên" />
-    </a-form-item>
-
-    <a-form-item label="Tài khoản" name="username" :rules="[{ required: true, message: 'Vui lòng nhập tài khoản!' }]">
-      <a-input v-model:value="form.username" placeholder="Nhập tài khoản" />
-    </a-form-item>
-
     <a-form-item
       label="Email"
-      name="email"
+      name="username"
       :rules="[
         { required: true, message: 'Vui lòng nhập email!' },
         { type: 'email', message: 'Email không hợp lệ!' },
       ]">
-      <a-input v-model:value="form.email" placeholder="Nhập email" />
-    </a-form-item>
-
-    <a-form-item label="Số điện thoại" name="phone_number" :rules="[{ required: true, message: 'Vui lòng nhập số điện thoại!' }]">
-      <a-input v-model:value="form.phone_number" placeholder="Nhập số điện thoại" />
+      <a-input v-model:value="form.username" placeholder="Nhập email đăng nhập" />
     </a-form-item>
 
     <a-form-item
@@ -30,6 +18,21 @@
         { min: 6, message: 'Mật khẩu cần tối thiểu 6 ký tự!' },
       ]">
       <a-input-password v-model:value="form.password" placeholder="Nhập mật khẩu" />
+    </a-form-item>
+
+    <a-form-item
+      label="Xác nhận mật khẩu"
+      name="confirmPassword"
+      :rules="[
+        { required: true, message: 'Vui lòng xác nhận mật khẩu!' },
+        {
+          validator: async (_rule, value) => {
+            if (!value || value === form.password) return Promise.resolve();
+            return Promise.reject(new Error('Mật khẩu xác nhận không khớp!'));
+          },
+        },
+      ]">
+      <a-input-password v-model:value="form.confirmPassword" placeholder="Nhập lại mật khẩu" />
     </a-form-item>
 
     <a-form-item class="mb-0">
@@ -46,18 +49,22 @@ const loading = ref(false);
 const form = reactive({
   username: "",
   password: "",
-  email: "",
-  phone_number: "",
-  full_name: "",
+  confirmPassword: "",
 });
 
 const handleRegister = async () => {
   loading.value = true;
 
   try {
-    const { data, error } = await authUser.register({ body: { ...form } });
+    const { data, error } = await authUser.register({
+      body: {
+        username: form.username,
+        password: form.password,
+        confirmPassword: form.confirmPassword,
+      },
+    });
 
-    if (error.value || data.value?.status !== "success") {
+    if (error.value || data.value?.success === false) {
       throw new Error(error.value?.data?.message || data.value?.message || "Đăng ký thất bại");
     }
 
@@ -67,9 +74,7 @@ const handleRegister = async () => {
     Object.assign(form, {
       username: "",
       password: "",
-      email: "",
-      phone_number: "",
-      full_name: "",
+      confirmPassword: "",
     });
   } catch (error) {
     message.error(error?.message || "Đăng ký thất bại");

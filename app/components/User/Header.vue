@@ -32,6 +32,10 @@
                   <template #icon><Icon name="lucide:user" class="text-lg" /></template>
                   Thông tin cá nhân
                 </a-menu-item>
+                <a-menu-item key="change-password" class="rounded-lg py-3" @click="userStore.openChangePassword()">
+                  <template #icon><Icon name="lucide:key-round" class="text-lg" /></template>
+                  Đổi mật khẩu
+                </a-menu-item>
                 <a-menu-divider />
                 <a-menu-item key="logout" class="text-error hover:bg-error/5 rounded-lg py-3" @click="handleLogout">
                   <template #icon><Icon name="lucide:log-out" class="text-error text-lg" /></template>
