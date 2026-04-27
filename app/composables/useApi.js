@@ -3,6 +3,7 @@ export const useApi = () => {
   const adminRequest = new RequestAdmin();
 
   return {
+    s3: useS3Upload("/api/upload"),
     authUser: {
       register(options) {
         return userRequest.post("/api/users/register", options ?? {});
