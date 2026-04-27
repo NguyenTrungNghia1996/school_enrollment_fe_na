@@ -16,6 +16,9 @@ export const useApi = () => {
       forgotPassword(options) {
         return userRequest.post("/api/users/forgotPassword", options ?? {});
       },
+      activateToken(options) {
+        return userRequest.get("/api/users/activate", options ?? {});
+      },
       activate(options) {
         return userRequest.post("/api/v1/auth/activate", options ?? {});
       },
