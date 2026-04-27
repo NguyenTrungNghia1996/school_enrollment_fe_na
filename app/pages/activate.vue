@@ -9,9 +9,7 @@
           </div>
         </div>
         <h1 class="text-3xl font-extrabold text-slate-900">Kích hoạt tài khoản</h1>
-        <p class="mt-3 max-w-[360px] text-sm leading-relaxed text-slate-500">
-          Hệ thống đang xác thực liên kết kích hoạt tài khoản của bạn.
-        </p>
+        <p class="mt-3 max-w-[360px] text-sm leading-relaxed text-slate-500">Hệ thống đang kích hoạt tài khoản của bạn.</p>
       </div>
 
       <a-card :bordered="false" class="overflow-hidden rounded-3xl shadow-[0_18px_60px_rgba(15,23,42,0.12)]">
@@ -37,27 +35,11 @@
             </div>
 
             <div class="grid gap-3 pt-2">
-              <a-button
-                v-if="isSuccess"
-                type="primary"
-                size="large"
-                class="h-12 rounded-xl font-bold"
-                @click="navigateTo('/')">
-                Về trang chủ
-              </a-button>
+              <a-button v-if="isSuccess" type="primary" size="large" class="h-12 rounded-xl font-bold" @click="navigateTo('/')">Về trang chủ</a-button>
 
-              <a-button
-                v-else
-                type="primary"
-                size="large"
-                class="h-12 rounded-xl font-bold"
-                @click="retryActivate">
-                Thử lại
-              </a-button>
+              <a-button v-else type="primary" size="large" class="h-12 rounded-xl font-bold" @click="retryActivate">Thử lại</a-button>
 
-              <a-button size="large" class="h-12 rounded-xl" @click="userStore.openLogin()">
-                Mở đăng nhập
-              </a-button>
+              <a-button size="large" class="h-12 rounded-xl" @click="userStore.openLogin()">Mở đăng nhập</a-button>
             </div>
           </template>
         </div>
@@ -99,7 +81,7 @@ const activateAccount = async () => {
 
   try {
     if (!token.value) {
-      throw new Error("Liên kết kích hoạt không hợp lệ hoặc thiếu token.");
+      throw new Error("Liên kết kích hoạt không hợp lệ");
     }
 
     const { data, error } = await authUser.activateToken({
@@ -131,6 +113,6 @@ watch(
   () => {
     activateAccount();
   },
-  { immediate: true }
+  { immediate: true },
 );
 </script>
