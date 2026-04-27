@@ -1,0 +1,61 @@
+<template>
+  <span class="inline-flex items-center">
+    <button type="button" class="cursor-pointer border-0 bg-transparent p-0 text-left text-blue-600 underline-offset-2 transition hover:text-blue-500 hover:underline" @click="openPreview">
+      {{ displayName }}
+    </button>
+
+    <a-image
+      :src="src"
+      class="hidden"
+      :preview="{
+        visible: isPreviewOpen,
+        src,
+        onVisibleChange: handleVisibleChange,
+      }" />
+  </span>
+</template>
+
+<script setup>
+const props = defineProps({
+  src: {
+    type: String,
+    default: "",
+  },
+});
+
+const isPreviewOpen = ref(false);
+
+const fileName = computed(() => {
+  if (!props.src) {
+    return "";
+  }
+
+  try {
+    const { pathname } = new URL(props.src);
+    const segments = pathname.split("/").filter(Boolean);
+
+    return decodeURIComponent(segments.at(-1) || props.src);
+  } catch {
+    const cleanUrl = props.src.split("?")[0].split("#")[0];
+    const segments = cleanUrl.split("/").filter(Boolean);
+
+    return decodeURIComponent(segments.at(-1) || props.src);
+  }
+});
+
+const displayName = computed(() => {
+  return fileName.value.replace(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}-/i, "");
+});
+
+const openPreview = () => {
+  if (!props.src) {
+    return;
+  }
+
+  isPreviewOpen.value = true;
+};
+
+const handleVisibleChange = visible => {
+  isPreviewOpen.value = visible;
+};
+</script>
