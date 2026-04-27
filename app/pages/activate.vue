@@ -78,6 +78,7 @@ const statusTextClass = computed(() => (isSuccess.value ? "text-emerald-600" : "
 
 const activateAccount = async () => {
   loading.value = true;
+  userStore.closeAuthModal();
 
   try {
     if (!token.value) {
@@ -96,6 +97,7 @@ const activateAccount = async () => {
 
     isSuccess.value = true;
     statusMessage.value = data.value?.message || "Tài khoản của bạn đã được kích hoạt. Bạn có thể đăng nhập để tiếp tục.";
+    userStore.closeAuthModal();
   } catch (error) {
     isSuccess.value = false;
     statusMessage.value = error?.message || "Không thể kích hoạt tài khoản với liên kết hiện tại.";
@@ -111,6 +113,7 @@ const retryActivate = () => {
 watch(
   token,
   () => {
+    userStore.closeAuthModal();
     activateAccount();
   },
   { immediate: true },
