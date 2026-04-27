@@ -21,8 +21,8 @@
         { required: true, message: 'Vui lòng xác nhận mật khẩu mới!' },
         {
           validator: async (_rule, value) => {
-            if (!value || value === form.newPassword) return Promise.resolve();
-            return Promise.reject(new Error('Mật khẩu xác nhận không khớp!'));
+            if (!value || value === form.newPassword) return;
+            throw new Error('Mật khẩu xác nhận không khớp!');
           },
         },
       ]">
