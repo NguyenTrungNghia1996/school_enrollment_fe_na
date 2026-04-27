@@ -7,7 +7,7 @@
 
       <div class="flex items-center gap-4">
         <template v-if="!userStore.token">
-          <a-button type="primary" class="bg-primary shadow-primary/20 hover:bg-primary/90 flex h-10 items-center justify-center gap-2 rounded-lg px-6 text-sm font-bold shadow-md" @click="userStore.openLogin()">
+          <a-button type="primary" class="flex h-10 items-center justify-center gap-2 rounded-lg bg-primary px-6 text-sm font-bold shadow-md shadow-primary/20 hover:bg-primary/90" @click="userStore.openLogin()">
             <!-- <template #icon>
               <UserOutlined />
             </template> -->
@@ -28,17 +28,17 @@
             </div>
             <template #overlay>
               <a-menu class="min-w-[200px] overflow-hidden rounded-xl border-none p-2 shadow-2xl">
-                <a-menu-item key="profile" class="rounded-lg py-3">
+                <!-- <a-menu-item key="profile" class="rounded-lg py-3">
                   <template #icon><Icon name="lucide:user" class="text-lg" /></template>
                   Thông tin cá nhân
-                </a-menu-item>
+                </a-menu-item> -->
                 <a-menu-item key="change-password" class="rounded-lg py-3" @click="userStore.openChangePassword()">
                   <template #icon><Icon name="lucide:key-round" class="text-lg" /></template>
                   Đổi mật khẩu
                 </a-menu-item>
                 <a-menu-divider />
-                <a-menu-item key="logout" class="text-error hover:bg-error/5 rounded-lg py-3" @click="handleLogout">
-                  <template #icon><Icon name="lucide:log-out" class="text-error text-lg" /></template>
+                <a-menu-item key="logout" class="rounded-lg py-3 text-error hover:bg-error/5" @click="handleLogout">
+                  <template #icon><Icon name="lucide:log-out" class="text-lg text-error" /></template>
                   Đăng xuất
                 </a-menu-item>
               </a-menu>

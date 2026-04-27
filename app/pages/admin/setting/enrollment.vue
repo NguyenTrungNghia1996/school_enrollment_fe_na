@@ -46,12 +46,12 @@
             <a-input v-model:value="formState.examName" placeholder="Nhập tên kỳ tuyển sinh" />
           </a-form-item>
 
-          <a-form-item label="Ngày bắt đầu" name="startDate">
-            <a-date-picker v-model:value="formState.startDate" show-time class="w-full" placeholder="Chọn ngày bắt đầu" />
-          </a-form-item>
-
-          <a-form-item label="Ngày kết thúc" name="endDate">
-            <a-date-picker v-model:value="formState.endDate" show-time class="w-full" placeholder="Chọn ngày kết thúc" />
+          <a-form-item label="Khoảng thời gian" name="dateRange" class="md:col-span-2">
+            <a-range-picker
+              v-model:value="formState.dateRange"
+              show-time
+              class="w-full"
+              :placeholder="['Chọn ngày bắt đầu', 'Chọn ngày kết thúc']" />
           </a-form-item>
 
           <a-form-item label="Lệ phí (VNĐ)" name="fee">
@@ -135,6 +135,7 @@ const columns = [
 
 const formState = reactive({
   id: null,
+  dateRange: [],
   examName: "",
   startDate: null,
   endDate: null,
@@ -147,8 +148,14 @@ const formState = reactive({
 
 const rules = {
   examName: [{ required: true, message: "Vui lòng nhập tên kỳ tuyển sinh", trigger: "blur" }],
-  startDate: [{ required: true, message: "Vui lòng chọn ngày bắt đầu", trigger: "change" }],
-  endDate: [{ required: true, message: "Vui lòng chọn ngày kết thúc", trigger: "change" }],
+  dateRange: [
+    {
+      required: true,
+      type: "array",
+      message: "Vui lòng chọn khoảng thời gian",
+      trigger: "change",
+    },
+  ],
 };
 
 const param = ref({ pageIndex: 1, pageSize: 10, search: "" });
@@ -195,6 +202,7 @@ const showModal = () => {
   isEdit.value = false;
   Object.assign(formState, {
     id: null,
+    dateRange: [],
     examName: "",
     startDate: null,
     endDate: null,
@@ -213,11 +221,14 @@ const editItem = async id => {
     const { data } = await adminEnrollment.getByRest("detail", { params: { id: id } });
     if (data.value?.success) {
       const detail = data.value.data;
+      const startDate = detail.startDate ? dayjs(detail.startDate) : null;
+      const endDate = detail.endDate ? dayjs(detail.endDate) : null;
       Object.assign(formState, {
         id: detail.id,
+        dateRange: startDate && endDate ? [startDate, endDate] : [],
         examName: detail.examName,
-        startDate: detail.startDate ? dayjs(detail.startDate) : null,
-        endDate: detail.endDate ? dayjs(detail.endDate) : null,
+        startDate,
+        endDate,
         examType: detail.examType,
         fee: detail.fee,
         quantity: detail.quantity,
@@ -235,9 +246,12 @@ const handleOk = async () => {
   try {
     await formRef.value.validate();
     confirmLoading.value = true;
+    formState.startDate = formState.dateRange?.[0] || null;
+    formState.endDate = formState.dateRange?.[1] || null;
 
     const payload = {
       ...formState,
+      dateRange: undefined,
       startDate: formState.startDate ? formState.startDate.toISOString() : null,
       endDate: formState.endDate ? formState.endDate.toISOString() : null,
     };

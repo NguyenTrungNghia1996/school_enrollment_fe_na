@@ -67,8 +67,9 @@ const onRegistered = (username) => {
   authMode.value = "login";
 };
 
-const onAuthenticated = () => {
+const onAuthenticated = async () => {
   userStore.closeAuthModal();
+  await navigateTo("/");
 };
 
 const onForgotPassword = (email) => {
