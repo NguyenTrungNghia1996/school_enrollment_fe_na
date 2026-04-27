@@ -1,7 +1,7 @@
 // composables/useRequest.js
 import { useJwt } from "@vueuse/integrations/useJwt";
 
-export class Request {
+export class RequestUser {
   constructor() {
     const config = useRuntimeConfig();
     this.baseURL = config.public.baseURL;
