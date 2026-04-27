@@ -31,9 +31,6 @@ export const useApi = () => {
     communeUser: useCrudApiUser("/api/commune"),
     examUser: {
       ...useCrudApiUser("/api/exam"),
-      getDetail(options) {
-        return userRequest.get("/api/exam/detail", options ?? {});
-      },
     },
     authAdmin: {
       login(options) {

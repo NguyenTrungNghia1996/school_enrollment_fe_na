@@ -1,8 +1,8 @@
-export const useS3Upload = (endpoint) => {
-  const request = new Request();
-
-  const getPresignedUrl = async (payload) => {
-    const { data, error } = await request.put(endpoint, {
+export const useS3Upload = endpoint => {
+  // const request = new Request();
+  const userRequest = new RequestUser();
+  const getPresignedUrl = async payload => {
+    const { data, error } = await userRequest.put(endpoint, {
       body: payload,
     });
 
@@ -14,7 +14,7 @@ export const useS3Upload = (endpoint) => {
     return data.value.data;
   };
 
-  const upload = async (file) => {
+  const upload = async file => {
     const presigned = await getPresignedUrl({
       filename: file.name,
       filetype: file.type,
