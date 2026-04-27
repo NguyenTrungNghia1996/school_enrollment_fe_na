@@ -65,7 +65,14 @@
                   </div>
                 </div>
                 <div class="mt-8">
-                  <a-button block type="primary" class="h-11 rounded-lg bg-primary font-bold hover:bg-primary/90" @click="handleRegistration(exam)">ĐĂNG KÝ NGAY</a-button>
+                  <a-button
+                    block
+                    type="primary"
+                    class="h-11 rounded-lg bg-primary font-bold hover:bg-primary/90"
+                    :disabled="exam.isClosed"
+                    @click="handleRegistration(exam)">
+                    ĐĂNG KÝ NGAY
+                  </a-button>
                 </div>
               </article>
             </div>
@@ -188,6 +195,7 @@ const getExamStatus = exam => {
     return {
       label: "Sắp mở",
       badgeClass: "bg-sky-50 text-sky-700 ring-sky-200",
+      isClosed: true,
     };
   }
 
@@ -195,12 +203,14 @@ const getExamStatus = exam => {
     return {
       label: "Đã đóng",
       badgeClass: "bg-slate-100 text-slate-600 ring-slate-200",
+      isClosed: true,
     };
   }
 
   return {
     label: "Đang mở",
     badgeClass: "bg-primary/10 text-primary ring-primary/10",
+    isClosed: false,
   };
 };
 
@@ -214,6 +224,7 @@ const mapExamItem = exam => {
     end: $dayjs(exam.endDate).format("DD/MM/YYYY"),
     status: status.label,
     badgeClass: status.badgeClass,
+    isClosed: status.isClosed,
     raw: exam,
   };
 };
