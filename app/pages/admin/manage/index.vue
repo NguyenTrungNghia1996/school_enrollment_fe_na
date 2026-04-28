@@ -4,7 +4,7 @@
       <a-input-search v-model:value="searchText" placeholder="Tìm kiếm quản trị viên..." enter-button @search="handleSearch" class="w-full" />
       <div class="flex w-full gap-2 md:w-auto">
         <a-button @click="resetForm" class="flex-1 md:flex-none">Đặt lại</a-button>
-        <a-button type="primary" @click="showModal" class="flex-1 md:flex-none" :disabled="!adminStore.currentPermission">Thêm mới</a-button>
+        <a-button type="primary" @click="showModal" class="flex-1 md:flex-none" :disabled="!adminStore.canEditCurrentPage">Thêm mới</a-button>
       </div>
     </div>
 
@@ -21,11 +21,11 @@
           </template>
           <template v-if="column.key === 'action'">
             <div class="flex justify-center space-x-2">
-              <a-button type="link" size="small" @click="editItem(record.id)" :disabled="!adminStore.currentPermission">
+              <a-button type="link" size="small" @click="editItem(record.id)" :disabled="!adminStore.canEditCurrentPage">
                 <template #icon><EditOutlined /></template>
               </a-button>
               <a-popconfirm title="Bạn chắc chắn muốn xóa quản trị viên này?" ok-text="Đồng ý" cancel-text="Hủy" @confirm="deleteItem(record.id)">
-                <a-button type="link" danger size="small" :disabled="!adminStore.currentPermission">
+                <a-button type="link" danger size="small" :disabled="!adminStore.canEditCurrentPage">
                   <template #icon><DeleteOutlined /></template>
                 </a-button>
               </a-popconfirm>

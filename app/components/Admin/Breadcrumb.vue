@@ -16,29 +16,13 @@
 </template>
 
 <script setup>
+import { PERMISSION_STATE, findAdminMenuPath, resolveAdminRoutePermission } from "~/composables/useAdminRoutePermission";
+
 const route = useRoute();
 const adminStore = useAdminStore();
 import { useMenu } from "~/composables/useMenu";
 const { visibleMenu } = useMenu();
 const breadcrumbItems = ref([]);
-
-// Map các permission từ store thành dạng { key: permissionValue }
-const permissionMap = computed(() => {
-  const map = {};
-  if (adminStore.permissions && Array.isArray(adminStore.permissions)) {
-    adminStore.permissions.forEach(p => {
-      map[p.key] = p.permissionValue;
-    });
-  }
-  return map;
-});
-
-// Các trạng thái quyền
-const PERMISSION_STATE = {
-  NO_ACCESS: 0,
-  VIEW: 1,
-  EDIT: 2,
-};
 
 // Quyền của route hiện tại
 const currentPermission = ref(PERMISSION_STATE.NO_ACCESS);
@@ -46,47 +30,9 @@ const currentPermission = ref(PERMISSION_STATE.NO_ACCESS);
 // Lấy menu data từ store
 const menuData = computed(() => visibleMenu.value);
 
-// Hàm tìm kiếm menu item theo path
-const findMenuItemByPath = (items, path) => {
-  if (!items || !items.length) return [];
-
-  for (const item of items) {
-    // 1. Khớp chính xác
-    if (item.url === path) {
-      return [item];
-    }
-
-    // 2. Kiểm tra dynamic routes (ví dụ: /products/:id)
-    if (item.url && item.url.includes(":")) {
-      const regexPath = item.url.replace(/:[^/]+/g, "[^/]+");
-      const regex = new RegExp(`^${regexPath}$`);
-      if (regex.test(path)) {
-        return [item];
-      }
-    }
-
-    // 3. Đệ quy tìm trong con
-    if (item.children && item.children.length > 0) {
-      const found = findMenuItemByPath(item.children, path);
-      if (found.length > 0) {
-        return [item, ...found];
-      }
-    }
-  }
-
-  // 4. Nếu không khớp chính xác, tìm item là cha của path hiện tại
-  for (const item of items) {
-    if (item.url && item.url !== "/" && path.startsWith(item.url + "/")) {
-      return [item];
-    }
-  }
-
-  return [];
-};
-
 // Hàm cập nhật breadcrumb
 const updateBreadcrumb = () => {
-  const matchedItems = findMenuItemByPath(menuData.value, route.path);
+  const matchedItems = findAdminMenuPath(menuData.value, route.path);
 
   breadcrumbItems.value = matchedItems.map(item => ({
     title: item.title,
@@ -94,15 +40,12 @@ const updateBreadcrumb = () => {
     path: item.url,
   }));
 
-  // Tính quyền hiện tại dựa trên menu matched
-  if (matchedItems.length) {
-    const currentItem = matchedItems[matchedItems.length - 1];
-    const parentKey = matchedItems.length > 1 ? matchedItems[matchedItems.length - 2].key : "menu";
-    const parentPerm = permissionMap.value[parentKey] ?? 0;
-    currentPermission.value = (parentPerm >> currentItem.permissionBit) & 0b11;
-  } else {
-    currentPermission.value = PERMISSION_STATE.NO_ACCESS;
-  }
+  currentPermission.value = resolveAdminRoutePermission({
+    menu: adminStore.menu,
+    permissions: adminStore.permissions,
+    path: route.path,
+    isSuperAdmin: adminStore.isSuperAdmin,
+  }).permission;
 
   // Chỉ gọi nếu method tồn tại (để tránh crash)
   if (adminStore.setCurrentPermission) {

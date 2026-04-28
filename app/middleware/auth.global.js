@@ -1,4 +1,5 @@
 import { useJwt } from "@vueuse/integrations/useJwt";
+import { PERMISSION_STATE, resolveAdminRoutePermission } from "~/composables/useAdminRoutePermission";
 
 export default defineNuxtRouteMiddleware(async to => {
   const adminStore = useAdminStore();
@@ -42,6 +43,21 @@ export default defineNuxtRouteMiddleware(async to => {
     if (typeof setPermissions === "function" && adminStore.menuPermissions?.length) {
       setPermissions(adminStore.menuPermissions);
     }
+
+    const { permission } = resolveAdminRoutePermission({
+      menu: adminStore.menu,
+      permissions: adminStore.menuPermissions,
+      path: to.path,
+      isSuperAdmin: adminStore.isSuperAdmin,
+    });
+
+    adminStore.setCurrentPermission(permission);
+
+    if (permission === PERMISSION_STATE.NO_ACCESS) {
+      message.warning("Bạn không có quyền truy cập trang này");
+      return navigateTo("/admin");
+    }
+
     return;
   }
   if (isUserRoute) {
