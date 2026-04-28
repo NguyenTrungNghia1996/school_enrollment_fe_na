@@ -259,7 +259,7 @@ const pagination = reactive({
 const columns = [
   { title: "STT", key: "stt", width: 60, align: "center" },
   { title: "Mã hồ sơ", dataIndex: "applicationCode", key: "applicationCode", width: 140 },
-  { title: "Kỳ tuyển sinh", dataIndex: "idExam", key: "idExam", width: 120, align: "center" },
+  { title: "Kỳ tuyển sinh", dataIndex: "examName", key: "examName", width: 120, align: "center" },
   { title: "Họ tên", dataIndex: "fullname", key: "fullname", ellipsis: true },
   { title: "Ngày sinh", dataIndex: "dateOfBirth", key: "dateOfBirth", width: 130 },
   { title: "Số CCCD", dataIndex: "identityNumber", key: "identityNumber", width: 150 },
