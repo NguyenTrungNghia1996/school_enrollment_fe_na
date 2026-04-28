@@ -448,6 +448,7 @@ const normalizeApplicationDetail = (detail, fallbackRecord = null) => {
 
   return {
     ...detail,
+    avatar: detail.avatar || fallbackRecord?.avatar || userStore.image_url || "",
     applicationCode: detail.applicationCode || fallbackRecord?.applicationCode || null,
     statusName: detail.statusName || fallbackRecord?.statusName || null,
     fullName: detail.fullName || detail.fullname || fallbackRecord?.fullName || fallbackRecord?.fullname || null,
@@ -504,6 +505,7 @@ const buildApplicationPayload = () => {
   return {
     id: detailData.value.id,
     idExam: Number(detailData.value.idExam),
+    avatar: String(detailData.value.avatar || userStore.image_url || "").trim(),
     fullName: (detailData.value.fullName || detailData.value.fullname || "").trim(),
     dateOfBirth: detailData.value.dateOfBirth,
     idProvince: Number(detailData.value.idProvince),

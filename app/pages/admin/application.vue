@@ -6,6 +6,9 @@
         <AdminSelectEnrollment v-model="selectedExamId" no-form-item :inlineLabel="false" placeholder="Lọc theo kỳ tuyển sinh" label="" />
       </div>
       <div class="flex w-full gap-2 md:w-auto">
+        <a-button v-if="selectedExamId" type="primary" ghost :loading="exportLoading" @click="exportApplications">
+          Xuất dữ liệu
+        </a-button>
         <a-button @click="resetFilters" class="flex-1 md:flex-none">Đặt lại</a-button>
       </div>
     </div>
@@ -219,10 +222,12 @@ definePageMeta({
 });
 
 const adminStore = useAdminStore();
+const config = useRuntimeConfig();
 const { adminApplication, adminPayment } = useApi();
 
 const searchText = ref("");
 const selectedExamId = ref(null);
+const exportLoading = ref(false);
 const detailVisible = ref(false);
 const detailLoading = ref(false);
 const detailData = ref(null);
@@ -359,6 +364,55 @@ const resetFilters = () => {
   };
   pagination.current = 1;
   pagination.pageSize = 10;
+};
+
+const exportApplications = async () => {
+  if (!selectedExamId.value) {
+    return;
+  }
+
+  if (!adminStore.token) {
+    message.error("Không tìm thấy phiên đăng nhập quản trị");
+    return;
+  }
+
+  exportLoading.value = true;
+
+  try {
+    const exportUrl = new URL("/api/admin/application/export", config.public.baseURL);
+    exportUrl.searchParams.set("idExam", String(selectedExamId.value));
+
+    const response = await fetch(exportUrl.toString(), {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${adminStore.token}`,
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error("Xuất dữ liệu thất bại");
+    }
+
+    const blob = await response.blob();
+    const downloadUrl = window.URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    const contentDisposition = response.headers.get("content-disposition") || "";
+    const fileNameMatch = contentDisposition.match(/filename\*=UTF-8''([^;]+)|filename=\"?([^"]+)\"?/i);
+    const fileName = decodeURIComponent(fileNameMatch?.[1] || fileNameMatch?.[2] || `ho-so-ky-tuyen-sinh-${selectedExamId.value}.xlsx`);
+
+    link.href = downloadUrl;
+    link.download = fileName;
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    window.URL.revokeObjectURL(downloadUrl);
+
+    message.success("Xuất dữ liệu thành công");
+  } catch (error) {
+    message.error(error?.message || "Xuất dữ liệu thất bại");
+  } finally {
+    exportLoading.value = false;
+  }
 };
 
 const formatDate = value => {

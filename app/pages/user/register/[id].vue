@@ -46,6 +46,44 @@
               <h2 class="text-base font-semibold text-sky-700">Thông tin thí sinh</h2>
 
               <div class="mt-5 grid gap-x-4 gap-y-1 md:grid-cols-3">
+                <a-form-item label="Ảnh 3x4" name="avatar" class="md:col-span-3">
+                  <div class="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+                    <div class="flex flex-col gap-4 md:flex-row md:items-start">
+                      <div class="flex h-48 w-36 items-center justify-center overflow-hidden rounded-xl border border-dashed border-slate-300 bg-white">
+                        <img v-if="formState.avatar" :src="formState.avatar" alt="Ảnh 3x4" class="h-full w-full object-cover" />
+                        <div v-else class="px-4 text-center text-sm leading-6 text-slate-400">
+                          Chưa có ảnh 3x4
+                        </div>
+                      </div>
+
+                      <div class="flex-1">
+                        <input
+                          id="avatar-upload"
+                          type="file"
+                          class="block w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-600 file:mr-3 file:rounded-md file:border-0 file:bg-sky-600 file:px-3 file:py-2 file:text-sm file:font-medium file:text-white"
+                          :disabled="avatarUploading || isProcessing"
+                          accept=".png,.jpg,.jpeg,.webp"
+                          @change="handleAvatarUpload" />
+
+                        <div v-if="avatarUploading" class="mt-4 flex items-center gap-3 rounded-xl border border-sky-200 bg-sky-50 px-4 py-3 text-sm text-sky-700">
+                          <a-spin size="small" />
+                          Đang upload ảnh 3x4...
+                        </div>
+
+                        <div v-else class="mt-4 space-y-3">
+                          <p class="text-sm text-slate-500">Chỉ chấp nhận ảnh định dạng JPG, PNG, WEBP với tỷ lệ 3:4.</p>
+                          <div v-if="formState.avatar" class="flex flex-wrap gap-2">
+                            <a :href="formState.avatar" target="_blank" rel="noopener noreferrer" class="text-sm font-medium text-sky-600 hover:underline">
+                              Xem ảnh đã tải lên
+                            </a>
+                            <a-button danger ghost size="small" :disabled="isProcessing" @click="removeAvatar">Xóa ảnh</a-button>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </a-form-item>
+
                 <a-form-item label="Họ tên đầy đủ" name="fullName" class="md:col-span-1" :rules="[{ required: true, message: 'Vui lòng nhập họ tên đầy đủ' }]">
                   <a-input v-model:value="formState.fullName" placeholder="Nhập họ tên đầy đủ" />
                 </a-form-item>
@@ -241,6 +279,7 @@ const examDetail = ref(null);
 const loading = ref(true);
 const saveLoading = ref(false);
 const submitLoading = ref(false);
+const avatarUploading = ref(false);
 const loadError = ref("");
 const documentUploads = ref([]);
 
@@ -250,6 +289,7 @@ const genderOptions = [
 ];
 
 const formState = reactive({
+  avatar: "",
   fullName: "",
   dateOfBirth: null,
   idProvince: undefined,
@@ -333,7 +373,7 @@ const remainingText = computed(() => {
 });
 
 const hasUploadingDocuments = computed(() => documentUploads.value.some(item => item.uploading));
-const isProcessing = computed(() => saveLoading.value || submitLoading.value);
+const isProcessing = computed(() => saveLoading.value || submitLoading.value || avatarUploading.value);
 
 const formatDateTime = value => {
   if (!value) return "-";
@@ -404,6 +444,7 @@ const createDocumentUploads = (documents = [], existingDocuments = []) => {
 
 const resetFormState = () => {
   Object.assign(formState, {
+    avatar: "",
     fullName: "",
     dateOfBirth: null,
     idProvince: undefined,
@@ -461,6 +502,7 @@ const restoreDraft = () => {
     Object.assign(formState, {
       ...formState,
       ...draftFormState,
+      avatar: draftFormState.avatar || "",
       dateOfBirth: draftFormState.dateOfBirth ? $dayjs(draftFormState.dateOfBirth) : null,
       identityIssueDate: draftFormState.identityIssueDate ? $dayjs(draftFormState.identityIssueDate) : null,
     });
@@ -479,6 +521,11 @@ const clearDraftStorage = () => {
 };
 
 const saveDraft = async () => {
+  if (avatarUploading.value) {
+    message.warning("Vui lòng chờ upload ảnh 3x4 hoàn tất");
+    return;
+  }
+
   if (hasUploadingDocuments.value) {
     message.warning("Vui lòng chờ upload hồ sơ hoàn tất");
     return;
@@ -526,6 +573,67 @@ const removeDocumentFile = (documentIndex, fileIndex) => {
   document.files.splice(fileIndex, 1);
 };
 
+const loadImageMeta = file =>
+  new Promise((resolve, reject) => {
+    const objectUrl = URL.createObjectURL(file);
+    const image = new Image();
+
+    image.onload = () => {
+      resolve({
+        width: image.naturalWidth,
+        height: image.naturalHeight,
+      });
+      URL.revokeObjectURL(objectUrl);
+    };
+
+    image.onerror = () => {
+      URL.revokeObjectURL(objectUrl);
+      reject(new Error("Không thể đọc kích thước ảnh"));
+    };
+
+    image.src = objectUrl;
+  });
+
+const validateAvatarRatio = async file => {
+  const { width, height } = await loadImageMeta(file);
+  const ratio = width / height;
+  const expectedRatio = 3 / 4;
+
+  if (Math.abs(ratio - expectedRatio) > 0.08) {
+    throw new Error("Ảnh avatar phải có tỷ lệ 3:4");
+  }
+};
+
+const removeAvatar = () => {
+  formState.avatar = "";
+};
+
+const handleAvatarUpload = async event => {
+  const file = event?.target?.files?.[0];
+  if (!file) return;
+
+  avatarUploading.value = true;
+
+  try {
+    await validateAvatarRatio(file);
+
+    const result = await s3.upload(file, {
+      key: `${Date.now()}-${file.name}`,
+      contentType: file.type || "application/octet-stream",
+    });
+
+    formState.avatar = result.directUrl;
+    message.success("Đã tải lên ảnh 3x4");
+  } catch (error) {
+    message.error(error?.message || "Upload ảnh 3x4 thất bại");
+  } finally {
+    avatarUploading.value = false;
+    if (event?.target) {
+      event.target.value = "";
+    }
+  }
+};
+
 const handleDocumentUpload = async (index, event) => {
   const files = Array.from(event?.target?.files || []);
   if (!files.length) return;
@@ -567,6 +675,7 @@ const handleDocumentUpload = async (index, event) => {
 const buildPayload = () => {
   return {
     idExam: examId.value,
+    avatar: String(formState.avatar || "").trim(),
     fullName: formState.fullName.trim(),
     dateOfBirth: $dayjs(formState.dateOfBirth).toISOString(),
     idProvince: Number(formState.idProvince),
@@ -592,6 +701,11 @@ const buildPayload = () => {
 const handleSubmit = async () => {
   if (status.value.isClosed) {
     message.warning("Kỳ khảo thí này hiện chưa mở hoặc đã kết thúc");
+    return;
+  }
+
+  if (avatarUploading.value) {
+    message.warning("Vui lòng chờ upload ảnh 3x4 hoàn tất");
     return;
   }
 
