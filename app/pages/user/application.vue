@@ -247,7 +247,7 @@
           <div v-if="normalizedDocuments.length" class="space-y-4">
             <div v-for="document in normalizedDocuments" :key="document.key" class="rounded-xl border border-slate-200 bg-slate-50 p-4">
               <div class="mb-3 flex items-center justify-between gap-3">
-                <div class="font-medium text-slate-900">Hồ sơ #{{ document.idExamDocument }}</div>
+                <div class="font-medium text-slate-900">{{ document.displayName }}</div>
                 <div class="text-xs text-slate-500">{{ document.links.length }} file</div>
               </div>
 
@@ -379,7 +379,6 @@ const searchText = ref("");
 const selectedExamId = ref(undefined);
 const loadError = ref("");
 const detailVisible = ref(false);
-const detailLoading = ref(false);
 const detailData = ref(null);
 const selectedRecord = ref(null);
 const saveLoading = ref(false);
@@ -388,7 +387,6 @@ const avatarUploading = ref(false);
 const isAvatarPreviewOpen = ref(false);
 const documentUploadingMap = ref({});
 const paymentVisible = ref(false);
-const qrLoading = ref(false);
 const qrData = ref(null);
 const confirmPaymentLoading = ref(false);
 const genderOptions = [
@@ -407,6 +405,14 @@ const params = ref({
   pageSize: 10,
   search: "",
   idExam: undefined,
+});
+
+const detailParams = ref({
+  id: undefined,
+});
+
+const qrParams = ref({
+  id: undefined,
 });
 
 const columns = [
@@ -428,6 +434,28 @@ const {
   key: "user-application-list",
 });
 
+const {
+  data: detailResponse,
+  error: detailError,
+  pending: detailLoading,
+  refresh: refreshDetail,
+} = await applicationUser.getDetail({
+  params: detailParams,
+  key: "user-application-detail",
+  immediate: false,
+});
+
+const {
+  data: qrResponse,
+  error: qrError,
+  pending: qrLoading,
+  refresh: refreshQr,
+} = await applicationUser.getQr({
+  params: qrParams,
+  key: "user-application-qr",
+  immediate: false,
+});
+
 const dataSource = computed(() => {
   if (!applicationResponse.value?.success) {
     return [];
@@ -446,13 +474,17 @@ const normalizedDocuments = computed(() => {
         return {
           key: `document-${index}`,
           idExamDocument: index + 1,
+          displayName: `Hồ sơ #${index + 1}`,
           links: splitDocumentLinks(document),
         };
       }
 
+      const idExamDocument = document?.idExamDocument || document?.id || index + 1;
+
       return {
-        key: `${document?.idExamDocument || document?.id || "document"}-${index}`,
-        idExamDocument: document?.idExamDocument || document?.id || index + 1,
+        key: `${idExamDocument || "document"}-${index}`,
+        idExamDocument,
+        displayName: document?.documentName || `Hồ sơ #${idExamDocument}`,
         links: splitDocumentLinks(document?.url || document?.fileUrl || document?.link || document?.path),
       };
     })
@@ -461,7 +493,10 @@ const normalizedDocuments = computed(() => {
 
 const showSubmitAction = computed(() => Number(detailData.value?.idStatus) < 2);
 const showEditAction = computed(() => Number(detailData.value?.idStatus) === 1);
-const showPaymentAction = computed(() => Number(detailData.value?.idStatus) === 3);
+const showPaymentAction = computed(() => {
+  const status = Number(detailData.value?.idStatus);
+  return status === 3 && status !== 4;
+});
 const hasUploadingEditDocuments = computed(() => Object.values(documentUploadingMap.value).some(Boolean));
 const isEditingProcessing = computed(() => saveLoading.value || submitLoading.value || avatarUploading.value || hasUploadingEditDocuments.value);
 
@@ -801,9 +836,11 @@ const buildApplicationPayload = ({ includeAvatar = true } = {}) => {
     identityIssuePlace: (detailData.value.identityIssuePlace || "").trim(),
     idEthnicity: Number(detailData.value.idEthnicity),
     gender: detailData.value.gender,
+    idPermanentProvince: Number(detailData.value.idPermanentProvince),
     idCommune: Number(detailData.value.idCommune),
     permanentAddress: (detailData.value.permanentAddress || "").trim(),
     phoneNumber: (detailData.value.phoneNumber || "").trim(),
+    idCurrentProvince: Number(detailData.value.idCurrentProvince),
     idCurrentCommune: Number(detailData.value.idCurrentCommune),
     currentAddress: (detailData.value.currentAddress || "").trim(),
     documents: normalizedDocuments.value.map(document => ({
@@ -822,31 +859,27 @@ const buildApplicationPayload = ({ includeAvatar = true } = {}) => {
 const openDetail = async record => {
   selectedRecord.value = record;
   detailVisible.value = true;
-  detailLoading.value = true;
   detailData.value = null;
+  detailParams.value.id = record.id;
 
   try {
-    const { data, error } = await applicationUser.getDetail({
-      params: { id: record.id },
-    });
+    await refreshDetail();
 
-    if (error.value || data.value?.success === false || !data.value?.data) {
-      throw new Error(error.value?.data?.message || data.value?.message || "Không thể tải thông tin chi tiết");
+    if (detailError.value || detailResponse.value?.success === false || !detailResponse.value?.data) {
+      throw new Error(detailError.value?.data?.message || detailResponse.value?.message || "Không thể tải thông tin chi tiết");
     }
 
-    detailData.value = normalizeApplicationDetail(data.value.data, record);
+    detailData.value = normalizeApplicationDetail(detailResponse.value.data, record);
   } catch (error) {
     detailVisible.value = false;
     message.error(error?.message || "Không thể tải thông tin chi tiết");
-  } finally {
-    detailLoading.value = false;
   }
 };
 
 const closeDetail = () => {
   detailVisible.value = false;
-  detailLoading.value = false;
   detailData.value = null;
+  detailParams.value.id = undefined;
   selectedRecord.value = null;
   saveLoading.value = false;
   submitLoading.value = false;
@@ -854,8 +887,8 @@ const closeDetail = () => {
   isAvatarPreviewOpen.value = false;
   documentUploadingMap.value = {};
   paymentVisible.value = false;
-  qrLoading.value = false;
   qrData.value = null;
+  qrParams.value.id = undefined;
   confirmPaymentLoading.value = false;
 };
 
@@ -935,32 +968,28 @@ const openPaymentModal = async () => {
     return;
   }
 
-  qrLoading.value = true;
   qrData.value = null;
   paymentVisible.value = true;
+  qrParams.value.id = detailData.value.id;
 
   try {
-    const { data, error } = await applicationUser.getQr({
-      params: { id: detailData.value.id },
-    });
+    await refreshQr();
 
-    if (error.value || data.value?.success === false || !data.value?.data) {
-      throw new Error(error.value?.data?.message || data.value?.message || "Không tải được thông tin thanh toán");
+    if (qrError.value || qrResponse.value?.success === false || !qrResponse.value?.data) {
+      throw new Error(qrError.value?.data?.message || qrResponse.value?.message || "Không tải được thông tin thanh toán");
     }
 
-    qrData.value = data.value.data;
+    qrData.value = qrResponse.value.data;
   } catch (error) {
     paymentVisible.value = false;
     message.error(error?.message || "Không tải được thông tin thanh toán");
-  } finally {
-    qrLoading.value = false;
   }
 };
 
 const closePaymentModal = () => {
   paymentVisible.value = false;
-  qrLoading.value = false;
   qrData.value = null;
+  qrParams.value.id = undefined;
   confirmPaymentLoading.value = false;
 };
 

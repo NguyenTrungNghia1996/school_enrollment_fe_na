@@ -1,21 +1,28 @@
 <template>
   <a-form-item :label="label" :name="name" :rules="rules" :label-col="labelCol" :wrapper-col="wrapperCol">
     <a-select
-      :value="modelValue"
+      v-if="hasProvince"
+      :value="normalizedModelValue"
       @update:value="handleUpdateValue"
       v-model:searchValue="search"
       :mode="multiple ? 'multiple' : undefined"
       show-search
-      :placeholder="selectPlaceholder"
+      :placeholder="placeholder"
       :size="size"
       :loading="loading"
-      :disabled="isDisabled"
+      :disabled="disabled"
       allow-clear
       class="w-full"
       :options="options"
       @search="onSearch"
       @clear="onClear"
       :filter-option="false" />
+    <a-input
+      v-else
+      :value="selectPlaceholder"
+      :size="size"
+      disabled
+      class="w-full" />
   </a-form-item>
 </template>
 
@@ -44,9 +51,8 @@ const props = defineProps({
 const emit = defineEmits(["update:modelValue", "change"]);
 
 const search = ref("");
-const searchKeyword = ref("");
-const response = ref(null);
-const loading = ref(false);
+const hasInitializedProvince = ref(false);
+let retryTimer = null;
 
 const normalizedProvinceId = computed(() => {
   if (props.idProvince === null || props.idProvince === undefined || props.idProvince === "") {
@@ -57,98 +63,159 @@ const normalizedProvinceId = computed(() => {
 });
 
 const hasProvince = computed(() => normalizedProvinceId.value !== null);
-const isDisabled = computed(() => props.disabled || !hasProvince.value);
-const selectPlaceholder = computed(() => (hasProvince.value ? props.placeholder : "Vui lòng chọn tỉnh / thành phố trước"));
+const selectPlaceholder = computed(() => "Vui lòng chọn tỉnh / thành phố trước");
+const normalizeOptionValue = value => {
+  if (value === null || value === undefined || value === "") {
+    return undefined;
+  }
+
+  return String(value);
+};
+
+const params = ref({
+  pageIndex: 1,
+  pageSize: 100,
+  idProvince: undefined,
+  search: "",
+});
+
+const {
+  data: response,
+  refresh: refreshData,
+  pending: loading,
+} = await communeUser.get({
+  params,
+  key: "user-commune-select",
+  immediate: false,
+});
 
 const options = computed(() => {
+  if (!hasProvince.value) return [];
   if (!response.value?.success) return [];
 
   const items = Array.isArray(response.value.data?.items) ? response.value.data.items : [];
   return items.map(item => ({
     label: item.communeName,
-    value: item.id,
+    value: normalizeOptionValue(item.id),
   }));
+});
+
+const normalizedModelValue = computed(() => {
+  if (props.multiple) {
+    return Array.isArray(props.modelValue) ? props.modelValue.map(item => normalizeOptionValue(item)).filter(item => item !== undefined) : [];
+  }
+
+  return normalizeOptionValue(props.modelValue);
 });
 
 const fetchCommunes = async () => {
   if (!hasProvince.value) {
-    response.value = null;
+    params.value.idProvince = undefined;
     return;
   }
 
-  loading.value = true;
+  params.value.idProvince = normalizedProvinceId.value;
+  await refreshData();
+};
 
-  try {
-    const { data, error } = await communeUser.get({
-      query: {
-        idProvince: normalizedProvinceId.value,
-        search: searchKeyword.value || undefined,
-      },
-    });
-
-    if (error.value) {
-      throw new Error(error.value?.data?.message || "Không tải được danh sách phường / xã");
-    }
-
-    response.value = data.value;
-  } catch (_error) {
-    response.value = {
-      success: false,
-      data: {
-        items: [],
-      },
-    };
-  } finally {
-    loading.value = false;
-  }
+const resetSearch = () => {
+  search.value = "";
+  const hadSearch = params.value.search !== "";
+  params.value.search = "";
+  return hadSearch;
 };
 
 const onSearch = debounce(val => {
-  searchKeyword.value = (val || "").trim();
+  params.value.search = (val || "").trim();
 }, 300);
 
 const onClear = () => {
   emit("update:modelValue", props.multiple ? [] : null);
   emit("change", props.multiple ? [] : null, null);
-  search.value = "";
-  searchKeyword.value = "";
+  resetSearch();
 };
 
 const handleUpdateValue = (val, option) => {
-  emit("update:modelValue", val);
-  emit("change", val, option);
+  const nextValue = props.multiple
+    ? (Array.isArray(val) ? val.map(item => (item === undefined ? item : Number(item))) : [])
+    : (val === undefined || val === null ? null : Number(val));
+
+  emit("update:modelValue", nextValue);
+  emit("change", nextValue, option);
 
   if (search.value) {
-    search.value = "";
-    searchKeyword.value = "";
+    resetSearch();
   }
+};
+
+const clearRetryTimer = () => {
+  if (retryTimer) {
+    clearTimeout(retryTimer);
+    retryTimer = null;
+  }
+};
+
+const scheduleRetry = () => {
+  clearRetryTimer();
+
+  if (!hasProvince.value || loading.value || options.value.length > 0) {
+    return;
+  }
+
+  retryTimer = setTimeout(async () => {
+    retryTimer = null;
+
+    if (!hasProvince.value || loading.value || options.value.length > 0) {
+      return;
+    }
+
+    await fetchCommunes();
+  }, 3000);
 };
 
 watch(
   normalizedProvinceId,
   (newValue, oldValue) => {
-    search.value = "";
-    searchKeyword.value = "";
+    const hadSearch = resetSearch();
+    clearRetryTimer();
 
     if (!newValue) {
-      response.value = null;
-      emit("update:modelValue", props.multiple ? [] : null);
-      emit("change", props.multiple ? [] : null, null);
+      params.value.idProvince = undefined;
+      if (hasInitializedProvince.value) {
+        emit("update:modelValue", props.multiple ? [] : null);
+        emit("change", props.multiple ? [] : null, null);
+      }
+      hasInitializedProvince.value = true;
       return;
     }
 
-    if (oldValue !== newValue) {
+    if (hasInitializedProvince.value && oldValue !== newValue) {
       emit("update:modelValue", props.multiple ? [] : null);
       emit("change", props.multiple ? [] : null, null);
     }
 
+    hasInitializedProvince.value = true;
+    if (hadSearch) return;
     fetchCommunes();
   },
   { immediate: true }
 );
 
-watch(searchKeyword, () => {
+watch(() => params.value.search, () => {
   if (!hasProvince.value) return;
   fetchCommunes();
+});
+
+watch(
+  [hasProvince, options, loading],
+  () => {
+    scheduleRetry();
+  },
+  { immediate: true }
+);
+
+onBeforeUnmount(() => {
+  clearRetryTimer();
+  onSearch.cancel();
 });
 </script>
