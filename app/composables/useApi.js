@@ -57,6 +57,11 @@ export const useApi = () => {
     adminUser: useCrudApiAdmin("/api/users"),
     adminSubject: useCrudApiAdmin("/api/subject"),
     adminEnrollment: useCrudApiAdmin("/api/exam"),
+    adminPayment: {
+      getDetail(options) {
+        return adminRequest.get("/api/admin/payment/detail", options ?? {});
+      },
+    },
     adminApplication: {
       get(options) {
         return adminRequest.get("/api/admin/application", options ?? {});
@@ -72,6 +77,9 @@ export const useApi = () => {
       },
       reject(options) {
         return adminRequest.put("/api/admin/application/reject", options ?? {});
+      },
+      completePayment(options) {
+        return adminRequest.put("/api/admin/application/completePayment", options ?? {});
       },
     },
   };

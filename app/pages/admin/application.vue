@@ -51,6 +51,12 @@
                 </a-button>
               </a-tooltip>
 
+              <a-tooltip v-if="showPaymentInfoAction(record)" title="Thông tin thanh toán">
+                <a-button type="link" size="small" class="text-sky-600" :disabled="!adminStore.currentPermission" @click="openPaymentDetail(record)">
+                  <template #icon><CreditCardOutlined /></template>
+                </a-button>
+              </a-tooltip>
+
               <a-popconfirm title="Bạn chắc chắn muốn xóa hồ sơ này?" ok-text="Đồng ý" cancel-text="Hủy" @confirm="deleteItem(record.id)">
                 <a-button type="link" size="small" danger :disabled="!adminStore.currentPermission">
                   <template #icon><DeleteOutlined /></template>
@@ -133,8 +139,64 @@
 
         <div class="flex justify-end gap-2 border-t border-slate-100 pt-4">
           <a-button @click="closeDetail">Đóng</a-button>
+          <a-button v-if="showPaymentInfoAction(detailData)" :disabled="!adminStore.currentPermission" @click="openPaymentDetail(detailData, true)">Thông tin thanh toán</a-button>
           <a-button type="primary" :disabled="!detailData || isActionDisabled(detailData) || !adminStore.currentPermission" @click="approveItem(detailData, true)">Duyệt hồ sơ</a-button>
           <a-button danger :disabled="!detailData || isActionDisabled(detailData) || !adminStore.currentPermission" @click="openReject(detailData, true)">Từ chối</a-button>
+        </div>
+      </div>
+    </a-modal>
+
+    <a-modal v-model:open="paymentVisible" title="Thông tin thanh toán" :width="900" :footer="null" @cancel="closePaymentDetail">
+      <div v-if="paymentLoading" class="py-12 text-center">
+        <a-spin size="large" />
+      </div>
+
+      <div v-else-if="paymentData" class="space-y-6">
+        <div class="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+          <div class="rounded-xl border border-slate-200 bg-slate-50 px-4 py-3">
+            <div class="text-xs uppercase tracking-[0.2em] text-slate-400">Mã hồ sơ</div>
+            <div class="mt-2 font-bold text-slate-900">{{ detailData?.applicationCode || selectedRecord?.applicationCode || `#${paymentData.idApplication}` }}</div>
+          </div>
+          <div class="rounded-xl border border-slate-200 bg-slate-50 px-4 py-3">
+            <div class="text-xs uppercase tracking-[0.2em] text-slate-400">Số tiền</div>
+            <div class="mt-2 font-bold text-slate-900">{{ formatCurrency(paymentData.amount) }}</div>
+          </div>
+          <div class="rounded-xl border border-slate-200 bg-slate-50 px-4 py-3">
+            <div class="text-xs uppercase tracking-[0.2em] text-slate-400">Nội dung CK</div>
+            <div class="mt-2 font-bold text-slate-900">{{ paymentData.transCode?.trim() || "-" }}</div>
+          </div>
+          <div class="rounded-xl border border-slate-200 bg-slate-50 px-4 py-3">
+            <div class="text-xs uppercase tracking-[0.2em] text-slate-400">Ngày thanh toán</div>
+            <div class="mt-2 font-bold text-slate-900">{{ formatDateTime(paymentData.payDate) }}</div>
+          </div>
+        </div>
+
+        <a-descriptions bordered :column="2" size="small">
+          <a-descriptions-item label="Ngân hàng">{{ paymentData.bank || "-" }}</a-descriptions-item>
+          <a-descriptions-item label="Số tài khoản">{{ paymentData.accountNumber || "-" }}</a-descriptions-item>
+          <a-descriptions-item label="Chủ tài khoản" :span="2">{{ paymentData.accountName || "-" }}</a-descriptions-item>
+        </a-descriptions>
+
+        <a-form layout="vertical">
+          <div class="grid gap-4 md:grid-cols-2">
+            <a-form-item label="Ngày thanh toán">
+              <a-date-picker v-model:value="paymentForm.payDate" show-time format="DD/MM/YYYY HH:mm:ss" class="w-full" placeholder="Chọn ngày thanh toán" />
+            </a-form-item>
+            <a-form-item label="Ngân hàng" required>
+              <a-input v-model:value="paymentForm.bank" placeholder="Nhập tên ngân hàng" />
+            </a-form-item>
+            <a-form-item label="Chủ tài khoản" required>
+              <a-input v-model:value="paymentForm.accountName" placeholder="Nhập tên chủ tài khoản" />
+            </a-form-item>
+            <a-form-item label="Số tài khoản" required>
+              <a-input v-model:value="paymentForm.accountNumber" placeholder="Nhập số tài khoản" />
+            </a-form-item>
+          </div>
+        </a-form>
+
+        <div class="flex justify-end gap-2 border-t border-slate-100 pt-4">
+          <a-button @click="closePaymentDetail">Đóng</a-button>
+          <a-button type="primary" :loading="completePaymentLoading" :disabled="!adminStore.currentPermission" @click="submitCompletePayment">Xác nhận thanh toán</a-button>
         </div>
       </div>
     </a-modal>
@@ -157,7 +219,7 @@ definePageMeta({
 });
 
 const adminStore = useAdminStore();
-const { adminApplication } = useApi();
+const { adminApplication, adminPayment } = useApi();
 
 const searchText = ref("");
 const selectedExamId = ref(null);
@@ -168,6 +230,16 @@ const rejectVisible = ref(false);
 const rejectLoading = ref(false);
 const rejectNote = ref("");
 const selectedRecord = ref(null);
+const paymentVisible = ref(false);
+const paymentLoading = ref(false);
+const completePaymentLoading = ref(false);
+const paymentData = ref(null);
+const paymentForm = reactive({
+  payDate: null,
+  bank: "",
+  accountName: "",
+  accountNumber: "",
+});
 
 const pagination = reactive({
   current: 1,
@@ -294,6 +366,19 @@ const formatDate = value => {
   return dayjs(value).format("DD/MM/YYYY");
 };
 
+const formatDateTime = value => {
+  if (!value) return "-";
+  return dayjs(value).format("DD/MM/YYYY HH:mm:ss");
+};
+
+const formatCurrency = value => {
+  if (value === undefined || value === null) return "0 VND";
+  return new Intl.NumberFormat("vi-VN", {
+    style: "currency",
+    currency: "VND",
+  }).format(value);
+};
+
 const formatGender = value => {
   if (value === true) return "Nam";
   if (value === false) return "Nữ";
@@ -322,6 +407,10 @@ const getStatusColor = record => {
 
 const isActionDisabled = record => {
   return Number(record?.idStatus) !== 2;
+};
+
+const showPaymentInfoAction = record => {
+  return Number(record?.idStatus) === 4;
 };
 
 const getFileName = link => {
@@ -399,6 +488,101 @@ const closeDetail = () => {
   detailLoading.value = false;
   detailData.value = null;
   selectedRecord.value = null;
+};
+
+const resetPaymentState = () => {
+  paymentLoading.value = false;
+  completePaymentLoading.value = false;
+  paymentData.value = null;
+  paymentForm.payDate = null;
+  paymentForm.bank = "";
+  paymentForm.accountName = "";
+  paymentForm.accountNumber = "";
+};
+
+const openPaymentDetail = async (record, fromDetail = false) => {
+  if (fromDetail && detailData.value) {
+    selectedRecord.value = detailData.value;
+  } else {
+    selectedRecord.value = record;
+  }
+
+  if (!selectedRecord.value?.id) {
+    message.error("Không xác định được hồ sơ thanh toán");
+    return;
+  }
+
+  paymentVisible.value = true;
+  paymentLoading.value = true;
+  paymentData.value = null;
+
+  try {
+    const { data, error } = await adminPayment.getDetail({
+      params: { idApplication: selectedRecord.value.id },
+    });
+
+    if (error.value || data.value?.success === false || !data.value?.data) {
+      throw new Error(error.value?.data?.message || data.value?.message || "Không thể tải thông tin thanh toán");
+    }
+
+    paymentData.value = data.value.data;
+    paymentForm.payDate = paymentData.value.payDate ? dayjs(paymentData.value.payDate) : dayjs();
+    paymentForm.bank = paymentData.value.bank || "";
+    paymentForm.accountName = paymentData.value.accountName || "";
+    paymentForm.accountNumber = paymentData.value.accountNumber || "";
+  } catch (error) {
+    paymentVisible.value = false;
+    message.error(error?.message || "Không thể tải thông tin thanh toán");
+  } finally {
+    paymentLoading.value = false;
+  }
+};
+
+const closePaymentDetail = () => {
+  paymentVisible.value = false;
+  resetPaymentState();
+};
+
+const submitCompletePayment = async () => {
+  if (!paymentData.value?.id || !paymentData.value?.idApplication) {
+    message.error("Không có dữ liệu thanh toán để xác nhận");
+    return;
+  }
+
+  if (!paymentForm.bank.trim() || !paymentForm.accountName.trim() || !paymentForm.accountNumber.trim()) {
+    message.warning("Vui lòng nhập đầy đủ thông tin thanh toán");
+    return;
+  }
+
+  completePaymentLoading.value = true;
+
+  try {
+    const { data, error } = await adminApplication.completePayment({
+      body: {
+        id: Number(paymentData.value.id),
+        idApplication: Number(paymentData.value.idApplication),
+        payDate: dayjs(paymentForm.payDate || dayjs()).toISOString(),
+        bank: paymentForm.bank.trim(),
+        accountName: paymentForm.accountName.trim(),
+        accountNumber: paymentForm.accountNumber.trim(),
+      },
+    });
+
+    if (error.value || data.value?.success === false) {
+      throw new Error(error.value?.data?.message || data.value?.message || "Xác nhận thanh toán thất bại");
+    }
+
+    message.success(data.value?.message || "Xác nhận thanh toán thành công");
+    closePaymentDetail();
+    await refreshApplications();
+    if (detailVisible.value && detailData.value?.id === selectedRecord.value?.id) {
+      await openDetail(selectedRecord.value.id);
+    }
+  } catch (error) {
+    message.error(error?.message || "Xác nhận thanh toán thất bại");
+  } finally {
+    completePaymentLoading.value = false;
+  }
 };
 
 const approveItem = async (record, keepModal = false) => {
