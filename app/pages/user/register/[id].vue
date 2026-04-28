@@ -44,26 +44,17 @@
           <a-form ref="formRef" :model="formState" layout="vertical" class="px-6 py-6 sm:px-8" @finish="handleSubmit">
             <section class="border-b border-slate-100 pb-8">
               <h2 class="text-base font-semibold text-sky-700">Thông tin thí sinh</h2>
-
               <div class="mt-5 grid gap-x-4 gap-y-1 md:grid-cols-3">
                 <a-form-item label="Ảnh 3x4" name="avatar" class="md:col-span-3">
                   <div class="rounded-2xl border border-slate-200 bg-slate-50 p-4">
                     <div class="flex flex-col gap-4 md:flex-row md:items-start">
-                      <div class="flex h-48 w-36 items-center justify-center overflow-hidden rounded-xl border border-dashed border-slate-300 bg-white">
+                      <button type="button" class="flex h-48 w-36 items-center justify-center overflow-hidden rounded-xl border border-dashed border-slate-300 bg-white" :class="formState.avatar ? 'cursor-pointer' : 'cursor-default'" :disabled="!formState.avatar" @click="openAvatarPreview">
                         <img v-if="formState.avatar" :src="formState.avatar" alt="Ảnh 3x4" class="h-full w-full object-cover" />
-                        <div v-else class="px-4 text-center text-sm leading-6 text-slate-400">
-                          Chưa có ảnh 3x4
-                        </div>
-                      </div>
+                        <div v-else class="px-4 text-center text-sm leading-6 text-slate-400">Chưa có ảnh 3x4</div>
+                      </button>
 
                       <div class="flex-1">
-                        <input
-                          id="avatar-upload"
-                          type="file"
-                          class="block w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-600 file:mr-3 file:rounded-md file:border-0 file:bg-sky-600 file:px-3 file:py-2 file:text-sm file:font-medium file:text-white"
-                          :disabled="avatarUploading || isProcessing"
-                          accept=".png,.jpg,.jpeg,.webp"
-                          @change="handleAvatarUpload" />
+                        <input id="avatar-upload" type="file" class="block w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-600 file:mr-3 file:rounded-md file:border-0 file:bg-sky-600 file:px-3 file:py-2 file:text-sm file:font-medium file:text-white" :disabled="avatarUploading || isProcessing" accept=".png,.jpg,.jpeg,.webp" @change="handleAvatarUpload" />
 
                         <div v-if="avatarUploading" class="mt-4 flex items-center gap-3 rounded-xl border border-sky-200 bg-sky-50 px-4 py-3 text-sm text-sky-700">
                           <a-spin size="small" />
@@ -73,14 +64,21 @@
                         <div v-else class="mt-4 space-y-3">
                           <p class="text-sm text-slate-500">Chỉ chấp nhận ảnh định dạng JPG, PNG, WEBP với tỷ lệ 3:4.</p>
                           <div v-if="formState.avatar" class="flex flex-wrap gap-2">
-                            <a :href="formState.avatar" target="_blank" rel="noopener noreferrer" class="text-sm font-medium text-sky-600 hover:underline">
-                              Xem ảnh đã tải lên
-                            </a>
                             <a-button danger ghost size="small" :disabled="isProcessing" @click="removeAvatar">Xóa ảnh</a-button>
                           </div>
                         </div>
                       </div>
                     </div>
+
+                    <a-image
+                      v-if="formState.avatar"
+                      :src="formState.avatar"
+                      class="hidden"
+                      :preview="{
+                        visible: isAvatarPreviewOpen,
+                        src: formState.avatar,
+                        onVisibleChange: handleAvatarPreviewVisibleChange,
+                      }" />
                   </div>
                 </a-form-item>
 
@@ -280,6 +278,7 @@ const loading = ref(true);
 const saveLoading = ref(false);
 const submitLoading = ref(false);
 const avatarUploading = ref(false);
+const isAvatarPreviewOpen = ref(false);
 const loadError = ref("");
 const documentUploads = ref([]);
 
@@ -606,6 +605,16 @@ const validateAvatarRatio = async file => {
 
 const removeAvatar = () => {
   formState.avatar = "";
+  isAvatarPreviewOpen.value = false;
+};
+
+const openAvatarPreview = () => {
+  if (!formState.avatar) return;
+  isAvatarPreviewOpen.value = true;
+};
+
+const handleAvatarPreviewVisibleChange = visible => {
+  isAvatarPreviewOpen.value = visible;
 };
 
 const handleAvatarUpload = async event => {
