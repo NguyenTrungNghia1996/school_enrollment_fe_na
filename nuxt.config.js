@@ -4,8 +4,8 @@ export default defineNuxtConfig({
   devtools: { enabled: true },
   app: {
     head: {
-      titleTemplate: "%s - Trường THCS Giảng Võ",
-      title: "Trường THCS Giảng Võ",
+      titleTemplate: "%s - Trường THCS Giảng Võ 2",
+      title: "Trường THCS Giảng Võ 2",
       link: [
         {
           rel: "stylesheet",

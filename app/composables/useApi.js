@@ -75,6 +75,15 @@ export const useApi = () => {
         return adminRequest.post("/api/admin/examScore/publish", options ?? {});
       },
     },
+    adminResult: {
+      ...useCrudApiAdmin("/api/admin/exam/result"),
+      calculator(options) {
+        return adminRequest.get("/api/admin/exam/result/caculator", options ?? {});
+      },
+      publish(options) {
+        return adminRequest.post("/api/admin/exam/result/publish", options ?? {});
+      },
+    },
     adminPayment: {
       getDetail(options) {
         return adminRequest.get("/api/admin/payment/detail", options ?? {});

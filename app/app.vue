@@ -1,8 +1,8 @@
 <template>
   <a-extract-style>
     <a-config-provider :locale="locale" :theme="theme">
-      <BaseLoading :loading="loading" title="Đang tải dữ liệu" description="Dữ liệu đang được xử lý..." :transparent="false" :show-logo="true" logo-class="w-20 h-24" />
-      <BaseLoading :loading="settingStore.isLoading" :title="settingStore.loading.title" :description="settingStore.loading.description" :transparent="settingStore.loading.transparent" :show-logo="settingStore.loading.showLogo" logo-class="w-20 h-24" />
+      <BaseLoading :loading="loading" title="Đang tải dữ liệu" description="Dữ liệu đang được xử lý..." :transparent="false" :show-logo="true" logo-class="w-20 h-20" />
+      <BaseLoading :loading="settingStore.isLoading" :title="settingStore.loading.title" :description="settingStore.loading.description" :transparent="settingStore.loading.transparent" :show-logo="settingStore.loading.showLogo" logo-class="w-20 h-20" />
       <NuxtLayout>
         <NuxtPage />
       </NuxtLayout>
