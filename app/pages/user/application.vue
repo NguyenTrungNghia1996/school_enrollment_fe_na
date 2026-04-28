@@ -116,7 +116,113 @@
           </div>
         </div>
 
-        <a-descriptions bordered :column="2" size="small">
+        <a-form v-if="showEditAction" layout="vertical">
+          <div class="grid gap-x-4 gap-y-1 md:grid-cols-2">
+            <a-form-item label="Ảnh 3x4" class="md:col-span-2">
+              <div class="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+                <div class="flex flex-col gap-4 md:flex-row md:items-start">
+                  <button
+                    type="button"
+                    class="flex h-48 w-36 items-center justify-center overflow-hidden rounded-xl border border-dashed border-slate-300 bg-white"
+                    :class="detailData.avatar ? 'cursor-pointer' : 'cursor-default'"
+                    :disabled="!detailData.avatar"
+                    @click="openAvatarPreview">
+                    <img v-if="detailData.avatar" :src="detailData.avatar" alt="Ảnh 3x4" class="h-full w-full object-cover" />
+                    <div v-else class="px-4 text-center text-sm leading-6 text-slate-400">Chưa có ảnh 3x4</div>
+                  </button>
+
+                  <div class="flex-1">
+                    <input type="file" class="block w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-600 file:mr-3 file:rounded-md file:border-0 file:bg-sky-600 file:px-3 file:py-2 file:text-sm file:font-medium file:text-white" :disabled="avatarUploading || isEditingProcessing" accept=".png,.jpg,.jpeg,.webp" @change="handleAvatarUpload" />
+
+                    <div v-if="avatarUploading" class="mt-4 flex items-center gap-3 rounded-xl border border-sky-200 bg-sky-50 px-4 py-3 text-sm text-sky-700">
+                      <a-spin size="small" />
+                      Đang upload ảnh 3x4...
+                    </div>
+
+                    <div v-else class="mt-4 space-y-3">
+                      <p class="text-sm text-slate-500">Chỉ chấp nhận ảnh định dạng JPG, PNG, WEBP với tỷ lệ 3:4.</p>
+                      <div v-if="detailData.avatar" class="flex flex-wrap gap-2">
+                        <a-button danger ghost size="small" :disabled="isEditingProcessing" @click="removeAvatar">Xóa ảnh</a-button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <a-image
+                  v-if="detailData.avatar"
+                  :src="detailData.avatar"
+                  class="hidden"
+                  :preview="{
+                    visible: isAvatarPreviewOpen,
+                    src: detailData.avatar,
+                    onVisibleChange: handleAvatarPreviewVisibleChange,
+                  }" />
+              </div>
+            </a-form-item>
+
+            <a-form-item label="Họ tên">
+              <a-input v-model:value="detailData.fullName" placeholder="Nhập họ tên đầy đủ" />
+            </a-form-item>
+
+            <a-form-item label="Ngày sinh">
+              <a-date-picker v-model:value="detailData.dateOfBirth" format="DD/MM/YYYY" class="w-full" placeholder="Chọn ngày sinh" />
+            </a-form-item>
+
+            <div>
+              <UserSelectProvince v-model="detailData.idProvince" label="Nơi sinh" name="idProvince" placeholder="Chọn tỉnh thành phố" />
+            </div>
+
+            <a-form-item label="Số CCCD">
+              <a-input v-model:value="detailData.identityNumber" placeholder="Nhập số CCCD" />
+            </a-form-item>
+
+            <a-form-item label="Ngày cấp CCCD">
+              <a-date-picker v-model:value="detailData.identityIssueDate" format="DD/MM/YYYY" class="w-full" placeholder="Chọn ngày cấp CCCD" />
+            </a-form-item>
+
+            <a-form-item label="Nơi cấp CCCD">
+              <a-input v-model:value="detailData.identityIssuePlace" placeholder="Nhập nơi cấp CCCD" />
+            </a-form-item>
+
+            <div>
+              <UserSelectEthnicity v-model="detailData.idEthnicity" label="Dân tộc" name="idEthnicity" placeholder="Chọn dân tộc" />
+            </div>
+
+            <a-form-item label="Giới tính">
+              <a-select v-model:value="detailData.gender" :options="genderOptions" placeholder="Chọn giới tính" />
+            </a-form-item>
+
+            <div>
+              <UserSelectProvince v-model="detailData.idPermanentProvince" label="Tỉnh thường trú" name="idPermanentProvince" placeholder="Chọn tỉnh thành phố" />
+            </div>
+
+            <div>
+              <UserSelectCommune v-model="detailData.idCommune" :id-province="detailData.idPermanentProvince" label="Phường/xã thường trú" name="idCommune" placeholder="Chọn phường/xã" />
+            </div>
+
+            <a-form-item label="Địa chỉ thường trú" class="md:col-span-2">
+              <a-input v-model:value="detailData.permanentAddress" placeholder="Nhập địa chỉ thường trú" />
+            </a-form-item>
+
+            <a-form-item label="Số điện thoại">
+              <a-input v-model:value="detailData.phoneNumber" placeholder="Nhập số điện thoại" />
+            </a-form-item>
+
+            <div>
+              <UserSelectProvince v-model="detailData.idCurrentProvince" label="Tỉnh hiện tại" name="idCurrentProvince" placeholder="Chọn tỉnh thành phố" />
+            </div>
+
+            <div>
+              <UserSelectCommune v-model="detailData.idCurrentCommune" :id-province="detailData.idCurrentProvince" label="Phường/xã hiện tại" name="idCurrentCommune" placeholder="Chọn phường/xã" />
+            </div>
+
+            <a-form-item label="Địa chỉ hiện tại" class="md:col-span-2">
+              <a-input v-model:value="detailData.currentAddress" placeholder="Nhập địa chỉ hiện tại" />
+            </a-form-item>
+          </div>
+        </a-form>
+
+        <a-descriptions v-else bordered :column="2" size="small">
           <a-descriptions-item label="Họ tên">{{ detailData.fullName || detailData.fullname || "-" }}</a-descriptions-item>
           <a-descriptions-item label="Ngày sinh">{{ formatDate(detailData.dateOfBirth) }}</a-descriptions-item>
           <a-descriptions-item label="Số CCCD">{{ detailData.identityNumber || "-" }}</a-descriptions-item>
@@ -145,11 +251,24 @@
                 <div class="text-xs text-slate-500">{{ document.links.length }} file</div>
               </div>
 
+              <div v-if="showEditAction" class="mb-3">
+                <input type="file" class="block w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-600 file:mr-3 file:rounded-md file:border-0 file:bg-sky-600 file:px-3 file:py-2 file:text-sm file:font-medium file:text-white" :disabled="isDocumentUploading(document.idExamDocument) || isEditingProcessing" accept=".pdf,.png,.jpg,.jpeg,.webp" multiple @change="event => handleEditDocumentUpload(document.idExamDocument, event)" />
+                <div v-if="isDocumentUploading(document.idExamDocument)" class="mt-3 flex items-center gap-3 rounded-xl border border-sky-200 bg-sky-50 px-4 py-3 text-sm text-sky-700">
+                  <a-spin size="small" />
+                  Đang upload hồ sơ...
+                </div>
+              </div>
+
               <div class="space-y-2 rounded-lg bg-white p-3">
-                <div v-for="(link, index) in document.links" :key="`${document.key}-${index}`" class="break-all text-sm text-slate-700">
-                  <BaseImagePreviewLink v-if="getFileType(link) === 'image'" :src="link" />
-                  <BasePdfPreviewLink v-else-if="getFileType(link) === 'pdf'" :src="link" />
-                  <a v-else :href="link" target="_blank" rel="noopener noreferrer" class="text-blue-600 hover:underline">{{ getDisplayName(link) }}</a>
+                <div v-for="(link, index) in document.links" :key="`${document.key}-${index}`" class="flex items-center justify-between gap-3 break-all text-sm text-slate-700">
+                  <div class="min-w-0 flex-1 break-all">
+                    <BaseImagePreviewLink v-if="getFileType(link) === 'image'" :src="link" />
+                    <BasePdfPreviewLink v-else-if="getFileType(link) === 'pdf'" :src="link" />
+                    <a v-else :href="link" target="_blank" rel="noopener noreferrer" class="text-blue-600 hover:underline">{{ getDisplayName(link) }}</a>
+                  </div>
+                  <a-button v-if="showEditAction" type="link" danger size="small" :disabled="isEditingProcessing" @click="removeEditDocumentFile(document.idExamDocument, index)">
+                    Xóa
+                  </a-button>
                 </div>
               </div>
             </div>
@@ -160,7 +279,7 @@
 
         <div class="flex justify-end gap-2 border-t border-slate-100 pt-4">
           <a-button @click="closeDetail">Đóng</a-button>
-          <!-- <a-button :loading="saveLoading" @click="saveApplication">Lưu</a-button> -->
+          <a-button v-if="showEditAction" :loading="saveLoading" @click="saveApplication">Lưu</a-button>
           <a-button v-if="showPaymentAction" type="primary" :loading="qrLoading" @click="openPaymentModal">Thanh toán ngay</a-button>
           <a-button v-else-if="showSubmitAction" type="primary" :loading="submitLoading" @click="submitApplication">Nộp hồ sơ</a-button>
         </div>
@@ -249,7 +368,7 @@ definePageMeta({
 });
 
 const userStore = useUserStore();
-const { applicationUser } = useApi();
+const { applicationUser, s3 } = useApi();
 
 if (!userStore.token) {
   userStore.openLogin();
@@ -265,10 +384,17 @@ const detailData = ref(null);
 const selectedRecord = ref(null);
 const saveLoading = ref(false);
 const submitLoading = ref(false);
+const avatarUploading = ref(false);
+const isAvatarPreviewOpen = ref(false);
+const documentUploadingMap = ref({});
 const paymentVisible = ref(false);
 const qrLoading = ref(false);
 const qrData = ref(null);
 const confirmPaymentLoading = ref(false);
+const genderOptions = [
+  { label: "Nam", value: true },
+  { label: "Nữ", value: false },
+];
 
 const pagination = reactive({
   current: 1,
@@ -334,7 +460,10 @@ const normalizedDocuments = computed(() => {
 });
 
 const showSubmitAction = computed(() => Number(detailData.value?.idStatus) < 2);
+const showEditAction = computed(() => Number(detailData.value?.idStatus) === 1);
 const showPaymentAction = computed(() => Number(detailData.value?.idStatus) === 3);
+const hasUploadingEditDocuments = computed(() => Object.values(documentUploadingMap.value).some(Boolean));
+const isEditingProcessing = computed(() => saveLoading.value || submitLoading.value || avatarUploading.value || hasUploadingEditDocuments.value);
 
 watch(
   () => applicationResponse.value,
@@ -456,6 +585,8 @@ const normalizeApplicationDetail = (detail, fallbackRecord = null) => {
     statusName: detail.statusName || fallbackRecord?.statusName || null,
     fullName: detail.fullName || detail.fullname || fallbackRecord?.fullName || fallbackRecord?.fullname || null,
     examName: detail.examName || fallbackRecord?.examName || null,
+    dateOfBirth: detail.dateOfBirth ? dayjs(detail.dateOfBirth) : null,
+    identityIssueDate: detail.identityIssueDate ? dayjs(detail.identityIssueDate) : null,
     documents: Array.isArray(detail.documents) ? detail.documents : [],
   };
 };
@@ -500,36 +631,192 @@ const getFileType = link => {
   return "unsupported";
 };
 
-const buildApplicationPayload = () => {
+const loadImageMeta = file =>
+  new Promise((resolve, reject) => {
+    const objectUrl = URL.createObjectURL(file);
+    const image = new Image();
+
+    image.onload = () => {
+      resolve({
+        width: image.naturalWidth,
+        height: image.naturalHeight,
+      });
+      URL.revokeObjectURL(objectUrl);
+    };
+
+    image.onerror = () => {
+      URL.revokeObjectURL(objectUrl);
+      reject(new Error("Không thể đọc kích thước ảnh"));
+    };
+
+    image.src = objectUrl;
+  });
+
+const validateAvatarRatio = async file => {
+  const { width, height } = await loadImageMeta(file);
+  const ratio = width / height;
+  const expectedRatio = 3 / 4;
+
+  if (Math.abs(ratio - expectedRatio) > 0.08) {
+    throw new Error("Ảnh avatar phải có tỷ lệ 3:4");
+  }
+};
+
+const openAvatarPreview = () => {
+  if (!detailData.value?.avatar) return;
+  isAvatarPreviewOpen.value = true;
+};
+
+const handleAvatarPreviewVisibleChange = visible => {
+  isAvatarPreviewOpen.value = visible;
+};
+
+const removeAvatar = () => {
+  if (!detailData.value) return;
+  detailData.value.avatar = "";
+  isAvatarPreviewOpen.value = false;
+};
+
+const handleAvatarUpload = async event => {
+  const file = event?.target?.files?.[0];
+  if (!file || !detailData.value) return;
+
+  avatarUploading.value = true;
+
+  try {
+    await validateAvatarRatio(file);
+
+    const result = await s3.upload(file, {
+      key: `${Date.now()}-${file.name}`,
+      contentType: file.type || "application/octet-stream",
+    });
+
+    detailData.value.avatar = result.directUrl;
+    message.success("Đã tải lên ảnh 3x4");
+  } catch (error) {
+    message.error(error?.message || "Upload ảnh 3x4 thất bại");
+  } finally {
+    avatarUploading.value = false;
+    if (event?.target) {
+      event.target.value = "";
+    }
+  }
+};
+
+const updateDocumentLinks = (idExamDocument, links) => {
+  if (!detailData.value) return;
+
+  const nextLinks = Array.from(new Set((links || []).filter(Boolean)));
+  const documents = Array.isArray(detailData.value.documents) ? [...detailData.value.documents] : [];
+  const documentIndex = documents.findIndex(item => Number(item?.idExamDocument || item?.id) === Number(idExamDocument));
+
+  if (!nextLinks.length) {
+    if (documentIndex >= 0) {
+      documents.splice(documentIndex, 1);
+    }
+    detailData.value.documents = documents;
+    return;
+  }
+
+  const documentPayload = {
+    ...(documentIndex >= 0 ? documents[documentIndex] : {}),
+    idExamDocument: Number(idExamDocument),
+    url: nextLinks.join(","),
+  };
+
+  if (documentIndex >= 0) {
+    documents.splice(documentIndex, 1, documentPayload);
+  } else {
+    documents.push(documentPayload);
+  }
+
+  detailData.value.documents = documents;
+};
+
+const isDocumentUploading = idExamDocument => {
+  return !!documentUploadingMap.value[String(idExamDocument)];
+};
+
+const removeEditDocumentFile = (idExamDocument, fileIndex) => {
+  const document = normalizedDocuments.value.find(item => Number(item.idExamDocument) === Number(idExamDocument));
+  if (!document) return;
+
+  const nextLinks = [...document.links];
+  nextLinks.splice(fileIndex, 1);
+  updateDocumentLinks(idExamDocument, nextLinks);
+};
+
+const handleEditDocumentUpload = async (idExamDocument, event) => {
+  const files = Array.from(event?.target?.files || []);
+  if (!files.length) return;
+
+  const key = String(idExamDocument);
+  documentUploadingMap.value = {
+    ...documentUploadingMap.value,
+    [key]: true,
+  };
+
+  try {
+    const uploadedFiles = await Promise.all(
+      files.map(async file => {
+        const result = await s3.upload(file, {
+          key: `${Date.now()}-${file.name}`,
+          contentType: file.type || "application/octet-stream",
+        });
+
+        return result.directUrl;
+      }),
+    );
+
+    const existingDocument = normalizedDocuments.value.find(item => Number(item.idExamDocument) === Number(idExamDocument));
+    const nextLinks = [...(existingDocument?.links || []), ...uploadedFiles];
+    updateDocumentLinks(idExamDocument, nextLinks);
+    message.success(`Đã tải lên hồ sơ #${idExamDocument}`);
+  } catch (error) {
+    message.error(error?.message || `Upload thất bại: hồ sơ #${idExamDocument}`);
+  } finally {
+    documentUploadingMap.value = {
+      ...documentUploadingMap.value,
+      [key]: false,
+    };
+    if (event?.target) {
+      event.target.value = "";
+    }
+  }
+};
+
+const buildApplicationPayload = ({ includeAvatar = true } = {}) => {
   if (!detailData.value) {
     return null;
   }
 
-  return {
+  const payload = {
     id: detailData.value.id,
     idExam: Number(detailData.value.idExam),
-    avatar: String(detailData.value.avatar || userStore.image_url || "").trim(),
     fullName: (detailData.value.fullName || detailData.value.fullname || "").trim(),
-    dateOfBirth: detailData.value.dateOfBirth,
+    dateOfBirth: detailData.value.dateOfBirth ? dayjs(detailData.value.dateOfBirth).toISOString() : null,
     idProvince: Number(detailData.value.idProvince),
     identityNumber: (detailData.value.identityNumber || "").trim(),
-    identityIssueDate: detailData.value.identityIssueDate,
+    identityIssueDate: detailData.value.identityIssueDate ? dayjs(detailData.value.identityIssueDate).toISOString() : null,
     identityIssuePlace: (detailData.value.identityIssuePlace || "").trim(),
     idEthnicity: Number(detailData.value.idEthnicity),
     gender: detailData.value.gender,
     idCommune: Number(detailData.value.idCommune),
-    idPermanentProvince: Number(detailData.value.idPermanentProvince),
     permanentAddress: (detailData.value.permanentAddress || "").trim(),
     phoneNumber: (detailData.value.phoneNumber || "").trim(),
     idCurrentCommune: Number(detailData.value.idCurrentCommune),
-    idCurrentProvince: Number(detailData.value.idCurrentProvince),
     currentAddress: (detailData.value.currentAddress || "").trim(),
-    note: detailData.value.note,
     documents: normalizedDocuments.value.map(document => ({
       idExamDocument: Number(document.idExamDocument),
       url: document.links.join(","),
     })),
   };
+
+  if (includeAvatar) {
+    payload.avatar = String(detailData.value.avatar || userStore.image_url || "").trim();
+  }
+
+  return payload;
 };
 
 const openDetail = async record => {
@@ -563,39 +850,56 @@ const closeDetail = () => {
   selectedRecord.value = null;
   saveLoading.value = false;
   submitLoading.value = false;
+  avatarUploading.value = false;
+  isAvatarPreviewOpen.value = false;
+  documentUploadingMap.value = {};
   paymentVisible.value = false;
   qrLoading.value = false;
   qrData.value = null;
   confirmPaymentLoading.value = false;
 };
 
-// const saveApplication = async () => {
-//   const payload = buildApplicationPayload();
-//   if (!payload) {
-//     message.error("Không có dữ liệu hồ sơ để lưu");
-//     return;
-//   }
-//   saveLoading.value = true;
-//   try {
-//     const { data, error } = await applicationUser.post({
-//       body: payload,
-//     });
-//     if (error.value || data.value?.success === false) {
-//       throw new Error(error.value?.data?.message || data.value?.message || "Lưu hồ sơ thất bại");
-//     }
-//     message.success(data.value?.message || "Lưu hồ sơ thành công");
-//     await refreshApplications();
-//     if (selectedRecord.value?.id) {
-//       await openDetail(selectedRecord.value);
-//     }
-//   } catch (error) {
-//     message.error(error?.message || "Lưu hồ sơ thất bại");
-//   } finally {
-//     saveLoading.value = false;
-//   }
-// };
+const saveApplication = async () => {
+  if (avatarUploading.value || hasUploadingEditDocuments.value) {
+    message.warning("Vui lòng chờ upload hồ sơ hoàn tất");
+    return;
+  }
+
+  const payload = buildApplicationPayload();
+  if (!payload) {
+    message.error("Không có dữ liệu hồ sơ để lưu");
+    return;
+  }
+
+  saveLoading.value = true;
+
+  try {
+    const { data, error } = await applicationUser.put({
+      body: payload,
+    });
+
+    if (error.value || data.value?.success === false) {
+      throw new Error(error.value?.data?.message || data.value?.message || "Lưu hồ sơ thất bại");
+    }
+
+    message.success(data.value?.message || "Lưu hồ sơ thành công");
+    await refreshApplications();
+    if (selectedRecord.value?.id) {
+      await openDetail(selectedRecord.value);
+    }
+  } catch (error) {
+    message.error(error?.message || "Lưu hồ sơ thất bại");
+  } finally {
+    saveLoading.value = false;
+  }
+};
 
 const submitApplication = async () => {
+  if (avatarUploading.value || hasUploadingEditDocuments.value) {
+    message.warning("Vui lòng chờ upload hồ sơ hoàn tất");
+    return;
+  }
+
   const payload = buildApplicationPayload();
   if (!payload) {
     message.error("Không có dữ liệu hồ sơ để nộp");
