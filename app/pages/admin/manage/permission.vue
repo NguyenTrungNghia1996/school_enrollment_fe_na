@@ -3,7 +3,7 @@
     <div class="mb-4 flex flex-col items-start justify-between gap-2 md:flex-row md:items-center">
       <a-input-search v-model:value="searchText" placeholder="Tìm kiếm Nhóm quyền..." enter-button @search="handleSearch" class="w-full" />
       <a-button @click="resetForm" class="w-full md:w-auto">Đặt lại</a-button>
-      <a-button type="primary" @click="showModal" class="w-full md:w-auto" :disabled="!adminStore.currentPermission">Thêm mới</a-button>
+      <a-button type="primary" @click="showModal" class="w-full md:w-auto" :disabled="!adminStore.canEditCurrentPage">Thêm mới</a-button>
     </div>
 
     <ClientOnly class="overflow-x-auto">
@@ -19,13 +19,13 @@
           <template v-if="column.key === 'action'">
             <div class="flex justify-center">
               <div class="space-x-2 md:flex">
-                <a-button type="link" size="small" @click="editItem(record.id)" :disabled="!adminStore.currentPermission">
+                <a-button type="link" size="small" @click="editItem(record.id)" :disabled="!adminStore.canEditCurrentPage">
                   <template #icon>
                     <EditOutlined />
                   </template>
                 </a-button>
                 <a-popconfirm title="Bạn chắc chắn muốn xóa?" ok-text="Đồng ý" cancel-text="Hủy" @confirm="deleteItem(record.id)">
-                  <a-button type="link" danger size="small" :disabled="!adminStore.currentPermission">
+                  <a-button type="link" danger size="small" :disabled="!adminStore.canEditCurrentPage">
                     <template #icon>
                       <DeleteOutlined />
                     </template>

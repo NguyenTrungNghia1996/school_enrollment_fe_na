@@ -2,7 +2,7 @@
   <div class="min-h-full rounded bg-white p-4 shadow">
     <!-- 🧭 Thanh công cụ tìm kiếm & thêm mới -->
     <div class="mb-6 flex flex-col items-end justify-end gap-2 md:flex-row md:items-center">
-      <a-button type="primary" @click="showModal(null)" class="w-full md:w-auto" :disabled="!adminStore.currentPermission">Thêm mới</a-button>
+      <a-button type="primary" @click="showModal(null)" class="w-full md:w-auto" :disabled="!adminStore.canEditCurrentPage">Thêm mới</a-button>
     </div>
 
     <!-- 📋 Bảng danh sách menu -->
@@ -16,18 +16,18 @@
         <template v-if="column.key === 'action'">
           <div class="flex justify-center gap-2">
             <a-tooltip title="Thêm menu con" v-if="getDepth(record) < 2">
-              <a-button type="link" size="small" @click="showModal(record.id)" :disabled="!adminStore.currentPermission">
+              <a-button type="link" size="small" @click="showModal(record.id)" :disabled="!adminStore.canEditCurrentPage">
                 <FolderAddOutlined />
               </a-button>
             </a-tooltip>
             <a-tooltip title="Sửa">
-              <a-button type="link" size="small" @click="editItem(record)" :disabled="!adminStore.currentPermission">
+              <a-button type="link" size="small" @click="editItem(record)" :disabled="!adminStore.canEditCurrentPage">
                 <EditOutlined />
               </a-button>
             </a-tooltip>
             <a-popconfirm title="Bạn chắc chắn muốn xóa?" ok-text="Đồng ý" cancel-text="Hủy" @confirm="deleteItem(record.id)">
               <a-tooltip title="Xóa">
-                <a-button type="link" danger size="small" :disabled="!adminStore.currentPermission">
+                <a-button type="link" danger size="small" :disabled="!adminStore.canEditCurrentPage">
                   <DeleteOutlined />
                 </a-button>
               </a-tooltip>

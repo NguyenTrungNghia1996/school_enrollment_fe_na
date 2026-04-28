@@ -27,6 +27,7 @@ export const useAdminStore = defineStore("admin", {
   },
 
   getters: {
+    permissionState: state => state.current_permission,
     token: state => state.admin?.token ?? null,
     name: state => state.admin?.name ?? "",
     role: state => state.admin?.name ?? "",
@@ -34,10 +35,18 @@ export const useAdminStore = defineStore("admin", {
     image_url: state => state.admin?.image_url ?? null,
     menuItems: state => state.menu,
     menuPermissions: state => state.permissions,
-    currentPermission: state => {
+    canViewCurrentPage: state => {
+      if (state.admin?.isSuperAdmin) return true;
+      const PERMISSION_STATE = { NO_ACCESS: 0, VIEW: 1, EDIT: 2 };
+      return state.current_permission === PERMISSION_STATE.VIEW || state.current_permission === PERMISSION_STATE.EDIT;
+    },
+    canEditCurrentPage: state => {
       if (state.admin?.isSuperAdmin) return true;
       const PERMISSION_STATE = { NO_ACCESS: 0, VIEW: 1, EDIT: 2 };
       return state.current_permission === PERMISSION_STATE.EDIT;
+    },
+    currentPermission() {
+      return this.canEditCurrentPage;
     },
   },
 
