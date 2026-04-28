@@ -29,10 +29,10 @@
               <p class="text-sm leading-6 text-slate-500">{{ statusMessage }}</p>
             </div>
 
-            <div class="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-left">
+            <!-- <div class="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-left">
               <p class="text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">Token</p>
               <p class="mt-2 break-all font-mono text-sm text-slate-700">{{ token || "Không có token" }}</p>
-            </div>
+            </div> -->
 
             <div class="grid gap-3 pt-2">
               <a-button v-if="isSuccess" type="primary" size="large" class="h-12 rounded-xl font-bold" @click="navigateTo('/')">Về trang chủ</a-button>
