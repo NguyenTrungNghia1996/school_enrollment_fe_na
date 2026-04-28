@@ -31,7 +31,12 @@ export const useApi = () => {
     provinceUser: useCrudApiUser("/api/province"),
     communeUser: useCrudApiUser("/api/commune"),
     examUser: useCrudApiUser("/api/exam"),
-    applicationUser: useCrudApiUser("/api/application"),
+    applicationUser: {
+      ...useCrudApiUser("/api/application"),
+      getDetail(options) {
+        return userRequest.get("/api/admin/application/detail", options ?? {});
+      },
+    },
     authAdmin: {
       login(options) {
         return adminRequest.post("/api/admin/login", options ?? {});

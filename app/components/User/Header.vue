@@ -28,10 +28,10 @@
             </div>
             <template #overlay>
               <a-menu class="min-w-[200px] overflow-hidden rounded-xl border-none p-2 shadow-2xl">
-                <!-- <a-menu-item key="profile" class="rounded-lg py-3">
+                <a-menu-item key="profile" class="rounded-lg py-3" @click="navigateTo('/user/application')">
                   <template #icon><Icon name="lucide:user" class="text-lg" /></template>
-                  Thông tin cá nhân
-                </a-menu-item> -->
+                  Hồ sơ của tôi
+                </a-menu-item>
                 <a-menu-item key="change-password" class="rounded-lg py-3" @click="userStore.openChangePassword()">
                   <template #icon><Icon name="lucide:key-round" class="text-lg" /></template>
                   Đổi mật khẩu

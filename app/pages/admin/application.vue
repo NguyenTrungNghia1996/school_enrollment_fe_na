@@ -2,13 +2,14 @@
   <div class="min-h-full bg-white p-2 md:p-4">
     <div class="mb-4 flex flex-col items-start justify-between gap-2 md:flex-row md:items-center">
       <a-input-search v-model:value="searchText" placeholder="Tìm theo mã hồ sơ, họ tên, CCCD..." enter-button @search="handleSearch" class="w-full" />
+      <div class="w-1/3 py-2 md:py-0">
+        <AdminSelectEnrollment v-model="selectedExamId" no-form-item :inlineLabel="false" placeholder="Lọc theo kỳ tuyển sinh" label="" />
+      </div>
       <div class="flex w-full gap-2 md:w-auto">
         <a-button @click="resetFilters" class="flex-1 md:flex-none">Đặt lại</a-button>
       </div>
     </div>
-    <div class="w-full py-2">
-      <AdminSelectEnrollment v-model="selectedExamId" no-form-item placeholder="Lọc theo kỳ tuyển sinh" />
-    </div>
+
     <ClientOnly class="overflow-x-auto">
       <a-table :columns="columns" :data-source="dataSource" :pagination="pagination" :loading="loading" :scroll="{ x: '1200' }" bordered size="small" @change="handleTableChange">
         <template #bodyCell="{ column, record, index }">
