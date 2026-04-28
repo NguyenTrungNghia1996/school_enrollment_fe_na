@@ -2,13 +2,14 @@
   <div class="min-h-full bg-white p-2 md:p-4">
     <div class="mb-4 flex flex-col items-start justify-between gap-2 md:flex-row md:items-center">
       <a-input-search v-model:value="searchText" placeholder="Tìm theo mã hồ sơ, họ tên, CCCD..." enter-button @search="handleSearch" class="w-full" />
+      <div class="w-1/3 py-2 md:py-0">
+        <AdminSelectEnrollment v-model="selectedExamId" no-form-item :inlineLabel="false" placeholder="Lọc theo kỳ tuyển sinh" label="" />
+      </div>
       <div class="flex w-full gap-2 md:w-auto">
         <a-button @click="resetFilters" class="flex-1 md:flex-none">Đặt lại</a-button>
       </div>
     </div>
-    <div class="w-full py-2">
-      <AdminSelectEnrollment v-model="selectedExamId" no-form-item placeholder="Lọc theo kỳ tuyển sinh" />
-    </div>
+
     <ClientOnly class="overflow-x-auto">
       <a-table :columns="columns" :data-source="dataSource" :pagination="pagination" :loading="loading" :scroll="{ x: '1200' }" bordered size="small" @change="handleTableChange">
         <template #bodyCell="{ column, record, index }">
@@ -50,6 +51,12 @@
                 </a-button>
               </a-tooltip>
 
+              <a-tooltip v-if="showPaymentInfoAction(record)" title="Thông tin thanh toán">
+                <a-button type="link" size="small" class="text-sky-600" :disabled="!adminStore.currentPermission" @click="openPaymentDetail(record)">
+                  <template #icon><CreditCardOutlined /></template>
+                </a-button>
+              </a-tooltip>
+
               <a-popconfirm title="Bạn chắc chắn muốn xóa hồ sơ này?" ok-text="Đồng ý" cancel-text="Hủy" @confirm="deleteItem(record.id)">
                 <a-button type="link" size="small" danger :disabled="!adminStore.currentPermission">
                   <template #icon><DeleteOutlined /></template>
@@ -74,7 +81,7 @@
           </div>
           <div class="rounded-xl border border-slate-200 bg-slate-50 px-4 py-3">
             <div class="text-xs uppercase tracking-[0.2em] text-slate-400">Kỳ tuyển sinh</div>
-            <div class="mt-2 font-bold text-slate-900">#{{ detailData.idExam }}</div>
+            <div class="mt-2 font-bold text-slate-900">{{ detailData.examName || `#${detailData.idExam}` }}</div>
           </div>
           <div class="rounded-xl border border-slate-200 bg-slate-50 px-4 py-3">
             <div class="text-xs uppercase tracking-[0.2em] text-slate-400">Trạng thái</div>
@@ -95,14 +102,14 @@
           <a-descriptions-item label="Ngày cấp CCCD">{{ formatDate(detailData.identityIssueDate) }}</a-descriptions-item>
           <a-descriptions-item label="Nơi cấp CCCD">{{ detailData.identityIssuePlace || "-" }}</a-descriptions-item>
           <a-descriptions-item label="Giới tính">{{ formatGender(detailData.gender) }}</a-descriptions-item>
-          <a-descriptions-item label="Dân tộc">#{{ detailData.idEthnicity || "-" }}</a-descriptions-item>
-          <a-descriptions-item label="Nơi sinh">#{{ detailData.idProvince || "-" }}</a-descriptions-item>
-          <a-descriptions-item label="Tỉnh thường trú">#{{ detailData.idPermanentProvince || "-" }}</a-descriptions-item>
-          <a-descriptions-item label="Phường/xã thường trú">#{{ detailData.idCommune || "-" }}</a-descriptions-item>
+          <a-descriptions-item label="Dân tộc">{{ detailData.ethnicityName || `#${detailData.idEthnicity || "-"}` }}</a-descriptions-item>
+          <a-descriptions-item label="Nơi sinh">{{ detailData.provinceName || `#${detailData.idProvince || "-"}` }}</a-descriptions-item>
+          <a-descriptions-item label="Tỉnh thường trú">{{ detailData.permanentProvinceName || `#${detailData.idPermanentProvince || "-"}` }}</a-descriptions-item>
+          <a-descriptions-item label="Phường/xã thường trú">{{ detailData.permanentCommuneName || `#${detailData.idCommune || "-"}` }}</a-descriptions-item>
           <a-descriptions-item label="Địa chỉ thường trú" :span="2">{{ detailData.permanentAddress || "-" }}</a-descriptions-item>
           <a-descriptions-item label="Số điện thoại">{{ detailData.phoneNumber || "-" }}</a-descriptions-item>
-          <a-descriptions-item label="Tỉnh hiện tại">#{{ detailData.idCurrentProvince || "-" }}</a-descriptions-item>
-          <a-descriptions-item label="Phường/xã hiện tại">#{{ detailData.idCurrentCommune || "-" }}</a-descriptions-item>
+          <a-descriptions-item label="Tỉnh hiện tại">{{ detailData.currentProvinceName || `#${detailData.idCurrentProvince || "-"}` }}</a-descriptions-item>
+          <a-descriptions-item label="Phường/xã hiện tại">{{ detailData.currentCommuneName || `#${detailData.idCurrentCommune || "-"}` }}</a-descriptions-item>
           <a-descriptions-item label="Địa chỉ hiện tại" :span="2">{{ detailData.currentAddress || "-" }}</a-descriptions-item>
           <a-descriptions-item label="Ghi chú" :span="2">{{ detailData.note || "-" }}</a-descriptions-item>
         </a-descriptions>
@@ -132,8 +139,64 @@
 
         <div class="flex justify-end gap-2 border-t border-slate-100 pt-4">
           <a-button @click="closeDetail">Đóng</a-button>
+          <a-button v-if="showPaymentInfoAction(detailData)" :disabled="!adminStore.currentPermission" @click="openPaymentDetail(detailData, true)">Thông tin thanh toán</a-button>
           <a-button type="primary" :disabled="!detailData || isActionDisabled(detailData) || !adminStore.currentPermission" @click="approveItem(detailData, true)">Duyệt hồ sơ</a-button>
           <a-button danger :disabled="!detailData || isActionDisabled(detailData) || !adminStore.currentPermission" @click="openReject(detailData, true)">Từ chối</a-button>
+        </div>
+      </div>
+    </a-modal>
+
+    <a-modal v-model:open="paymentVisible" title="Thông tin thanh toán" :width="900" :footer="null" @cancel="closePaymentDetail">
+      <div v-if="paymentLoading" class="py-12 text-center">
+        <a-spin size="large" />
+      </div>
+
+      <div v-else-if="paymentData" class="space-y-6">
+        <div class="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+          <div class="rounded-xl border border-slate-200 bg-slate-50 px-4 py-3">
+            <div class="text-xs uppercase tracking-[0.2em] text-slate-400">Mã hồ sơ</div>
+            <div class="mt-2 font-bold text-slate-900">{{ detailData?.applicationCode || selectedRecord?.applicationCode || `#${paymentData.idApplication}` }}</div>
+          </div>
+          <div class="rounded-xl border border-slate-200 bg-slate-50 px-4 py-3">
+            <div class="text-xs uppercase tracking-[0.2em] text-slate-400">Số tiền</div>
+            <div class="mt-2 font-bold text-slate-900">{{ formatCurrency(paymentData.amount) }}</div>
+          </div>
+          <div class="rounded-xl border border-slate-200 bg-slate-50 px-4 py-3">
+            <div class="text-xs uppercase tracking-[0.2em] text-slate-400">Nội dung CK</div>
+            <div class="mt-2 font-bold text-slate-900">{{ paymentData.transCode?.trim() || "-" }}</div>
+          </div>
+          <div class="rounded-xl border border-slate-200 bg-slate-50 px-4 py-3">
+            <div class="text-xs uppercase tracking-[0.2em] text-slate-400">Ngày thanh toán</div>
+            <div class="mt-2 font-bold text-slate-900">{{ formatDateTime(paymentData.payDate) }}</div>
+          </div>
+        </div>
+
+        <a-descriptions bordered :column="2" size="small">
+          <a-descriptions-item label="Ngân hàng">{{ paymentData.bank || "-" }}</a-descriptions-item>
+          <a-descriptions-item label="Số tài khoản">{{ paymentData.accountNumber || "-" }}</a-descriptions-item>
+          <a-descriptions-item label="Chủ tài khoản" :span="2">{{ paymentData.accountName || "-" }}</a-descriptions-item>
+        </a-descriptions>
+
+        <a-form layout="vertical">
+          <div class="grid gap-4 md:grid-cols-2">
+            <a-form-item label="Ngày thanh toán">
+              <a-date-picker v-model:value="paymentForm.payDate" show-time format="DD/MM/YYYY HH:mm:ss" class="w-full" placeholder="Chọn ngày thanh toán" />
+            </a-form-item>
+            <a-form-item label="Ngân hàng" required>
+              <a-input v-model:value="paymentForm.bank" placeholder="Nhập tên ngân hàng" />
+            </a-form-item>
+            <a-form-item label="Chủ tài khoản" required>
+              <a-input v-model:value="paymentForm.accountName" placeholder="Nhập tên chủ tài khoản" />
+            </a-form-item>
+            <a-form-item label="Số tài khoản" required>
+              <a-input v-model:value="paymentForm.accountNumber" placeholder="Nhập số tài khoản" />
+            </a-form-item>
+          </div>
+        </a-form>
+
+        <div class="flex justify-end gap-2 border-t border-slate-100 pt-4">
+          <a-button @click="closePaymentDetail">Đóng</a-button>
+          <a-button type="primary" :loading="completePaymentLoading" :disabled="!adminStore.currentPermission" @click="submitCompletePayment">Xác nhận thanh toán</a-button>
         </div>
       </div>
     </a-modal>
@@ -156,7 +219,7 @@ definePageMeta({
 });
 
 const adminStore = useAdminStore();
-const { adminApplication } = useApi();
+const { adminApplication, adminPayment } = useApi();
 
 const searchText = ref("");
 const selectedExamId = ref(null);
@@ -167,6 +230,16 @@ const rejectVisible = ref(false);
 const rejectLoading = ref(false);
 const rejectNote = ref("");
 const selectedRecord = ref(null);
+const paymentVisible = ref(false);
+const paymentLoading = ref(false);
+const completePaymentLoading = ref(false);
+const paymentData = ref(null);
+const paymentForm = reactive({
+  payDate: null,
+  bank: "",
+  accountName: "",
+  accountNumber: "",
+});
 
 const pagination = reactive({
   current: 1,
@@ -209,14 +282,41 @@ const dataSource = computed(() => {
   return Array.isArray(applicationResponse.value?.data?.items) ? applicationResponse.value.data.items : [];
 });
 
+const normalizeApplicationDetail = (detail, fallbackRecord = null) => {
+  if (!detail || typeof detail !== "object") {
+    return null;
+  }
+
+  return {
+    ...detail,
+    applicationCode: detail.applicationCode || fallbackRecord?.applicationCode || null,
+    statusName: detail.statusName || fallbackRecord?.statusName || null,
+    fullName: detail.fullName || detail.fullname || fallbackRecord?.fullName || fallbackRecord?.fullname || null,
+    examName: detail.examName || fallbackRecord?.examName || null,
+    documents: Array.isArray(detail.documents) ? detail.documents : [],
+  };
+};
+
 const normalizedDocuments = computed(() => {
   const documents = Array.isArray(detailData.value?.documents) ? detailData.value.documents : [];
 
-  return documents.map((document, index) => ({
-    key: `${document.idExamDocument}-${index}`,
-    idExamDocument: document.idExamDocument,
-    links: splitDocumentLinks(document.url),
-  }));
+  return documents
+    .map((document, index) => {
+      if (typeof document === "string") {
+        return {
+          key: `document-${index}`,
+          idExamDocument: index + 1,
+          links: splitDocumentLinks(document),
+        };
+      }
+
+      return {
+        key: `${document?.idExamDocument || document?.id || "document"}-${index}`,
+        idExamDocument: document?.idExamDocument || document?.id || index + 1,
+        links: splitDocumentLinks(document?.url || document?.fileUrl || document?.link || document?.path),
+      };
+    })
+    .filter(document => document.links.length);
 });
 
 watch(
@@ -266,6 +366,19 @@ const formatDate = value => {
   return dayjs(value).format("DD/MM/YYYY");
 };
 
+const formatDateTime = value => {
+  if (!value) return "-";
+  return dayjs(value).format("DD/MM/YYYY HH:mm:ss");
+};
+
+const formatCurrency = value => {
+  if (value === undefined || value === null) return "0 VND";
+  return new Intl.NumberFormat("vi-VN", {
+    style: "currency",
+    currency: "VND",
+  }).format(value);
+};
+
 const formatGender = value => {
   if (value === true) return "Nam";
   if (value === false) return "Nữ";
@@ -293,10 +406,11 @@ const getStatusColor = record => {
 };
 
 const isActionDisabled = record => {
-  const normalized = String(record?.statusName || "")
-    .trim()
-    .toLowerCase();
-  return normalized.includes("duyệt") || normalized.includes("từ chối") || normalized.includes("hủy");
+  return Number(record?.idStatus) !== 2;
+};
+
+const showPaymentInfoAction = record => {
+  return Number(record?.idStatus) === 4;
 };
 
 const getFileName = link => {
@@ -360,11 +474,7 @@ const openDetail = async recordOrId => {
       throw new Error(error.value?.data?.message || data.value?.message || "Không thể tải thông tin chi tiết");
     }
 
-    detailData.value = {
-      ...data.value.data,
-      applicationCode: data.value.data.applicationCode || selectedRecord.value?.applicationCode || null,
-      statusName: data.value.data.statusName || selectedRecord.value?.statusName || null,
-    };
+    detailData.value = normalizeApplicationDetail(data.value.data, selectedRecord.value);
   } catch (error) {
     detailVisible.value = false;
     message.error(error?.message || "Không thể tải thông tin chi tiết");
@@ -378,6 +488,101 @@ const closeDetail = () => {
   detailLoading.value = false;
   detailData.value = null;
   selectedRecord.value = null;
+};
+
+const resetPaymentState = () => {
+  paymentLoading.value = false;
+  completePaymentLoading.value = false;
+  paymentData.value = null;
+  paymentForm.payDate = null;
+  paymentForm.bank = "";
+  paymentForm.accountName = "";
+  paymentForm.accountNumber = "";
+};
+
+const openPaymentDetail = async (record, fromDetail = false) => {
+  if (fromDetail && detailData.value) {
+    selectedRecord.value = detailData.value;
+  } else {
+    selectedRecord.value = record;
+  }
+
+  if (!selectedRecord.value?.id) {
+    message.error("Không xác định được hồ sơ thanh toán");
+    return;
+  }
+
+  paymentVisible.value = true;
+  paymentLoading.value = true;
+  paymentData.value = null;
+
+  try {
+    const { data, error } = await adminPayment.getDetail({
+      params: { idApplication: selectedRecord.value.id },
+    });
+
+    if (error.value || data.value?.success === false || !data.value?.data) {
+      throw new Error(error.value?.data?.message || data.value?.message || "Không thể tải thông tin thanh toán");
+    }
+
+    paymentData.value = data.value.data;
+    paymentForm.payDate = paymentData.value.payDate ? dayjs(paymentData.value.payDate) : dayjs();
+    paymentForm.bank = paymentData.value.bank || "";
+    paymentForm.accountName = paymentData.value.accountName || "";
+    paymentForm.accountNumber = paymentData.value.accountNumber || "";
+  } catch (error) {
+    paymentVisible.value = false;
+    message.error(error?.message || "Không thể tải thông tin thanh toán");
+  } finally {
+    paymentLoading.value = false;
+  }
+};
+
+const closePaymentDetail = () => {
+  paymentVisible.value = false;
+  resetPaymentState();
+};
+
+const submitCompletePayment = async () => {
+  if (!paymentData.value?.id || !paymentData.value?.idApplication) {
+    message.error("Không có dữ liệu thanh toán để xác nhận");
+    return;
+  }
+
+  if (!paymentForm.bank.trim() || !paymentForm.accountName.trim() || !paymentForm.accountNumber.trim()) {
+    message.warning("Vui lòng nhập đầy đủ thông tin thanh toán");
+    return;
+  }
+
+  completePaymentLoading.value = true;
+
+  try {
+    const { data, error } = await adminApplication.completePayment({
+      body: {
+        id: Number(paymentData.value.id),
+        idApplication: Number(paymentData.value.idApplication),
+        payDate: dayjs(paymentForm.payDate || dayjs()).toISOString(),
+        bank: paymentForm.bank.trim(),
+        accountName: paymentForm.accountName.trim(),
+        accountNumber: paymentForm.accountNumber.trim(),
+      },
+    });
+
+    if (error.value || data.value?.success === false) {
+      throw new Error(error.value?.data?.message || data.value?.message || "Xác nhận thanh toán thất bại");
+    }
+
+    message.success(data.value?.message || "Xác nhận thanh toán thành công");
+    closePaymentDetail();
+    await refreshApplications();
+    if (detailVisible.value && detailData.value?.id === selectedRecord.value?.id) {
+      await openDetail(selectedRecord.value.id);
+    }
+  } catch (error) {
+    message.error(error?.message || "Xác nhận thanh toán thất bại");
+  } finally {
+    completePaymentLoading.value = false;
+  }
 };
 
 const approveItem = async (record, keepModal = false) => {

@@ -152,7 +152,7 @@
                     </div>
 
                     <div class="w-full lg:w-64">
-                      <input :id="`document-upload-${index}`" type="file" class="block w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-600 file:mr-3 file:rounded-md file:border-0 file:bg-sky-600 file:px-3 file:py-2 file:text-sm file:font-medium file:text-white" :disabled="document.uploading || submitting" accept=".pdf,.png,.jpg,.jpeg,.webp" multiple @change="event => handleDocumentUpload(index, event)" />
+                      <input :id="`document-upload-${index}`" type="file" class="block w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-600 file:mr-3 file:rounded-md file:border-0 file:bg-sky-600 file:px-3 file:py-2 file:text-sm file:font-medium file:text-white" :disabled="document.uploading || isProcessing" accept=".pdf,.png,.jpg,.jpeg,.webp" multiple @change="event => handleDocumentUpload(index, event)" />
                     </div>
                   </div>
 
@@ -184,9 +184,9 @@
             </section>
 
             <div class="flex flex-wrap justify-end gap-3 border-t border-slate-100 pt-6">
-              <a-button class="min-w-28" :disabled="submitting" @click="saveDraft">Lưu</a-button>
-              <a-button class="min-w-28" danger ghost :disabled="submitting" @click="handleCancel">Hủy</a-button>
-              <a-button type="primary" class="min-w-32" html-type="submit" :loading="submitting" :disabled="status.isClosed || hasUploadingDocuments">Nộp hồ sơ</a-button>
+              <a-button class="min-w-28" :loading="saveLoading" :disabled="isProcessing" @click="saveDraft">Lưu</a-button>
+              <a-button class="min-w-28" danger ghost :disabled="isProcessing" @click="handleCancel">Hủy</a-button>
+              <a-button type="primary" class="min-w-32" html-type="submit" :loading="submitLoading" :disabled="status.isClosed || hasUploadingDocuments || isProcessing">Nộp hồ sơ</a-button>
             </div>
           </a-form>
         </section>
@@ -239,7 +239,8 @@ const { examUser, applicationUser, s3 } = useApi();
 const formRef = ref();
 const examDetail = ref(null);
 const loading = ref(true);
-const submitting = ref(false);
+const saveLoading = ref(false);
+const submitLoading = ref(false);
 const loadError = ref("");
 const documentUploads = ref([]);
 
@@ -332,6 +333,7 @@ const remainingText = computed(() => {
 });
 
 const hasUploadingDocuments = computed(() => documentUploads.value.some(item => item.uploading));
+const isProcessing = computed(() => saveLoading.value || submitLoading.value);
 
 const formatDateTime = value => {
   if (!value) return "-";
@@ -476,9 +478,30 @@ const clearDraftStorage = () => {
   localStorage.removeItem(draftStorageKey.value);
 };
 
-const saveDraft = () => {
+const saveDraft = async () => {
+  if (hasUploadingDocuments.value) {
+    message.warning("Vui lòng chờ upload hồ sơ hoàn tất");
+    return;
+  }
+
   saveDraftSnapshot();
-  message.success("Đã lưu thông tin tạm thời");
+  saveLoading.value = true;
+
+  try {
+    const { data, error } = await applicationUser.post({
+      body: buildPayload(),
+    });
+
+    if (error.value || data.value?.success === false) {
+      throw new Error(error.value?.data?.message || data.value?.message || "Lưu hồ sơ thất bại");
+    }
+
+    message.success(data.value?.message || "Lưu hồ sơ thành công");
+  } catch (error) {
+    message.error(error?.message || "Lưu hồ sơ thất bại");
+  } finally {
+    saveLoading.value = false;
+  }
 };
 
 const clearDocument = index => {
@@ -577,12 +600,12 @@ const handleSubmit = async () => {
     return;
   }
 
-  submitting.value = true;
+  submitLoading.value = true;
 
   try {
     ensureRequiredDocumentsUploaded();
 
-    const { data, error } = await applicationUser.post({
+    const { data, error } = await applicationUser.putByRest("submit", {
       body: buildPayload(),
     });
 
@@ -596,7 +619,7 @@ const handleSubmit = async () => {
   } catch (error) {
     message.error(error?.message || "Nộp hồ sơ thất bại");
   } finally {
-    submitting.value = false;
+    submitLoading.value = false;
   }
 };
 

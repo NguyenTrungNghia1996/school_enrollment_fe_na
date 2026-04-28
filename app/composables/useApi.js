@@ -30,10 +30,19 @@ export const useApi = () => {
     ethnicityUser: useCrudApiUser("/api/ethnicity"),
     provinceUser: useCrudApiUser("/api/province"),
     communeUser: useCrudApiUser("/api/commune"),
-    examUser: {
-      ...useCrudApiUser("/api/exam"),
+    examUser: useCrudApiUser("/api/exam"),
+    applicationUser: {
+      ...useCrudApiUser("/api/application"),
+      getDetail(options) {
+        return userRequest.get("/api/admin/application/detail", options ?? {});
+      },
+      getQr(options) {
+        return userRequest.get("/api/application/qr", options ?? {});
+      },
+      confirmPayment(options) {
+        return userRequest.put("/api/application/confirmPayment", options ?? {});
+      },
     },
-    applicationUser: useCrudApiUser("/api/application"),
     authAdmin: {
       login(options) {
         return adminRequest.post("/api/admin/login", options ?? {});
@@ -48,6 +57,11 @@ export const useApi = () => {
     adminUser: useCrudApiAdmin("/api/users"),
     adminSubject: useCrudApiAdmin("/api/subject"),
     adminEnrollment: useCrudApiAdmin("/api/exam"),
+    adminPayment: {
+      getDetail(options) {
+        return adminRequest.get("/api/admin/payment/detail", options ?? {});
+      },
+    },
     adminApplication: {
       get(options) {
         return adminRequest.get("/api/admin/application", options ?? {});
@@ -59,10 +73,13 @@ export const useApi = () => {
         return adminRequest.get("/api/admin/application/detail", options ?? {});
       },
       approve(options) {
-        return adminRequest.get("/api/admin/application/approve", options ?? {});
+        return adminRequest.put("/api/admin/application/approve", options ?? {});
       },
       reject(options) {
-        return adminRequest.get("/api/admin/application/reject", options ?? {});
+        return adminRequest.put("/api/admin/application/reject", options ?? {});
+      },
+      completePayment(options) {
+        return adminRequest.put("/api/admin/application/completePayment", options ?? {});
       },
     },
   };
