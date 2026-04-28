@@ -30,9 +30,7 @@ export const useApi = () => {
     ethnicityUser: useCrudApiUser("/api/ethnicity"),
     provinceUser: useCrudApiUser("/api/province"),
     communeUser: useCrudApiUser("/api/commune"),
-    examUser: {
-      ...useCrudApiUser("/api/exam"),
-    },
+    examUser: useCrudApiUser("/api/exam"),
     applicationUser: useCrudApiUser("/api/application"),
     authAdmin: {
       login(options) {
