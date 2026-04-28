@@ -36,6 +36,12 @@ export const useApi = () => {
       getDetail(options) {
         return userRequest.get("/api/admin/application/detail", options ?? {});
       },
+      getQr(options) {
+        return userRequest.get("/api/application/qr", options ?? {});
+      },
+      confirmPayment(options) {
+        return userRequest.put("/api/application/confirmPayment", options ?? {});
+      },
     },
     authAdmin: {
       login(options) {
@@ -62,10 +68,10 @@ export const useApi = () => {
         return adminRequest.get("/api/admin/application/detail", options ?? {});
       },
       approve(options) {
-        return adminRequest.get("/api/admin/application/approve", options ?? {});
+        return adminRequest.put("/api/admin/application/approve", options ?? {});
       },
       reject(options) {
-        return adminRequest.get("/api/admin/application/reject", options ?? {});
+        return adminRequest.put("/api/admin/application/reject", options ?? {});
       },
     },
   };

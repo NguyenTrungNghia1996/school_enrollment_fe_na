@@ -154,6 +154,85 @@
 
           <div v-else class="rounded-xl border border-dashed border-slate-300 bg-slate-50 px-4 py-6 text-sm text-slate-500">Hồ sơ này chưa có tài liệu đính kèm.</div>
         </div>
+
+        <div class="flex justify-end gap-2 border-t border-slate-100 pt-4">
+          <a-button @click="closeDetail">Đóng</a-button>
+          <!-- <a-button :loading="saveLoading" @click="saveApplication">Lưu</a-button> -->
+          <a-button v-if="showPaymentAction" type="primary" :loading="qrLoading" @click="openPaymentModal">Thanh toán ngay</a-button>
+          <a-button v-else-if="showSubmitAction" type="primary" :loading="submitLoading" @click="submitApplication">Nộp hồ sơ</a-button>
+        </div>
+      </div>
+    </a-modal>
+
+    <a-modal v-model:open="paymentVisible" title="Thanh toán hồ sơ" :width="960" :footer="null" @cancel="closePaymentModal">
+      <div v-if="qrLoading" class="py-12 text-center">
+        <a-spin size="large" />
+      </div>
+
+      <div v-else-if="qrData" class="grid gap-6 lg:grid-cols-[380px_minmax(0,1fr)]">
+        <section class="rounded-3xl border border-slate-200 bg-slate-50 p-5">
+          <h3 class="text-lg font-bold text-slate-900">Thông tin chuyển khoản</h3>
+
+          <div class="mt-5 overflow-hidden rounded-2xl border border-slate-200 bg-white p-4">
+            <img :src="qrData.url" :alt="`QR thanh toán ${qrData.applicationCode}`" class="mx-auto h-auto w-full max-w-[280px]" />
+          </div>
+
+          <p class="mt-4 text-sm leading-6 text-slate-500">Quét mã QR bằng ứng dụng ngân hàng để thanh toán. Vui lòng giữ nguyên nội dung chuyển khoản để hệ thống đối soát chính xác.</p>
+
+          <div class="mt-4 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3">
+            <div class="text-xs uppercase tracking-[0.15em] text-amber-600">Nội dung chuyển khoản</div>
+            <div class="mt-2 text-center text-xl font-bold tracking-[0.35em] text-amber-700">{{ qrData.code || "-" }}</div>
+          </div>
+
+          <div class="mt-4 space-y-3">
+            <div class="rounded-2xl bg-white px-4 py-3">
+              <div class="text-xs uppercase tracking-[0.15em] text-slate-400">Ngân hàng</div>
+              <div class="mt-2 font-semibold text-slate-800">{{ qrData.bank || "-" }}</div>
+            </div>
+            <div class="rounded-2xl bg-white px-4 py-3">
+              <div class="text-xs uppercase tracking-[0.15em] text-slate-400">Số tài khoản</div>
+              <div class="mt-2 font-semibold text-slate-800">{{ qrData.accountNo || "-" }}</div>
+            </div>
+            <div class="rounded-2xl bg-white px-4 py-3">
+              <div class="text-xs uppercase tracking-[0.15em] text-slate-400">Chủ tài khoản</div>
+              <div class="mt-2 font-semibold uppercase text-slate-800">{{ qrData.accountName || "-" }}</div>
+            </div>
+          </div>
+        </section>
+
+        <section class="rounded-3xl border border-slate-200 bg-white p-5">
+          <h3 class="text-lg font-bold text-slate-900">Thông tin đợt tuyển sinh / kỳ thi</h3>
+
+          <div class="mt-5 overflow-hidden rounded-2xl border border-slate-200">
+            <div class="grid grid-cols-[160px_1fr] border-b border-slate-200">
+              <div class="bg-slate-50 px-4 py-3 text-sm font-medium text-slate-500">Tên đợt</div>
+              <div class="px-4 py-3 text-sm font-semibold text-slate-900">{{ qrData.examName || "-" }}</div>
+            </div>
+            <div class="grid grid-cols-[160px_1fr] border-b border-slate-200">
+              <div class="bg-slate-50 px-4 py-3 text-sm font-medium text-slate-500">Mã hồ sơ</div>
+              <div class="px-4 py-3 text-sm font-semibold text-slate-900">{{ qrData.applicationCode || "-" }}</div>
+            </div>
+            <div class="grid grid-cols-[160px_1fr] border-b border-slate-200">
+              <div class="bg-slate-50 px-4 py-3 text-sm font-medium text-slate-500">Tên thí sinh</div>
+              <div class="px-4 py-3 text-sm font-semibold text-slate-900">{{ qrData.fullName || "-" }}</div>
+            </div>
+            <div class="grid grid-cols-[160px_1fr] border-b border-slate-200">
+              <div class="bg-slate-50 px-4 py-3 text-sm font-medium text-slate-500">Lệ phí</div>
+              <div class="px-4 py-3 text-sm font-semibold text-slate-900">{{ formatCurrency(qrData.fee) }}</div>
+            </div>
+            <div class="grid grid-cols-[160px_1fr]">
+              <div class="bg-emerald-50 px-4 py-3 text-sm font-bold text-emerald-700">Tổng thanh toán</div>
+              <div class="px-4 py-3 text-base font-bold text-emerald-700">{{ formatCurrency(qrData.fee) }}</div>
+            </div>
+          </div>
+
+          <div class="mt-6 rounded-2xl bg-slate-50 px-4 py-4 text-sm leading-6 text-slate-500">Sau khi chuyển khoản thành công, hồ sơ sẽ được nhà trường xác nhận theo quy trình đối soát.</div>
+
+          <div class="mt-6 flex justify-end gap-3">
+            <a-button class="min-w-32" @click="closePaymentModal">Quay lại</a-button>
+            <a-button type="primary" class="min-w-40" :loading="confirmPaymentLoading" @click="confirmPayment">Xác nhận thanh toán</a-button>
+          </div>
+        </section>
       </div>
     </a-modal>
   </div>
@@ -181,6 +260,12 @@ const detailVisible = ref(false);
 const detailLoading = ref(false);
 const detailData = ref(null);
 const selectedRecord = ref(null);
+const saveLoading = ref(false);
+const submitLoading = ref(false);
+const paymentVisible = ref(false);
+const qrLoading = ref(false);
+const qrData = ref(null);
+const confirmPaymentLoading = ref(false);
 
 const pagination = reactive({
   current: 1,
@@ -200,7 +285,7 @@ const columns = [
   { title: "Mã hồ sơ", dataIndex: "applicationCode", key: "applicationCode", width: 150 },
   { title: "Kỳ tuyển sinh", dataIndex: "examName", key: "examName", ellipsis: true },
   { title: "Họ tên", dataIndex: "fullname", key: "fullname", ellipsis: true },
-  { title: "Trạng thái", dataIndex: "statusName", key: "statusName", width: 140, align: "center" },
+  { title: "Trạng thái", dataIndex: "statusName", key: "statusName", width: 200, align: "center" },
   { title: "Thao tác", key: "action", width: 140, align: "center" },
 ];
 
@@ -244,6 +329,9 @@ const normalizedDocuments = computed(() => {
     })
     .filter(document => document.links.length);
 });
+
+const showSubmitAction = computed(() => Number(detailData.value?.idStatus) < 2);
+const showPaymentAction = computed(() => Number(detailData.value?.idStatus) === 3);
 
 watch(
   () => applicationResponse.value,
@@ -317,6 +405,14 @@ const handlePageChange = (page, pageSize) => {
 const formatDate = value => {
   if (!value) return "-";
   return dayjs(value).format("DD/MM/YYYY");
+};
+
+const formatCurrency = value => {
+  if (value === undefined || value === null) return "0 VND";
+  return new Intl.NumberFormat("vi-VN", {
+    style: "currency",
+    currency: "VND",
+  }).format(value);
 };
 
 const formatGender = value => {
@@ -400,6 +496,37 @@ const getFileType = link => {
   return "unsupported";
 };
 
+const buildApplicationPayload = () => {
+  if (!detailData.value) {
+    return null;
+  }
+
+  return {
+    id: detailData.value.id,
+    idExam: Number(detailData.value.idExam),
+    fullName: (detailData.value.fullName || detailData.value.fullname || "").trim(),
+    dateOfBirth: detailData.value.dateOfBirth,
+    idProvince: Number(detailData.value.idProvince),
+    identityNumber: (detailData.value.identityNumber || "").trim(),
+    identityIssueDate: detailData.value.identityIssueDate,
+    identityIssuePlace: (detailData.value.identityIssuePlace || "").trim(),
+    idEthnicity: Number(detailData.value.idEthnicity),
+    gender: detailData.value.gender,
+    idCommune: Number(detailData.value.idCommune),
+    idPermanentProvince: Number(detailData.value.idPermanentProvince),
+    permanentAddress: (detailData.value.permanentAddress || "").trim(),
+    phoneNumber: (detailData.value.phoneNumber || "").trim(),
+    idCurrentCommune: Number(detailData.value.idCurrentCommune),
+    idCurrentProvince: Number(detailData.value.idCurrentProvince),
+    currentAddress: (detailData.value.currentAddress || "").trim(),
+    note: detailData.value.note,
+    documents: normalizedDocuments.value.map(document => ({
+      idExamDocument: Number(document.idExamDocument),
+      url: document.links.join(","),
+    })),
+  };
+};
+
 const openDetail = async record => {
   selectedRecord.value = record;
   detailVisible.value = true;
@@ -429,6 +556,147 @@ const closeDetail = () => {
   detailLoading.value = false;
   detailData.value = null;
   selectedRecord.value = null;
+  saveLoading.value = false;
+  submitLoading.value = false;
+  paymentVisible.value = false;
+  qrLoading.value = false;
+  qrData.value = null;
+  confirmPaymentLoading.value = false;
+};
+
+// const saveApplication = async () => {
+//   const payload = buildApplicationPayload();
+//   if (!payload) {
+//     message.error("Không có dữ liệu hồ sơ để lưu");
+//     return;
+//   }
+//   saveLoading.value = true;
+//   try {
+//     const { data, error } = await applicationUser.post({
+//       body: payload,
+//     });
+//     if (error.value || data.value?.success === false) {
+//       throw new Error(error.value?.data?.message || data.value?.message || "Lưu hồ sơ thất bại");
+//     }
+//     message.success(data.value?.message || "Lưu hồ sơ thành công");
+//     await refreshApplications();
+//     if (selectedRecord.value?.id) {
+//       await openDetail(selectedRecord.value);
+//     }
+//   } catch (error) {
+//     message.error(error?.message || "Lưu hồ sơ thất bại");
+//   } finally {
+//     saveLoading.value = false;
+//   }
+// };
+
+const submitApplication = async () => {
+  const payload = buildApplicationPayload();
+  if (!payload) {
+    message.error("Không có dữ liệu hồ sơ để nộp");
+    return;
+  }
+
+  submitLoading.value = true;
+
+  try {
+    const { data, error } = await applicationUser.putByRest("submit", {
+      body: payload,
+    });
+
+    if (error.value || data.value?.success === false) {
+      throw new Error(error.value?.data?.message || data.value?.message || "Nộp hồ sơ thất bại");
+    }
+
+    message.success(data.value?.message || "Nộp hồ sơ thành công");
+    await refreshApplications();
+    if (selectedRecord.value?.id) {
+      await openDetail(selectedRecord.value);
+    }
+  } catch (error) {
+    message.error(error?.message || "Nộp hồ sơ thất bại");
+  } finally {
+    submitLoading.value = false;
+  }
+};
+
+const openPaymentModal = async () => {
+  if (!detailData.value?.id) {
+    message.error("Không xác định được hồ sơ thanh toán");
+    return;
+  }
+
+  qrLoading.value = true;
+  qrData.value = null;
+  paymentVisible.value = true;
+
+  try {
+    const { data, error } = await applicationUser.getQr({
+      params: { id: detailData.value.id },
+    });
+
+    if (error.value || data.value?.success === false || !data.value?.data) {
+      throw new Error(error.value?.data?.message || data.value?.message || "Không tải được thông tin thanh toán");
+    }
+
+    qrData.value = data.value.data;
+  } catch (error) {
+    paymentVisible.value = false;
+    message.error(error?.message || "Không tải được thông tin thanh toán");
+  } finally {
+    qrLoading.value = false;
+  }
+};
+
+const closePaymentModal = () => {
+  paymentVisible.value = false;
+  qrLoading.value = false;
+  qrData.value = null;
+  confirmPaymentLoading.value = false;
+};
+
+const confirmPayment = async () => {
+  if (!detailData.value?.id) {
+    message.error("Không xác định được hồ sơ thanh toán");
+    return;
+  }
+
+  if (!qrData.value) {
+    message.error("Không có thông tin thanh toán để xác nhận");
+    return;
+  }
+
+  if (!qrData.value.code) {
+    message.error("Không có nội dung chuyển khoản để xác nhận");
+    return;
+  }
+
+  confirmPaymentLoading.value = true;
+
+  try {
+    const { data, error } = await applicationUser.confirmPayment({
+      body: {
+        idApplication: Number(detailData.value.id),
+        amount: Number(qrData.value.fee || 0),
+        transCode: String(qrData.value.code).trim(),
+      },
+    });
+
+    if (error.value || data.value?.success === false) {
+      throw new Error(error.value?.data?.message || data.value?.message || "Xác nhận thanh toán thất bại");
+    }
+
+    message.success(data.value?.message || "Xác nhận thanh toán thành công");
+    closePaymentModal();
+    await refreshApplications();
+    if (selectedRecord.value?.id) {
+      await openDetail(selectedRecord.value);
+    }
+  } catch (error) {
+    message.error(error?.message || "Xác nhận thanh toán thất bại");
+  } finally {
+    confirmPaymentLoading.value = false;
+  }
 };
 
 useHead({

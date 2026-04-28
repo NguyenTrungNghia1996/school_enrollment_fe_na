@@ -75,7 +75,7 @@
           </div>
           <div class="rounded-xl border border-slate-200 bg-slate-50 px-4 py-3">
             <div class="text-xs uppercase tracking-[0.2em] text-slate-400">Kỳ tuyển sinh</div>
-            <div class="mt-2 font-bold text-slate-900">#{{ detailData.idExam }}</div>
+            <div class="mt-2 font-bold text-slate-900">{{ detailData.examName || `#${detailData.idExam}` }}</div>
           </div>
           <div class="rounded-xl border border-slate-200 bg-slate-50 px-4 py-3">
             <div class="text-xs uppercase tracking-[0.2em] text-slate-400">Trạng thái</div>
@@ -96,14 +96,14 @@
           <a-descriptions-item label="Ngày cấp CCCD">{{ formatDate(detailData.identityIssueDate) }}</a-descriptions-item>
           <a-descriptions-item label="Nơi cấp CCCD">{{ detailData.identityIssuePlace || "-" }}</a-descriptions-item>
           <a-descriptions-item label="Giới tính">{{ formatGender(detailData.gender) }}</a-descriptions-item>
-          <a-descriptions-item label="Dân tộc">#{{ detailData.idEthnicity || "-" }}</a-descriptions-item>
-          <a-descriptions-item label="Nơi sinh">#{{ detailData.idProvince || "-" }}</a-descriptions-item>
-          <a-descriptions-item label="Tỉnh thường trú">#{{ detailData.idPermanentProvince || "-" }}</a-descriptions-item>
-          <a-descriptions-item label="Phường/xã thường trú">#{{ detailData.idCommune || "-" }}</a-descriptions-item>
+          <a-descriptions-item label="Dân tộc">{{ detailData.ethnicityName || `#${detailData.idEthnicity || "-"}` }}</a-descriptions-item>
+          <a-descriptions-item label="Nơi sinh">{{ detailData.provinceName || `#${detailData.idProvince || "-"}` }}</a-descriptions-item>
+          <a-descriptions-item label="Tỉnh thường trú">{{ detailData.permanentProvinceName || `#${detailData.idPermanentProvince || "-"}` }}</a-descriptions-item>
+          <a-descriptions-item label="Phường/xã thường trú">{{ detailData.permanentCommuneName || `#${detailData.idCommune || "-"}` }}</a-descriptions-item>
           <a-descriptions-item label="Địa chỉ thường trú" :span="2">{{ detailData.permanentAddress || "-" }}</a-descriptions-item>
           <a-descriptions-item label="Số điện thoại">{{ detailData.phoneNumber || "-" }}</a-descriptions-item>
-          <a-descriptions-item label="Tỉnh hiện tại">#{{ detailData.idCurrentProvince || "-" }}</a-descriptions-item>
-          <a-descriptions-item label="Phường/xã hiện tại">#{{ detailData.idCurrentCommune || "-" }}</a-descriptions-item>
+          <a-descriptions-item label="Tỉnh hiện tại">{{ detailData.currentProvinceName || `#${detailData.idCurrentProvince || "-"}` }}</a-descriptions-item>
+          <a-descriptions-item label="Phường/xã hiện tại">{{ detailData.currentCommuneName || `#${detailData.idCurrentCommune || "-"}` }}</a-descriptions-item>
           <a-descriptions-item label="Địa chỉ hiện tại" :span="2">{{ detailData.currentAddress || "-" }}</a-descriptions-item>
           <a-descriptions-item label="Ghi chú" :span="2">{{ detailData.note || "-" }}</a-descriptions-item>
         </a-descriptions>
@@ -210,14 +210,41 @@ const dataSource = computed(() => {
   return Array.isArray(applicationResponse.value?.data?.items) ? applicationResponse.value.data.items : [];
 });
 
+const normalizeApplicationDetail = (detail, fallbackRecord = null) => {
+  if (!detail || typeof detail !== "object") {
+    return null;
+  }
+
+  return {
+    ...detail,
+    applicationCode: detail.applicationCode || fallbackRecord?.applicationCode || null,
+    statusName: detail.statusName || fallbackRecord?.statusName || null,
+    fullName: detail.fullName || detail.fullname || fallbackRecord?.fullName || fallbackRecord?.fullname || null,
+    examName: detail.examName || fallbackRecord?.examName || null,
+    documents: Array.isArray(detail.documents) ? detail.documents : [],
+  };
+};
+
 const normalizedDocuments = computed(() => {
   const documents = Array.isArray(detailData.value?.documents) ? detailData.value.documents : [];
 
-  return documents.map((document, index) => ({
-    key: `${document.idExamDocument}-${index}`,
-    idExamDocument: document.idExamDocument,
-    links: splitDocumentLinks(document.url),
-  }));
+  return documents
+    .map((document, index) => {
+      if (typeof document === "string") {
+        return {
+          key: `document-${index}`,
+          idExamDocument: index + 1,
+          links: splitDocumentLinks(document),
+        };
+      }
+
+      return {
+        key: `${document?.idExamDocument || document?.id || "document"}-${index}`,
+        idExamDocument: document?.idExamDocument || document?.id || index + 1,
+        links: splitDocumentLinks(document?.url || document?.fileUrl || document?.link || document?.path),
+      };
+    })
+    .filter(document => document.links.length);
 });
 
 watch(
@@ -294,10 +321,7 @@ const getStatusColor = record => {
 };
 
 const isActionDisabled = record => {
-  const normalized = String(record?.statusName || "")
-    .trim()
-    .toLowerCase();
-  return normalized.includes("duyệt") || normalized.includes("từ chối") || normalized.includes("hủy");
+  return Number(record?.idStatus) !== 2;
 };
 
 const getFileName = link => {
@@ -361,11 +385,7 @@ const openDetail = async recordOrId => {
       throw new Error(error.value?.data?.message || data.value?.message || "Không thể tải thông tin chi tiết");
     }
 
-    detailData.value = {
-      ...data.value.data,
-      applicationCode: data.value.data.applicationCode || selectedRecord.value?.applicationCode || null,
-      statusName: data.value.data.statusName || selectedRecord.value?.statusName || null,
-    };
+    detailData.value = normalizeApplicationDetail(data.value.data, selectedRecord.value);
   } catch (error) {
     detailVisible.value = false;
     message.error(error?.message || "Không thể tải thông tin chi tiết");
