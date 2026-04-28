@@ -16,8 +16,14 @@
           </template>
           <template v-if="column.key === 'dates'">
             <div class="text-xs">
-              <div><span class="text-gray-400">Từ:</span> {{ formatDate(record.startDate) }}</div>
-              <div><span class="text-gray-400">Đến:</span> {{ formatDate(record.endDate) }}</div>
+              <div>
+                <span class="text-gray-400">Từ:</span>
+                {{ formatDate(record.startDate) }}
+              </div>
+              <div>
+                <span class="text-gray-400">Đến:</span>
+                {{ formatDate(record.endDate) }}
+              </div>
             </div>
           </template>
           <template v-if="column.key === 'fee'">
@@ -47,11 +53,7 @@
           </a-form-item>
 
           <a-form-item label="Khoảng thời gian" name="dateRange" class="md:col-span-2">
-            <a-range-picker
-              v-model:value="formState.dateRange"
-              show-time
-              class="w-full"
-              :placeholder="['Chọn ngày bắt đầu', 'Chọn ngày kết thúc']" />
+            <a-range-picker v-model:value="formState.dateRange" format="DD/MM/YYYY" class="w-full" :placeholder="['Chọn ngày bắt đầu', 'Chọn ngày kết thúc']" />
           </a-form-item>
 
           <a-form-item label="Lệ phí (VNĐ)" name="fee">
@@ -66,29 +68,27 @@
             <AdminSelectSubject v-model="formState.subjectIds" multiple label="Danh sách môn thi" placeholder="Chọn các môn thi" />
           </div>
 
-          <div class="md:col-span-2 mt-2">
-            <div class="flex items-center justify-between mb-2">
+          <div class="mt-2 md:col-span-2">
+            <div class="mb-2 flex items-center justify-between">
               <span class="font-medium text-gray-700">Hồ sơ yêu cầu</span>
               <a-button type="dashed" size="small" @click="addDocument" html-type="button">
                 <template #icon><PlusOutlined /></template>
                 Thêm hồ sơ
               </a-button>
             </div>
-            
-            <div v-if="formState.documents.length === 0" class="text-center py-4 bg-gray-50 rounded border border-dashed border-gray-300 text-gray-400 italic text-xs">
-              Chưa có hồ sơ nào được yêu cầu
-            </div>
 
-            <div v-for="(doc, index) in formState.documents" :key="index" class="flex items-start gap-2 mb-2 bg-slate-50 p-2 rounded relative group">
-              <a-form-item :name="['documents', index, 'documentName']" :rules="{ required: true, message: 'Nhập tên hồ sơ', trigger: 'blur' }" class="flex-1 mb-0">
+            <div v-if="formState.documents.length === 0" class="rounded border border-dashed border-gray-300 bg-gray-50 py-4 text-center text-xs italic text-gray-400">Chưa có hồ sơ nào được yêu cầu</div>
+
+            <div v-for="(doc, index) in formState.documents" :key="index" class="group relative mb-2 flex items-start gap-2 rounded bg-slate-50 p-2">
+              <a-form-item :name="['documents', index, 'documentName']" :rules="{ required: true, message: 'Nhập tên hồ sơ', trigger: 'blur' }" class="mb-0 flex-1">
                 <a-input v-model:value="doc.documentName" placeholder="Tên loại hồ sơ (vd: Giấy khai sinh)" size="small" />
               </a-form-item>
-              
-              <div class="flex items-center h-8 px-2">
+
+              <div class="flex h-8 items-center px-2">
                 <a-checkbox v-model:checked="doc.isRequired" class="text-xs">Bắt buộc</a-checkbox>
               </div>
 
-              <a-button type="text" danger size="small" @click="removeDocument(index)" class="opacity-0 group-hover:opacity-100 transition-opacity" html-type="button">
+              <a-button type="text" danger size="small" @click="removeDocument(index)" class="opacity-0 transition-opacity group-hover:opacity-100" html-type="button">
                 <template #icon><DeleteOutlined /></template>
               </a-button>
             </div>

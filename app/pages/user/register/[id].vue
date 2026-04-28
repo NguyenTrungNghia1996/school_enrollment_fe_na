@@ -198,15 +198,25 @@
                   </div>
 
                   <div v-else-if="document.files.length" class="mt-4 rounded-xl border border-emerald-200 bg-white px-4 py-4">
-                    <div class="mt-2 rounded-lg border border-slate-200 bg-white px-4 py-3 text-sm text-slate-700">
-                      <template v-for="(link, index) in document.files" :key="link.url">
-                        <BaseImagePreviewLink v-if="getFileType(link.url) === 'image'" :src="link.url" />
-                        <BasePdfPreviewLink v-else-if="getFileType(link.url) === 'pdf'" :src="link.url" />
-                        <span v-else class="text-sm text-slate-700">
-                          {{ getDisplayName(link.url) }}
-                        </span>
-                        <span v-if="index < document.files.length - 1" class="text-slate-400">,</span>
-                      </template>
+                    <div class="space-y-3 rounded-lg border border-slate-200 bg-white px-4 py-3 text-sm text-slate-700">
+                      <div v-for="(link, fileIndex) in document.files" :key="link.url" class="flex items-center justify-between gap-3">
+                        <div class="min-w-0 flex-1 break-all">
+                          <BaseImagePreviewLink v-if="getFileType(link.url) === 'image'" :src="link.url" />
+                          <BasePdfPreviewLink v-else-if="getFileType(link.url) === 'pdf'" :src="link.url" />
+                          <span v-else class="text-sm text-slate-700">
+                            {{ getDisplayName(link.url) }}
+                          </span>
+                        </div>
+                        <a-button type="link" danger size="small" :disabled="isProcessing" @click="removeDocumentFile(index, fileIndex)">
+                          Xóa
+                        </a-button>
+                      </div>
+                    </div>
+
+                    <div v-if="document.files.length > 1" class="mt-3 flex justify-end">
+                      <a-button danger ghost size="small" :disabled="isProcessing" @click="clearDocument(index)">
+                        Xóa tất cả
+                      </a-button>
                     </div>
                   </div>
 

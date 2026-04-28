@@ -216,6 +216,7 @@
 </template>
 
 <script setup>
+import DateBody from "ant-design-vue/es/vc-picker/panels/DatePanel/DateBody";
 import dayjs from "dayjs";
 
 definePageMeta({
@@ -699,7 +700,7 @@ const submitReject = async () => {
 
   try {
     const { data, error } = await adminApplication.reject({
-      params: {
+      body: {
         id: selectedRecord.value.id,
         note: rejectNote.value.trim(),
       },

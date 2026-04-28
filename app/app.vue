@@ -30,6 +30,11 @@ const theme = ref({
     colorWarning: "#F59E0B", // Màu vàng cam – cảnh báo
     colorError: "#DC2626", // Màu đỏ – trạng thái lỗi
     colorInfo: "#0057A0",
+    // colorPrimary: "#3ec7c7", // Màu xanh ngọc – màu chủ đạo
+    // colorSuccess: "#7AC943", // Màu xanh lá – thành công
+    // colorWarning: "#F59E0B", // Màu vàng cam – cảnh báo
+    // colorError: "#DC2626", // Màu đỏ – lỗi
+    // colorInfo: "#3ec7c7", // Cùng màu chủ đạo
     borderRadius: 8, // Bo góc đồng nhất cho các component (nút, input, card)
     fontFamily: "Roboto, sans-serif",
   },
