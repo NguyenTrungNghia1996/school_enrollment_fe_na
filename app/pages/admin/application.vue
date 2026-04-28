@@ -91,8 +91,11 @@
             </div>
           </div>
           <div class="rounded-xl border border-slate-200 bg-slate-50 px-4 py-3">
-            <div class="text-xs uppercase tracking-[0.2em] text-slate-400">QR</div>
-            <div class="mt-2 break-all text-sm text-slate-700">{{ detailData.urlQr || "-" }}</div>
+            <div class="text-xs uppercase tracking-[0.2em] text-slate-400">Ảnh 3x4</div>
+            <div class="mt-2">
+              <a-image v-if="detailData.avatar" :src="detailData.avatar" :width="72" class="overflow-hidden rounded-lg" :preview="{ src: detailData.avatar }" />
+              <span v-else class="text-sm text-slate-500">-</span>
+            </div>
           </div>
         </div>
 
