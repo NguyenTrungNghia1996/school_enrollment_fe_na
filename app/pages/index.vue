@@ -65,14 +65,7 @@
                   </div>
                 </div>
                 <div class="mt-8">
-                  <a-button
-                    block
-                    type="primary"
-                    class="h-11 rounded-lg bg-primary font-bold hover:bg-primary/90"
-                    :disabled="exam.isClosed"
-                    @click="handleRegistration(exam)">
-                    ĐĂNG KÝ NGAY
-                  </a-button>
+                  <a-button block type="primary" class="h-11 rounded-lg bg-primary font-bold hover:bg-primary/90" :disabled="exam.isClosed" @click="handleRegistration(exam)">ĐĂNG KÝ NGAY</a-button>
                 </div>
               </article>
             </div>
@@ -84,17 +77,12 @@
             <div v-if="!loading && !exams.length" class="rounded-2xl border border-dashed border-slate-300 bg-slate-50 px-6 py-10 text-center text-slate-500">Chưa có kỳ khảo thí nào để hiển thị.</div>
 
             <div v-if="examsExpanded && examTotal > expandedPageSize" class="flex justify-center pt-8">
-              <a-pagination
-                v-model:current="pageIndex"
-                :total="examTotal"
-                :page-size="expandedPageSize"
-                :show-size-changer="false"
-                @change="handleExamPageChange" />
+              <a-pagination v-model:current="pageIndex" :total="examTotal" :page-size="expandedPageSize" :show-size-changer="false" @change="handleExamPageChange" />
             </div>
           </section>
 
           <!-- Notifications Section -->
-          <section>
+          <!-- <section>
             <div class="mb-8 flex items-center justify-between border-b border-slate-200 pb-4">
               <h2 class="flex items-center gap-3 text-2xl font-bold text-slate-800">
                 <Icon name="lucide:megaphone" class="text-primary" />
@@ -112,7 +100,7 @@
                 </div>
               </div>
             </div>
-          </section>
+          </section> -->
         </div>
 
         <!-- Right: Sidebar -->
@@ -145,7 +133,7 @@
           </div>
 
           <!-- Statistics -->
-          <div class="rounded-2xl border border-slate-200 bg-white p-8">
+          <!-- <div class="rounded-2xl border border-slate-200 bg-white p-8">
             <h3 class="mb-6 text-lg font-bold uppercase tracking-wider text-slate-900">Thống kê cổng</h3>
             <div class="space-y-6">
               <div class="flex items-center justify-between">
@@ -161,7 +149,7 @@
                 <span class="text-xl font-bold text-primary">12K+</span>
               </div>
             </div>
-          </div>
+          </div> -->
         </aside>
       </div>
     </div>
