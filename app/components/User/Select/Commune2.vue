@@ -147,7 +147,7 @@ const scheduleRetry = () => {
     }
 
     await fetchCommunes();
-  }, 3000);
+  }, 1000);
 };
 
 watch(
