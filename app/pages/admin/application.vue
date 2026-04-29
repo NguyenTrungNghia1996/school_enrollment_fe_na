@@ -69,7 +69,7 @@
       </a-table>
     </ClientOnly>
 
-    <a-modal v-model:open="detailVisible" title="Chi tiết hồ sơ" :width="1000" :footer="null" @cancel="closeDetail">
+    <a-modal v-model:open="detailVisible" title="Chi tiết hồ sơ" :width="1000" :footer="null" :z-index="1000" @cancel="closeDetail">
       <div v-if="detailLoading" class="py-12 text-center">
         <a-spin size="large" />
       </div>
@@ -150,7 +150,7 @@
       </div>
     </a-modal>
 
-    <a-modal v-model:open="paymentVisible" title="Thông tin thanh toán" :width="900" :footer="null" @cancel="closePaymentDetail">
+    <a-modal v-model:open="paymentVisible" title="Thông tin thanh toán" :width="900" :footer="null" :z-index="1100" @cancel="closePaymentDetail">
       <div v-if="paymentLoading" class="py-12 text-center">
         <a-spin size="large" />
       </div>
@@ -550,6 +550,16 @@ const closeDetail = () => {
   selectedRecord.value = null;
 };
 
+const reloadApplicationTable = async () => {
+  await refreshApplications();
+};
+
+const reloadDetailIfOpen = async id => {
+  if (detailVisible.value && detailData.value?.id === id) {
+    await openDetail(id);
+  }
+};
+
 const resetPaymentState = () => {
   paymentLoading.value = false;
   completePaymentLoading.value = false;
@@ -634,10 +644,8 @@ const submitCompletePayment = async () => {
 
     message.success(data.value?.message || "Xác nhận thanh toán thành công");
     closePaymentDetail();
-    await refreshApplications();
-    if (detailVisible.value && detailData.value?.id === selectedRecord.value?.id) {
-      await openDetail(selectedRecord.value.id);
-    }
+    await reloadApplicationTable();
+    await reloadDetailIfOpen(selectedRecord.value?.id);
   } catch (error) {
     message.error(error?.message || "Xác nhận thanh toán thất bại");
   } finally {
@@ -659,10 +667,8 @@ const approveItem = async (record, keepModal = false) => {
     if (!keepModal) {
       selectedRecord.value = null;
     }
-    await refreshApplications();
-    if (detailVisible.value && detailData.value?.id === record.id) {
-      await openDetail(record.id);
-    }
+    await reloadApplicationTable();
+    await reloadDetailIfOpen(record.id);
   } catch (error) {
     message.error(error?.message || "Duyệt hồ sơ thất bại");
   }
@@ -711,11 +717,10 @@ const submitReject = async () => {
     }
 
     message.success(data.value?.message || "Đã từ chối hồ sơ");
+    const rejectedId = selectedRecord.value.id;
     rejectVisible.value = false;
-    await refreshApplications();
-    if (detailVisible.value && detailData.value?.id === selectedRecord.value.id) {
-      await openDetail(selectedRecord.value.id);
-    }
+    await reloadApplicationTable();
+    await reloadDetailIfOpen(rejectedId);
     closeReject();
   } catch (error) {
     rejectLoading.value = false;
@@ -734,7 +739,7 @@ const deleteItem = async id => {
     }
 
     message.success(data.value?.message || "Đã xóa hồ sơ");
-    await refreshApplications();
+    await reloadApplicationTable();
 
     if (detailVisible.value && detailData.value?.id === id) {
       closeDetail();
