@@ -150,7 +150,7 @@
       </div>
     </a-modal>
 
-    <a-modal v-model:open="paymentVisible" title="Thông tin thanh toán" :width="900" :footer="null" :z-index="1100" @cancel="closePaymentDetail">
+    <a-modal v-model:open="paymentVisible" title="Thông tin thanh toán" :width="900" :footer="null" :z-index="1010" @cancel="closePaymentDetail">
       <div v-if="paymentLoading" class="py-12 text-center">
         <a-spin size="large" />
       </div>
