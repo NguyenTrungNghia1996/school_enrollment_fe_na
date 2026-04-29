@@ -155,7 +155,7 @@
                 </div>
 
                 <div>
-                  <UserSelectCommune v-model="formState.idCurrentCommune" :id-province="formState.currentProvinceId" label="Phường/xã nơi ở hiện tại" name="idCurrentCommune" placeholder="Chọn phường/xã" :rules="[{ required: true, message: 'Vui lòng chọn phường/xã hiện tại' }]" />
+                  <UserSelectCommune2 v-model="formState.idCurrentCommune" :id-province="formState.currentProvinceId" label="Phường/xã nơi ở hiện tại" name="idCurrentCommune" placeholder="Chọn phường/xã" :rules="[{ required: true, message: 'Vui lòng chọn phường/xã hiện tại' }]" />
                 </div>
 
                 <a-form-item label="Địa chỉ nơi ở hiện tại" name="currentAddress" class="md:col-span-3" :rules="[{ required: true, message: 'Vui lòng nhập địa chỉ nơi ở hiện tại' }]">
