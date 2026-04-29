@@ -472,6 +472,14 @@ const showPaymentAction = computed(() => {
 const hasUploadingEditDocuments = computed(() => Object.values(documentUploadingMap.value).some(Boolean));
 const isEditingProcessing = computed(() => saveLoading.value || submitLoading.value || avatarUploading.value || hasUploadingEditDocuments.value);
 
+const canEditCurrentApplication = () => Number(detailData.value?.idStatus) === 1;
+
+const ensureEditableApplication = () => {
+  if (!canEditCurrentApplication()) {
+    throw new Error("Hồ sơ có trạng thái lớn hơn 1 nên không thể chỉnh sửa");
+  }
+};
+
 watch(
   () => applicationResponse.value,
   newValue => {
@@ -684,6 +692,12 @@ const handleAvatarPreviewVisibleChange = visible => {
 
 const removeAvatar = () => {
   if (!detailData.value) return;
+
+  if (!canEditCurrentApplication()) {
+    message.warning("Hồ sơ này không thể chỉnh sửa");
+    return;
+  }
+
   detailData.value.avatar = "";
   isAvatarPreviewOpen.value = false;
 };
@@ -691,6 +705,14 @@ const removeAvatar = () => {
 const handleAvatarUpload = async event => {
   const file = event?.target?.files?.[0];
   if (!file || !detailData.value) return;
+
+  if (!canEditCurrentApplication()) {
+    message.warning("Hồ sơ này không thể chỉnh sửa");
+    if (event?.target) {
+      event.target.value = "";
+    }
+    return;
+  }
 
   avatarUploading.value = true;
 
@@ -716,6 +738,7 @@ const handleAvatarUpload = async event => {
 
 const updateDocumentLinks = (idExamDocument, links) => {
   if (!detailData.value) return;
+  ensureEditableApplication();
 
   const nextLinks = Array.from(new Set((links || []).filter(Boolean)));
   const documents = Array.isArray(detailData.value.documents) ? [...detailData.value.documents] : [];
@@ -749,6 +772,11 @@ const isDocumentUploading = idExamDocument => {
 };
 
 const removeEditDocumentFile = (idExamDocument, fileIndex) => {
+  if (!canEditCurrentApplication()) {
+    message.warning("Hồ sơ này không thể chỉnh sửa");
+    return;
+  }
+
   const document = normalizedDocuments.value.find(item => Number(item.idExamDocument) === Number(idExamDocument));
   if (!document) return;
 
@@ -760,6 +788,14 @@ const removeEditDocumentFile = (idExamDocument, fileIndex) => {
 const handleEditDocumentUpload = async (idExamDocument, event) => {
   const files = Array.from(event?.target?.files || []);
   if (!files.length) return;
+
+  if (!canEditCurrentApplication()) {
+    message.warning("Hồ sơ này không thể chỉnh sửa");
+    if (event?.target) {
+      event.target.value = "";
+    }
+    return;
+  }
 
   const key = String(idExamDocument);
   documentUploadingMap.value = {
@@ -835,16 +871,16 @@ const buildApplicationPayload = ({ includeAvatar = true } = {}) => {
   return payload;
 };
 
-const openDetail = async record => {
+const fetchDetailData = async (record, { resetData = true } = {}) => {
   const recordId = Number(record?.id);
   if (!Number.isFinite(recordId) || recordId <= 0) {
-    message.error("Id hồ sơ không hợp lệ, vui lòng kiểm tra lại");
-    return;
+    throw new Error("Id hồ sơ không hợp lệ, vui lòng kiểm tra lại");
   }
 
-  selectedRecord.value = record;
-  detailVisible.value = true;
-  detailData.value = null;
+  if (resetData) {
+    detailData.value = null;
+  }
+
   detailLoading.value = true;
 
   try {
@@ -856,12 +892,23 @@ const openDetail = async record => {
       throw new Error(error.value?.data?.message || data.value?.message || "Không thể tải thông tin chi tiết");
     }
 
-    detailData.value = normalizeApplicationDetail(data.value.data, record);
+    const normalizedDetail = normalizeApplicationDetail(data.value.data, record);
+    detailData.value = normalizedDetail;
+    selectedRecord.value = normalizedDetail || record;
+    return normalizedDetail;
+  } finally {
+    detailLoading.value = false;
+  }
+};
+
+const openDetail = async record => {
+  detailVisible.value = true;
+
+  try {
+    await fetchDetailData(record);
   } catch (error) {
     detailVisible.value = false;
     message.error(error?.message || "Không thể tải thông tin chi tiết");
-  } finally {
-    detailLoading.value = false;
   }
 };
 
@@ -882,6 +929,11 @@ const closeDetail = () => {
 };
 
 const saveApplication = async () => {
+  if (!canEditCurrentApplication()) {
+    message.warning("Hồ sơ này không thể chỉnh sửa");
+    return;
+  }
+
   if (avatarUploading.value || hasUploadingEditDocuments.value) {
     message.warning("Vui lòng chờ upload hồ sơ hoàn tất");
     return;
@@ -906,9 +958,7 @@ const saveApplication = async () => {
 
     message.success(data.value?.message || "Lưu hồ sơ thành công");
     await refreshApplications();
-    if (selectedRecord.value?.id) {
-      await openDetail(selectedRecord.value);
-    }
+    closeDetail();
   } catch (error) {
     message.error(error?.message || "Lưu hồ sơ thất bại");
   } finally {
@@ -941,9 +991,7 @@ const submitApplication = async () => {
 
     message.success(data.value?.message || "Nộp hồ sơ thành công");
     await refreshApplications();
-    if (selectedRecord.value?.id) {
-      await openDetail(selectedRecord.value);
-    }
+    closeDetail();
   } catch (error) {
     message.error(error?.message || "Nộp hồ sơ thất bại");
   } finally {
@@ -1024,11 +1072,8 @@ const confirmPayment = async () => {
     }
 
     message.success(data.value?.message || "Xác nhận thanh toán thành công");
-    closePaymentModal();
     await refreshApplications();
-    if (selectedRecord.value?.id) {
-      await openDetail(selectedRecord.value);
-    }
+    closeDetail();
   } catch (error) {
     message.error(error?.message || "Xác nhận thanh toán thất bại");
   } finally {
