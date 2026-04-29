@@ -124,7 +124,7 @@
           <div v-if="normalizedDocuments.length" class="space-y-4">
             <div v-for="document in normalizedDocuments" :key="document.key" class="rounded-xl border border-slate-200 bg-slate-50 p-4">
               <div class="mb-3 flex items-center justify-between gap-3">
-                <div class="font-medium text-slate-900">Hồ sơ #{{ document.idExamDocument }}</div>
+                <div class="font-medium text-slate-900">{{ document.documentName }}</div>
                 <div class="text-xs text-slate-500">{{ document.links.length }} file</div>
               </div>
 
@@ -264,7 +264,7 @@ const columns = [
   { title: "Họ tên", dataIndex: "fullname", key: "fullname", ellipsis: true },
   { title: "Ngày sinh", dataIndex: "dateOfBirth", key: "dateOfBirth", width: 130 },
   { title: "Số CCCD", dataIndex: "identityNumber", key: "identityNumber", width: 150 },
-  { title: "Trạng thái", dataIndex: "statusName", key: "statusName", width: 130, align: "center" },
+  { title: "Trạng thái", dataIndex: "statusName", key: "statusName", width: 200, align: "center" },
   { title: "Thao tác", key: "action", width: 150, align: "center", fixed: "right" },
 ];
 
@@ -313,6 +313,7 @@ const normalizedDocuments = computed(() => {
         return {
           key: `document-${index}`,
           idExamDocument: index + 1,
+          documentName: `Hồ sơ ${index + 1}`,
           links: splitDocumentLinks(document),
         };
       }
@@ -320,6 +321,7 @@ const normalizedDocuments = computed(() => {
       return {
         key: `${document?.idExamDocument || document?.id || "document"}-${index}`,
         idExamDocument: document?.idExamDocument || document?.id || index + 1,
+        documentName: document?.documentName || `Hồ sơ ${document?.idExamDocument || document?.id || index + 1}`,
         links: splitDocumentLinks(document?.url || document?.fileUrl || document?.link || document?.path),
       };
     })
