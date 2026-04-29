@@ -380,6 +380,7 @@ const selectedExamId = ref(undefined);
 const loadError = ref("");
 const detailVisible = ref(false);
 const detailData = ref(null);
+const detailLoading = ref(false);
 const selectedRecord = ref(null);
 const saveLoading = ref(false);
 const submitLoading = ref(false);
@@ -388,6 +389,7 @@ const isAvatarPreviewOpen = ref(false);
 const documentUploadingMap = ref({});
 const paymentVisible = ref(false);
 const qrData = ref(null);
+const qrLoading = ref(false);
 const confirmPaymentLoading = ref(false);
 const genderOptions = [
   { label: "Nam", value: true },
@@ -407,14 +409,6 @@ const params = ref({
   idExam: undefined,
 });
 
-const detailParams = ref({
-  id: undefined,
-});
-
-const qrParams = ref({
-  id: undefined,
-});
-
 const columns = [
   { title: "STT", key: "stt", width: 70, align: "center" },
   { title: "Mã hồ sơ", dataIndex: "applicationCode", key: "applicationCode", width: 150 },
@@ -432,28 +426,6 @@ const {
 } = await applicationUser.get({
   params,
   key: "user-application-list",
-});
-
-const {
-  data: detailResponse,
-  error: detailError,
-  pending: detailLoading,
-  refresh: refreshDetail,
-} = await applicationUser.getDetail({
-  params: detailParams,
-  key: "user-application-detail",
-  immediate: false,
-});
-
-const {
-  data: qrResponse,
-  error: qrError,
-  pending: qrLoading,
-  refresh: refreshQr,
-} = await applicationUser.getQr({
-  params: qrParams,
-  key: "user-application-qr",
-  immediate: false,
 });
 
 const dataSource = computed(() => {
@@ -571,7 +543,8 @@ const handlePageChange = (page, pageSize) => {
 
 const formatDate = value => {
   if (!value) return "-";
-  return dayjs(value).format("DD/MM/YYYY");
+  const parsed = dayjs(value);
+  return parsed.isValid() ? parsed.format("DD/MM/YYYY") : "-";
 };
 
 const formatCurrency = value => {
@@ -613,6 +586,9 @@ const normalizeApplicationDetail = (detail, fallbackRecord = null) => {
     return null;
   }
 
+  const dateOfBirth = detail.dateOfBirth ? dayjs(detail.dateOfBirth) : null;
+  const identityIssueDate = detail.identityIssueDate ? dayjs(detail.identityIssueDate) : null;
+
   return {
     ...detail,
     avatar: detail.avatar || fallbackRecord?.avatar || userStore.image_url || "",
@@ -620,8 +596,8 @@ const normalizeApplicationDetail = (detail, fallbackRecord = null) => {
     statusName: detail.statusName || fallbackRecord?.statusName || null,
     fullName: detail.fullName || detail.fullname || fallbackRecord?.fullName || fallbackRecord?.fullname || null,
     examName: detail.examName || fallbackRecord?.examName || null,
-    dateOfBirth: detail.dateOfBirth ? dayjs(detail.dateOfBirth) : null,
-    identityIssueDate: detail.identityIssueDate ? dayjs(detail.identityIssueDate) : null,
+    dateOfBirth: dateOfBirth?.isValid() ? dateOfBirth : null,
+    identityIssueDate: identityIssueDate?.isValid() ? identityIssueDate : null,
     documents: Array.isArray(detail.documents) ? detail.documents : [],
   };
 };
@@ -825,14 +801,17 @@ const buildApplicationPayload = ({ includeAvatar = true } = {}) => {
     return null;
   }
 
+  const dateOfBirth = detailData.value.dateOfBirth ? dayjs(detailData.value.dateOfBirth) : null;
+  const identityIssueDate = detailData.value.identityIssueDate ? dayjs(detailData.value.identityIssueDate) : null;
+
   const payload = {
     id: detailData.value.id,
     idExam: Number(detailData.value.idExam),
     fullName: (detailData.value.fullName || detailData.value.fullname || "").trim(),
-    dateOfBirth: detailData.value.dateOfBirth ? dayjs(detailData.value.dateOfBirth).toISOString() : null,
+    dateOfBirth: dateOfBirth?.isValid() ? dateOfBirth.toISOString() : null,
     idProvince: Number(detailData.value.idProvince),
     identityNumber: (detailData.value.identityNumber || "").trim(),
-    identityIssueDate: detailData.value.identityIssueDate ? dayjs(detailData.value.identityIssueDate).toISOString() : null,
+    identityIssueDate: identityIssueDate?.isValid() ? identityIssueDate.toISOString() : null,
     identityIssuePlace: (detailData.value.identityIssuePlace || "").trim(),
     idEthnicity: Number(detailData.value.idEthnicity),
     gender: detailData.value.gender,
@@ -857,29 +836,39 @@ const buildApplicationPayload = ({ includeAvatar = true } = {}) => {
 };
 
 const openDetail = async record => {
+  const recordId = Number(record?.id);
+  if (!Number.isFinite(recordId) || recordId <= 0) {
+    message.error("Id hồ sơ không hợp lệ, vui lòng kiểm tra lại");
+    return;
+  }
+
   selectedRecord.value = record;
   detailVisible.value = true;
   detailData.value = null;
-  detailParams.value.id = record.id;
+  detailLoading.value = true;
 
   try {
-    await refreshDetail();
+    const { data, error } = await applicationUser.getDetail({
+      params: { id: recordId },
+    });
 
-    if (detailError.value || detailResponse.value?.success === false || !detailResponse.value?.data) {
-      throw new Error(detailError.value?.data?.message || detailResponse.value?.message || "Không thể tải thông tin chi tiết");
+    if (error.value || data.value?.success === false || !data.value?.data) {
+      throw new Error(error.value?.data?.message || data.value?.message || "Không thể tải thông tin chi tiết");
     }
 
-    detailData.value = normalizeApplicationDetail(detailResponse.value.data, record);
+    detailData.value = normalizeApplicationDetail(data.value.data, record);
   } catch (error) {
     detailVisible.value = false;
     message.error(error?.message || "Không thể tải thông tin chi tiết");
+  } finally {
+    detailLoading.value = false;
   }
 };
 
 const closeDetail = () => {
   detailVisible.value = false;
   detailData.value = null;
-  detailParams.value.id = undefined;
+  detailLoading.value = false;
   selectedRecord.value = null;
   saveLoading.value = false;
   submitLoading.value = false;
@@ -888,7 +877,7 @@ const closeDetail = () => {
   documentUploadingMap.value = {};
   paymentVisible.value = false;
   qrData.value = null;
-  qrParams.value.id = undefined;
+  qrLoading.value = false;
   confirmPaymentLoading.value = false;
 };
 
@@ -968,28 +957,38 @@ const openPaymentModal = async () => {
     return;
   }
 
+  const applicationId = Number(detailData.value.id);
+  if (!Number.isFinite(applicationId) || applicationId <= 0) {
+    message.error("Id hồ sơ không hợp lệ, vui lòng kiểm tra lại");
+    return;
+  }
+
   qrData.value = null;
   paymentVisible.value = true;
-  qrParams.value.id = detailData.value.id;
+  qrLoading.value = true;
 
   try {
-    await refreshQr();
+    const { data, error } = await applicationUser.getQr({
+      params: { id: applicationId },
+    });
 
-    if (qrError.value || qrResponse.value?.success === false || !qrResponse.value?.data) {
-      throw new Error(qrError.value?.data?.message || qrResponse.value?.message || "Không tải được thông tin thanh toán");
+    if (error.value || data.value?.success === false || !data.value?.data) {
+      throw new Error(error.value?.data?.message || data.value?.message || "Không tải được thông tin thanh toán");
     }
 
-    qrData.value = qrResponse.value.data;
+    qrData.value = data.value.data;
   } catch (error) {
     paymentVisible.value = false;
     message.error(error?.message || "Không tải được thông tin thanh toán");
+  } finally {
+    qrLoading.value = false;
   }
 };
 
 const closePaymentModal = () => {
   paymentVisible.value = false;
   qrData.value = null;
-  qrParams.value.id = undefined;
+  qrLoading.value = false;
   confirmPaymentLoading.value = false;
 };
 
