@@ -336,8 +336,16 @@ const status = computed(() => {
   }
 
   const now = $dayjs();
-  const startDate = $dayjs(exam.startDate);
-  const endDate = $dayjs(exam.endDate);
+  const startDate = getValidDayjs(exam.startDate);
+  const endDate = getValidDayjs(exam.endDate);
+
+  if (!startDate || !endDate) {
+    return {
+      label: "Không xác định",
+      badgeClass: "bg-slate-100 text-slate-500",
+      isClosed: true,
+    };
+  }
 
   if (now.isBefore(startDate)) {
     return {
@@ -367,8 +375,12 @@ const remainingText = computed(() => {
   if (!exam) return "-";
 
   const now = $dayjs();
-  const startDate = $dayjs(exam.startDate);
-  const endDate = $dayjs(exam.endDate);
+  const startDate = getValidDayjs(exam.startDate);
+  const endDate = getValidDayjs(exam.endDate);
+
+  if (!startDate || !endDate) {
+    return "-";
+  }
 
   if (now.isBefore(startDate)) {
     return `Mở sau ${startDate.from(now, true)}`;
@@ -384,9 +396,21 @@ const remainingText = computed(() => {
 const hasUploadingDocuments = computed(() => documentUploads.value.some(item => item.uploading));
 const isProcessing = computed(() => saveLoading.value || submitLoading.value || avatarUploading.value);
 
+const getValidDayjs = value => {
+  if (!value) return null;
+
+  const parsed = $dayjs(value);
+  return parsed.isValid() ? parsed : null;
+};
+
+const toIsoStringOrNull = value => {
+  const parsed = getValidDayjs(value);
+  return parsed ? parsed.toISOString() : null;
+};
+
 const formatDateTime = value => {
-  if (!value) return "-";
-  return $dayjs(value).format("DD/MM/YYYY HH:mm");
+  const parsed = getValidDayjs(value);
+  return parsed ? parsed.format("DD/MM/YYYY HH:mm") : "-";
 };
 
 const formatCurrency = value => {
@@ -478,8 +502,8 @@ const saveDraftSnapshot = () => {
   const snapshot = {
     formState: {
       ...formState,
-      dateOfBirth: formState.dateOfBirth ? $dayjs(formState.dateOfBirth).toISOString() : null,
-      identityIssueDate: formState.identityIssueDate ? $dayjs(formState.identityIssueDate).toISOString() : null,
+      dateOfBirth: toIsoStringOrNull(formState.dateOfBirth),
+      identityIssueDate: toIsoStringOrNull(formState.identityIssueDate),
     },
     documents: documentUploads.value
       .map(item => ({
@@ -512,8 +536,8 @@ const restoreDraft = () => {
       ...formState,
       ...draftFormState,
       avatar: draftFormState.avatar || "",
-      dateOfBirth: draftFormState.dateOfBirth ? $dayjs(draftFormState.dateOfBirth) : null,
-      identityIssueDate: draftFormState.identityIssueDate ? $dayjs(draftFormState.identityIssueDate) : null,
+      dateOfBirth: getValidDayjs(draftFormState.dateOfBirth),
+      identityIssueDate: getValidDayjs(draftFormState.identityIssueDate),
     });
 
     documentUploads.value = createDocumentUploads(examDetail.value?.documents || [], draft?.documents || []);
@@ -696,10 +720,10 @@ const buildPayload = () => {
     idExam: examId.value,
     avatar: String(formState.avatar || "").trim(),
     fullName: formState.fullName.trim(),
-    dateOfBirth: $dayjs(formState.dateOfBirth).toISOString(),
+    dateOfBirth: toIsoStringOrNull(formState.dateOfBirth),
     idProvince: Number(formState.idProvince),
     identityNumber: formState.identityNumber.trim(),
-    identityIssueDate: $dayjs(formState.identityIssueDate).toISOString(),
+    identityIssueDate: toIsoStringOrNull(formState.identityIssueDate),
     identityIssuePlace: formState.identityIssuePlace.trim(),
     idEthnicity: Number(formState.idEthnicity),
     gender: formState.gender,
