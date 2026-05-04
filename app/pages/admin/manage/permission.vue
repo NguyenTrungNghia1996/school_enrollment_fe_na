@@ -169,7 +169,7 @@ const editItem = async id => {
   try {
     const { data } = await adminRoles.getByRest("detail", {
       params: { id: id },
-      key: "admin-role-detail",
+      key: `admin-role-detail-${id}-${Date.now()}`,
     });
     if (data.value?.success) {
       Object.assign(formState, data.value.data);
@@ -198,7 +198,6 @@ const handleOk = async () => {
       message.success(res.data.value?.message || "Thành công");
       visible.value = false;
       formRef.value.resetFields();
-      clearNuxtData("admin-role-detail");
     } else {
       throw new Error(res.error?.value?.data?.message || "Lỗi không xác định");
     }
