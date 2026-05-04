@@ -57,7 +57,10 @@ export const resolveAdminRoutePermission = ({ menu = [], permissions = [], path 
 
   const permissionMap = {};
   for (const item of permissions || []) {
-    permissionMap[item.key] = item.permissionValue;
+    const resolvedKey = item?.keyCode || item?.key;
+    if (resolvedKey) {
+      permissionMap[resolvedKey] = item.permissionValue;
+    }
   }
 
   const currentItem = matchedItems[matchedItems.length - 1];

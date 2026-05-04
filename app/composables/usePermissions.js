@@ -60,7 +60,9 @@ export const usePermissions = () => {
   ];
   const loadPermissions = async () => {
     try {
-      const { data } = await authAdmin.permission();
+      const { data } = await authAdmin.permission({
+        key: `admin-permission-${Date.now()}`,
+      });
       if (data.value?.success) {
         const permission = data?.value?.data?.permission;
         adminStore.setPermissions(permission);

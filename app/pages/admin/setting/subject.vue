@@ -142,7 +142,10 @@ const showModal = () => {
 const editItem = async id => {
   isEdit.value = true;
   try {
-    const { data } = await adminSubject.getByRest("detail", { params: { id: id } });
+    const { data } = await adminSubject.getByRest("detail", {
+      params: { id: id },
+      key: `admin-subject-detail-${id}-${Date.now()}`,
+    });
     if (data.value?.success) {
       const detail = data.value.data;
       Object.assign(formState, {

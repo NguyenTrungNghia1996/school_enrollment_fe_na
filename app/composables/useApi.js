@@ -58,6 +58,7 @@ export const useApi = () => {
     adminRoles: useCrudApiAdmin("/api/admin/roles"),
     adminManage: useCrudApiAdmin("/api/admin"),
     adminUser: useCrudApiAdmin("/api/users"),
+    adminBank: useCrudApiAdmin("/api/banks"),
     adminSubject: useCrudApiAdmin("/api/subject"),
     adminEnrollment: useCrudApiAdmin("/api/exam"),
     adminCandidate: {
@@ -87,11 +88,7 @@ export const useApi = () => {
         return adminRequest.post("/api/admin/exam/result/publish", options ?? {});
       },
     },
-    adminPayment: {
-      getDetail(options) {
-        return adminRequest.get("/api/admin/payment/detail", options ?? {});
-      },
-    },
+    adminPayment: useCrudApiAdmin("/api/admin/payment"),
     adminApplication: {
       get(options) {
         return adminRequest.get("/api/admin/application", options ?? {});

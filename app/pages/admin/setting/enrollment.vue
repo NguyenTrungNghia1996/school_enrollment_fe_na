@@ -56,12 +56,38 @@
             <a-range-picker v-model:value="formState.dateRange" format="DD/MM/YYYY" class="w-full" :placeholder="['Chọn ngày bắt đầu', 'Chọn ngày kết thúc']" />
           </a-form-item>
 
+          <a-form-item label="Link đăng ký" name="url" class="md:col-span-2">
+            <a-input v-model:value="formState.url" placeholder="Nhập đường dẫn đăng ký hoặc thông tin liên quan" />
+          </a-form-item>
+
           <a-form-item label="Lệ phí (VNĐ)" name="fee">
             <a-input-number v-model:value="formState.fee" :min="0" :step="10000" class="w-full" :formatter="value => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')" :parser="value => value.replace(/\$\s?|(,*)/g, '')" />
           </a-form-item>
 
           <a-form-item label="Số lượng chỉ tiêu" name="quantity">
             <a-input-number v-model:value="formState.quantity" :min="0" class="w-full" />
+          </a-form-item>
+
+          <a-form-item label="Thời gian phúc khảo" name="reviewDateRange" class="md:col-span-2">
+            <a-range-picker v-model:value="formState.reviewDateRange" format="DD/MM/YYYY" class="w-full" :placeholder="['Chọn ngày bắt đầu phúc khảo', 'Chọn ngày kết thúc phúc khảo']" />
+          </a-form-item>
+
+          <a-form-item label="Lệ phí phúc khảo (VNĐ)" name="reviewFee">
+            <a-input-number v-model:value="formState.reviewFee" :min="0" :step="10000" class="w-full" :formatter="value => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')" :parser="value => value.replace(/\$\s?|(,*)/g, '')" />
+          </a-form-item>
+
+          <div />
+
+          <div class="md:col-span-2">
+            <AdminSelectBank v-model="formState.idBank" label="Ngân hàng" name="idBank" placeholder="Chọn ngân hàng" :rules="[{ required: true, message: 'Vui lòng chọn ngân hàng', trigger: 'change' }]" />
+          </div>
+
+          <a-form-item label="Số tài khoản" name="accountNumber">
+            <a-input v-model:value="formState.accountNumber" placeholder="Nhập số tài khoản" />
+          </a-form-item>
+
+          <a-form-item label="Chủ tài khoản" name="accountName">
+            <a-input v-model:value="formState.accountName" placeholder="Nhập tên chủ tài khoản" />
           </a-form-item>
 
           <div class="md:col-span-2">
@@ -136,12 +162,19 @@ const columns = [
 const formState = reactive({
   id: null,
   dateRange: [],
+  reviewDateRange: [],
   examName: "",
   startDate: null,
   endDate: null,
-  examType: 0,
+  reviewStartDate: null,
+  reviewEndDate: null,
   fee: 0,
   quantity: 0,
+  url: "",
+  reviewFee: 0,
+  idBank: undefined,
+  accountNumber: "",
+  accountName: "",
   subjectIds: [],
   documents: [],
 });
@@ -156,6 +189,9 @@ const rules = {
       trigger: "change",
     },
   ],
+  url: [{ required: true, message: "Vui lòng nhập link đăng ký", trigger: "blur" }],
+  accountNumber: [{ required: true, message: "Vui lòng nhập số tài khoản", trigger: "blur" }],
+  accountName: [{ required: true, message: "Vui lòng nhập chủ tài khoản", trigger: "blur" }],
 };
 
 const param = ref({ pageIndex: 1, pageSize: 10, search: "" });
@@ -203,12 +239,19 @@ const showModal = () => {
   Object.assign(formState, {
     id: null,
     dateRange: [],
+    reviewDateRange: [],
     examName: "",
     startDate: null,
     endDate: null,
-    examType: 0,
+    reviewStartDate: null,
+    reviewEndDate: null,
     fee: 0,
     quantity: 0,
+    url: "",
+    reviewFee: 0,
+    idBank: undefined,
+    accountNumber: "",
+    accountName: "",
     subjectIds: [],
     documents: [],
   });
@@ -218,20 +261,32 @@ const showModal = () => {
 const editItem = async id => {
   isEdit.value = true;
   try {
-    const { data } = await adminEnrollment.getByRest("detail", { params: { id: id } });
+    const { data } = await adminEnrollment.getByRest("detail", {
+      params: { id: id },
+      key: `admin-enrollment-detail-${id}-${Date.now()}`,
+    });
     if (data.value?.success) {
       const detail = data.value.data;
       const startDate = detail.startDate ? dayjs(detail.startDate) : null;
       const endDate = detail.endDate ? dayjs(detail.endDate) : null;
+      const reviewStartDate = detail.reviewStartDate ? dayjs(detail.reviewStartDate) : null;
+      const reviewEndDate = detail.reviewEndDate ? dayjs(detail.reviewEndDate) : null;
       Object.assign(formState, {
         id: detail.id,
         dateRange: startDate && endDate ? [startDate, endDate] : [],
+        reviewDateRange: reviewStartDate && reviewEndDate ? [reviewStartDate, reviewEndDate] : [],
         examName: detail.examName,
         startDate,
         endDate,
-        examType: detail.examType,
+        reviewStartDate,
+        reviewEndDate,
         fee: detail.fee,
         quantity: detail.quantity,
+        url: detail.url || "",
+        reviewFee: detail.reviewFee ?? 0,
+        idBank: detail.idBank ?? undefined,
+        accountNumber: detail.accountNumber || "",
+        accountName: detail.accountName || "",
         subjectIds: detail.subjectIds ? [...detail.subjectIds] : [],
         documents: detail.documents ? JSON.parse(JSON.stringify(detail.documents)) : [],
       });
@@ -248,21 +303,39 @@ const handleOk = async () => {
     confirmLoading.value = true;
     formState.startDate = formState.dateRange?.[0] || null;
     formState.endDate = formState.dateRange?.[1] || null;
+    formState.reviewStartDate = formState.reviewDateRange?.[0] || null;
+    formState.reviewEndDate = formState.reviewDateRange?.[1] || null;
 
     const payload = {
-      ...formState,
-      dateRange: undefined,
+      ...(isEdit.value ? { id: formState.id } : {}),
+      examName: formState.examName.trim(),
+      fee: Number(formState.fee || 0),
+      quantity: Number(formState.quantity || 0),
+      url: formState.url.trim(),
+      reviewFee: Number(formState.reviewFee || 0),
+      idBank: formState.idBank ?? 0,
+      accountNumber: formState.accountNumber.trim(),
+      accountName: formState.accountName.trim(),
+      subjectIds: Array.isArray(formState.subjectIds) ? formState.subjectIds.map(id => Number(id)).filter(id => !Number.isNaN(id)) : [],
+      documents: Array.isArray(formState.documents)
+        ? formState.documents
+            .map(doc => ({
+              documentName: String(doc?.documentName || "").trim(),
+              isRequired: Boolean(doc?.isRequired),
+            }))
+            .filter(doc => doc.documentName)
+        : [],
       startDate: formState.startDate ? formState.startDate.toISOString() : null,
       endDate: formState.endDate ? formState.endDate.toISOString() : null,
+      reviewStartDate: formState.reviewStartDate ? formState.reviewStartDate.toISOString() : null,
+      reviewEndDate: formState.reviewEndDate ? formState.reviewEndDate.toISOString() : null,
     };
 
     let res;
     if (isEdit.value) {
       res = await adminEnrollment.put({ body: payload });
     } else {
-      const createPayload = { ...payload };
-      delete createPayload.id;
-      res = await adminEnrollment.post({ body: createPayload });
+      res = await adminEnrollment.post({ body: payload });
     }
 
     if (res.data.value?.success) {

@@ -94,7 +94,7 @@ function normalizeInputPermissions(menuData, inputPermissions = []) {
 
   return inputPermissions
     .map((item, index) => {
-      const resolvedKey = item.key || item.keyCode || orderedKeys[index]
+      const resolvedKey = item.keyCode || item.key || orderedKeys[index]
       return {
         key: resolvedKey,
         permissionValue: item.permissionValue
@@ -181,6 +181,11 @@ const flattenPermissions = (nodes) =>
   })
 const flatPermissions = computed(() => flattenPermissions(flatMenuData.value))
 
+const createPermissionItem = (keyCode, permissionValue) => ({
+  keyCode,
+  permissionValue: Number(permissionValue || 0),
+})
+
 const permissionList = computed(() => {
   // Luôn trả về đầy đủ các menu cha kể cả không có trong modelValue
   const allParentKeys = flatData.value
@@ -191,17 +196,11 @@ const permissionList = computed(() => {
 
   // Thêm tất cả các menu cha vào kết quả
   allParentKeys.forEach(key => {
-    result.push({
-      key,
-      permissionValue: menuPermissions[key] || 0
-    })
+    result.push(createPermissionItem(key, menuPermissions[key]))
   })
 
   // Thêm menu gốc
-  result.unshift({
-    key: 'menu',
-    permissionValue: menuPermissions.menu || 0
-  })
+  result.unshift(createPermissionItem('menu', menuPermissions.menu))
 
   return result
 })

@@ -8,8 +8,11 @@ export const useMenu = () => {
   const permissionMap = computed(() => {
     const map = {};
     if (adminStore.menuPermissions) {
-      for (const { key, permissionValue } of adminStore.menuPermissions) {
-        map[key] = permissionValue;
+      for (const item of adminStore.menuPermissions) {
+        const resolvedKey = item?.keyCode || item?.key;
+        if (resolvedKey) {
+          map[resolvedKey] = item.permissionValue;
+        }
       }
     }
     return map;
@@ -74,7 +77,10 @@ export const useMenu = () => {
 
   const loadMenu = async () => {
     try {
-      const { data } = await adminMenus.get();
+      // key: `admin-permission-${Date.now()}`
+      const { data } = await adminMenus.get({
+        key: `admin-menu-${Date.now}`,
+      });
       if (data.value?.success) {
         const tree = buildTree(data.value.data.items);
         adminStore.setMenu(tree);

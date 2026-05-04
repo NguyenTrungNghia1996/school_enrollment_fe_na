@@ -133,7 +133,6 @@ watch(
   () => roleResponse.value,
   newVal => {
     if (newVal?.success) {
-      console.log(">>>>>>>>", newVal.data);
       pagination.total = newVal.data.total || 0;
     }
   },
@@ -169,7 +168,7 @@ const editItem = async id => {
   try {
     const { data } = await adminRoles.getByRest("detail", {
       params: { id: id },
-      key: "admin-role-detail",
+      key: `admin-role-detail-${id}-${Date.now()}`,
     });
     if (data.value?.success) {
       Object.assign(formState, data.value.data);
@@ -185,12 +184,17 @@ const handleOk = async () => {
     await formRef.value.validate();
     confirmLoading.value = true;
 
+    const payload = {
+      ...(isEdit.value ? { id: formState.id } : {}),
+      name: String(formState.name || "").trim(),
+      description: String(formState.description || "").trim(),
+      permission: Array.isArray(formState.permission) ? formState.permission : [],
+    };
+
     let res;
     if (isEdit.value) {
-      res = await adminRoles.put({ body: formState });
+      res = await adminRoles.put({ body: payload });
     } else {
-      const payload = { ...formState };
-      delete payload.id;
       res = await adminRoles.post({ body: payload });
     }
 
@@ -198,7 +202,6 @@ const handleOk = async () => {
       message.success(res.data.value?.message || "Thành công");
       visible.value = false;
       formRef.value.resetFields();
-      clearNuxtData("admin-role-detail");
     } else {
       throw new Error(res.error?.value?.data?.message || "Lỗi không xác định");
     }

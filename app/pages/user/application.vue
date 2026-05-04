@@ -117,32 +117,42 @@
         </div>
 
         <a-form v-if="showEditAction" layout="vertical">
-          <div class="grid gap-x-4 gap-y-1 md:grid-cols-2">
+          <div class="grid gap-x-6 gap-y-5 md:grid-cols-2">
             <a-form-item label="Ảnh 3x4" class="md:col-span-2">
-              <div class="rounded-2xl border border-slate-200 bg-slate-50 p-4">
-                <div class="flex flex-col gap-4 md:flex-row md:items-start">
-                  <button
-                    type="button"
-                    class="flex h-48 w-36 items-center justify-center overflow-hidden rounded-xl border border-dashed border-slate-300 bg-white"
-                    :class="detailData.avatar ? 'cursor-pointer' : 'cursor-default'"
-                    :disabled="!detailData.avatar"
-                    @click="openAvatarPreview">
-                    <img v-if="detailData.avatar" :src="detailData.avatar" alt="Ảnh 3x4" class="h-full w-full object-cover" />
-                    <div v-else class="px-4 text-center text-sm leading-6 text-slate-400">Chưa có ảnh 3x4</div>
+              <div class="rounded-3xl border border-slate-100 bg-slate-50/50 p-6 transition-colors hover:bg-slate-50">
+                <div class="flex flex-col gap-6 md:flex-row md:items-start">
+                  <button type="button" class="group relative flex h-[192px] w-[144px] shrink-0 items-center justify-center overflow-hidden rounded-2xl border-2 border-dashed border-slate-200 bg-white transition-all hover:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2" :class="detailData.avatar ? 'cursor-pointer border-solid border-slate-200' : 'cursor-default'" :disabled="!detailData.avatar" @click="openAvatarPreview">
+                    <img v-if="detailData.avatar" :src="detailData.avatar" alt="Ảnh 3x4" class="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105" />
+                    <div v-else class="flex flex-col items-center gap-2 px-4 text-center text-slate-400">
+                      <Icon name="lucide:image" class="text-3xl opacity-50" />
+                      <span class="text-xs font-medium uppercase tracking-wider">Chưa có ảnh</span>
+                    </div>
+                    <div v-if="detailData.avatar" class="absolute inset-0 flex items-center justify-center bg-slate-900/40 opacity-0 backdrop-blur-sm transition-opacity group-hover:opacity-100">
+                      <Icon name="lucide:zoom-in" class="text-2xl text-white" />
+                    </div>
                   </button>
 
-                  <div class="flex-1">
-                    <input type="file" class="block w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-600 file:mr-3 file:rounded-md file:border-0 file:bg-sky-600 file:px-3 file:py-2 file:text-sm file:font-medium file:text-white" :disabled="avatarUploading || isEditingProcessing" accept=".png,.jpg,.jpeg,.webp" @change="handleAvatarUpload" />
+                  <div class="flex-1 space-y-4">
+                    <div>
+                      <input id="edit-avatar-upload" type="file" class="!hidden" :disabled="avatarUploading || isEditingProcessing" accept=".png,.jpg,.jpeg,.webp" @change="handleAvatarUpload" />
+                      <label for="edit-avatar-upload" class="inline-flex cursor-pointer items-center justify-center gap-2 rounded-xl bg-white px-5 py-2.5 text-sm font-semibold text-slate-700 shadow-sm ring-1 ring-inset ring-slate-200 transition-all focus-within:ring-2 focus-within:ring-blue-500 hover:bg-slate-50 hover:text-blue-600" :class="{ 'cursor-not-allowed opacity-50': avatarUploading || isEditingProcessing }">
+                        <Icon name="lucide:upload-cloud" class="text-lg" />
+                        <span>Chọn ảnh tải lên</span>
+                      </label>
+                    </div>
 
-                    <div v-if="avatarUploading" class="mt-4 flex items-center gap-3 rounded-xl border border-sky-200 bg-sky-50 px-4 py-3 text-sm text-sky-700">
+                    <div v-if="avatarUploading" class="flex items-center gap-3 rounded-xl border border-blue-100 bg-blue-50/50 px-4 py-3 text-sm font-medium text-blue-700">
                       <a-spin size="small" />
                       Đang upload ảnh 3x4...
                     </div>
 
-                    <div v-else class="mt-4 space-y-3">
-                      <p class="text-sm text-slate-500">Chỉ chấp nhận ảnh định dạng JPG, PNG, WEBP với tỷ lệ 3:4.</p>
+                    <div v-else class="space-y-4">
+                      <p class="text-sm leading-relaxed text-slate-500">Chỉ chấp nhận ảnh định dạng JPG, PNG, WEBP với tỷ lệ 3:4. Kích thước tối đa 5MB.</p>
                       <div v-if="detailData.avatar" class="flex flex-wrap gap-2">
-                        <a-button danger ghost size="small" :disabled="isEditingProcessing" @click="removeAvatar">Xóa ảnh</a-button>
+                        <a-button danger type="text" class="rounded-lg font-medium hover:bg-rose-50" :disabled="isEditingProcessing" @click="removeAvatar">
+                          <template #icon><Icon name="lucide:trash-2" class="mr-1.5" /></template>
+                          Xóa ảnh
+                        </a-button>
                       </div>
                     </div>
                   </div>
@@ -161,120 +171,203 @@
             </a-form-item>
 
             <a-form-item label="Họ tên">
-              <a-input v-model:value="detailData.fullName" placeholder="Nhập họ tên đầy đủ" />
+              <a-input v-model:value="detailData.fullName" placeholder="Nhập họ tên đầy đủ" size="large" class="rounded-xl" />
             </a-form-item>
 
             <a-form-item label="Ngày sinh">
-              <a-date-picker v-model:value="detailData.dateOfBirth" format="DD/MM/YYYY" class="w-full" placeholder="Chọn ngày sinh" />
+              <a-date-picker v-model:value="detailData.dateOfBirth" format="DD/MM/YYYY" class="w-full rounded-xl" size="large" placeholder="Chọn ngày sinh" />
             </a-form-item>
 
             <div>
-              <UserSelectProvince v-model="detailData.idProvince" label="Nơi sinh" name="idProvince" placeholder="Chọn tỉnh thành phố" />
+              <UserSelectProvince v-model="detailData.idProvince" label="Nơi sinh" name="idProvince" placeholder="Chọn tỉnh thành phố" size="large" class="rounded-xl" />
             </div>
 
             <a-form-item label="Số CCCD">
-              <a-input v-model:value="detailData.identityNumber" placeholder="Nhập số CCCD" />
+              <a-input v-model:value="detailData.identityNumber" placeholder="Nhập số CCCD" size="large" class="rounded-xl" />
             </a-form-item>
 
             <a-form-item label="Ngày cấp CCCD">
-              <a-date-picker v-model:value="detailData.identityIssueDate" format="DD/MM/YYYY" class="w-full" placeholder="Chọn ngày cấp CCCD" />
+              <a-date-picker v-model:value="detailData.identityIssueDate" format="DD/MM/YYYY" class="w-full rounded-xl" size="large" placeholder="Chọn ngày cấp CCCD" />
             </a-form-item>
 
             <a-form-item label="Nơi cấp CCCD">
-              <a-input v-model:value="detailData.identityIssuePlace" placeholder="Nhập nơi cấp CCCD" />
+              <a-input v-model:value="detailData.identityIssuePlace" placeholder="Nhập nơi cấp CCCD" size="large" class="rounded-xl" />
             </a-form-item>
 
             <div>
-              <UserSelectEthnicity v-model="detailData.idEthnicity" label="Dân tộc" name="idEthnicity" placeholder="Chọn dân tộc" />
+              <UserSelectEthnicity v-model="detailData.idEthnicity" label="Dân tộc" name="idEthnicity" placeholder="Chọn dân tộc" size="large" class="rounded-xl" />
             </div>
 
             <a-form-item label="Giới tính">
-              <a-select v-model:value="detailData.gender" :options="genderOptions" placeholder="Chọn giới tính" />
+              <a-select v-model:value="detailData.gender" :options="genderOptions" placeholder="Chọn giới tính" size="large" class="rounded-xl" />
             </a-form-item>
 
             <div>
-              <UserSelectProvince v-model="detailData.idPermanentProvince" label="Tỉnh thường trú" name="idPermanentProvince" placeholder="Chọn tỉnh thành phố" />
+              <UserSelectProvince v-model="detailData.idPermanentProvince" label="Tỉnh thường trú" name="idPermanentProvince" placeholder="Chọn tỉnh thành phố" size="large" class="rounded-xl" />
             </div>
 
             <div>
-              <UserSelectCommune v-model="detailData.idCommune" :id-province="detailData.idPermanentProvince" label="Phường/xã thường trú" name="idCommune" placeholder="Chọn phường/xã" />
+              <UserSelectCommune v-model="detailData.idCommune" :id-province="detailData.idPermanentProvince" label="Phường/xã thường trú" name="idCommune" placeholder="Chọn phường/xã" size="large" class="rounded-xl" />
             </div>
 
             <a-form-item label="Địa chỉ thường trú" class="md:col-span-2">
-              <a-input v-model:value="detailData.permanentAddress" placeholder="Nhập địa chỉ thường trú" />
+              <a-input v-model:value="detailData.permanentAddress" placeholder="Nhập địa chỉ thường trú" size="large" class="rounded-xl" />
             </a-form-item>
 
             <a-form-item label="Số điện thoại">
-              <a-input v-model:value="detailData.phoneNumber" placeholder="Nhập số điện thoại" />
+              <a-input v-model:value="detailData.phoneNumber" placeholder="Nhập số điện thoại" size="large" class="rounded-xl" />
             </a-form-item>
 
             <div>
-              <UserSelectProvince v-model="detailData.idCurrentProvince" label="Tỉnh hiện tại" name="idCurrentProvince" placeholder="Chọn tỉnh thành phố" />
+              <UserSelectProvince v-model="detailData.idCurrentProvince" label="Tỉnh hiện tại" name="idCurrentProvince" placeholder="Chọn tỉnh thành phố" size="large" class="rounded-xl" />
             </div>
 
             <div>
-              <UserSelectCommune v-model="detailData.idCurrentCommune" :id-province="detailData.idCurrentProvince" label="Phường/xã hiện tại" name="idCurrentCommune" placeholder="Chọn phường/xã" />
+              <UserSelectCommune v-model="detailData.idCurrentCommune" :id-province="detailData.idCurrentProvince" label="Phường/xã hiện tại" name="idCurrentCommune" placeholder="Chọn phường/xã" size="large" class="rounded-xl" />
             </div>
 
             <a-form-item label="Địa chỉ hiện tại" class="md:col-span-2">
-              <a-input v-model:value="detailData.currentAddress" placeholder="Nhập địa chỉ hiện tại" />
+              <a-input v-model:value="detailData.currentAddress" placeholder="Nhập địa chỉ hiện tại" size="large" class="rounded-xl" />
             </a-form-item>
           </div>
         </a-form>
 
-        <a-descriptions v-else bordered :column="2" size="small">
-          <a-descriptions-item label="Họ tên">{{ detailData.fullName || detailData.fullname || "-" }}</a-descriptions-item>
-          <a-descriptions-item label="Ngày sinh">{{ formatDate(detailData.dateOfBirth) }}</a-descriptions-item>
-          <a-descriptions-item label="Số CCCD">{{ detailData.identityNumber || "-" }}</a-descriptions-item>
-          <a-descriptions-item label="Ngày cấp CCCD">{{ formatDate(detailData.identityIssueDate) }}</a-descriptions-item>
-          <a-descriptions-item label="Nơi cấp CCCD">{{ detailData.identityIssuePlace || "-" }}</a-descriptions-item>
-          <a-descriptions-item label="Giới tính">{{ formatGender(detailData.gender) }}</a-descriptions-item>
-          <a-descriptions-item label="Dân tộc">{{ detailData.ethnicityName || `#${detailData.idEthnicity || "-"}` }}</a-descriptions-item>
-          <a-descriptions-item label="Nơi sinh">{{ detailData.provinceName || `#${detailData.idProvince || "-"}` }}</a-descriptions-item>
-          <a-descriptions-item label="Tỉnh thường trú">{{ detailData.permanentProvinceName || `#${detailData.idPermanentProvince || "-"}` }}</a-descriptions-item>
-          <a-descriptions-item label="Phường/xã thường trú">{{ detailData.permanentCommuneName || `#${detailData.idCommune || "-"}` }}</a-descriptions-item>
-          <a-descriptions-item label="Địa chỉ thường trú" :span="2">{{ detailData.permanentAddress || "-" }}</a-descriptions-item>
-          <a-descriptions-item label="Số điện thoại">{{ detailData.phoneNumber || "-" }}</a-descriptions-item>
-          <a-descriptions-item label="Tỉnh hiện tại">{{ detailData.currentProvinceName || `#${detailData.idCurrentProvince || "-"}` }}</a-descriptions-item>
-          <a-descriptions-item label="Phường/xã hiện tại">{{ detailData.currentCommuneName || `#${detailData.idCurrentCommune || "-"}` }}</a-descriptions-item>
-          <a-descriptions-item label="Địa chỉ hiện tại" :span="2">{{ detailData.currentAddress || "-" }}</a-descriptions-item>
-          <a-descriptions-item label="Ghi chú" :span="2">{{ detailData.note || "-" }}</a-descriptions-item>
-        </a-descriptions>
+        <div v-else class="grid gap-4 md:grid-cols-2">
+          <div class="rounded-xl border border-slate-100 bg-white p-4 shadow-sm">
+            <div class="text-[11px] font-bold uppercase tracking-widest text-slate-400">Họ tên</div>
+            <div class="mt-1.5 font-medium text-slate-900">{{ detailData.fullName || detailData.fullname || "-" }}</div>
+          </div>
+          <div class="rounded-xl border border-slate-100 bg-white p-4 shadow-sm">
+            <div class="text-[11px] font-bold uppercase tracking-widest text-slate-400">Ngày sinh</div>
+            <div class="mt-1.5 font-medium text-slate-900">{{ formatDate(detailData.dateOfBirth) }}</div>
+          </div>
+          <div class="rounded-xl border border-slate-100 bg-white p-4 shadow-sm">
+            <div class="text-[11px] font-bold uppercase tracking-widest text-slate-400">Số CCCD</div>
+            <div class="mt-1.5 font-medium text-slate-900">{{ detailData.identityNumber || "-" }}</div>
+          </div>
+          <div class="rounded-xl border border-slate-100 bg-white p-4 shadow-sm">
+            <div class="text-[11px] font-bold uppercase tracking-widest text-slate-400">Ngày cấp CCCD</div>
+            <div class="mt-1.5 font-medium text-slate-900">{{ formatDate(detailData.identityIssueDate) }}</div>
+          </div>
+          <div class="rounded-xl border border-slate-100 bg-white p-4 shadow-sm">
+            <div class="text-[11px] font-bold uppercase tracking-widest text-slate-400">Nơi cấp CCCD</div>
+            <div class="mt-1.5 font-medium text-slate-900">{{ detailData.identityIssuePlace || "-" }}</div>
+          </div>
+          <div class="rounded-xl border border-slate-100 bg-white p-4 shadow-sm">
+            <div class="text-[11px] font-bold uppercase tracking-widest text-slate-400">Giới tính</div>
+            <div class="mt-1.5 font-medium text-slate-900">{{ formatGender(detailData.gender) }}</div>
+          </div>
+          <div class="rounded-xl border border-slate-100 bg-white p-4 shadow-sm">
+            <div class="text-[11px] font-bold uppercase tracking-widest text-slate-400">Dân tộc</div>
+            <div class="mt-1.5 font-medium text-slate-900">{{ detailData.ethnicityName || `#${detailData.idEthnicity || "-"}` }}</div>
+          </div>
+          <div class="rounded-xl border border-slate-100 bg-white p-4 shadow-sm">
+            <div class="text-[11px] font-bold uppercase tracking-widest text-slate-400">Nơi sinh</div>
+            <div class="mt-1.5 font-medium text-slate-900">{{ detailData.provinceName || `#${detailData.idProvince || "-"}` }}</div>
+          </div>
+          <div class="rounded-xl border border-slate-100 bg-white p-4 shadow-sm">
+            <div class="text-[11px] font-bold uppercase tracking-widest text-slate-400">Tỉnh thường trú</div>
+            <div class="mt-1.5 font-medium text-slate-900">{{ detailData.permanentProvinceName || `#${detailData.idPermanentProvince || "-"}` }}</div>
+          </div>
+          <div class="rounded-xl border border-slate-100 bg-white p-4 shadow-sm">
+            <div class="text-[11px] font-bold uppercase tracking-widest text-slate-400">Phường/xã thường trú</div>
+            <div class="mt-1.5 font-medium text-slate-900">{{ detailData.permanentCommuneName || `#${detailData.idCommune || "-"}` }}</div>
+          </div>
+          <div class="rounded-xl border border-slate-100 bg-white p-4 shadow-sm md:col-span-2">
+            <div class="text-[11px] font-bold uppercase tracking-widest text-slate-400">Địa chỉ thường trú</div>
+            <div class="mt-1.5 font-medium text-slate-900">{{ detailData.permanentAddress || "-" }}</div>
+          </div>
+          <div class="rounded-xl border border-slate-100 bg-white p-4 shadow-sm">
+            <div class="text-[11px] font-bold uppercase tracking-widest text-slate-400">Số điện thoại</div>
+            <div class="mt-1.5 font-medium text-slate-900">{{ detailData.phoneNumber || "-" }}</div>
+          </div>
+          <div class="rounded-xl border border-slate-100 bg-white p-4 shadow-sm">
+            <div class="text-[11px] font-bold uppercase tracking-widest text-slate-400">Tỉnh hiện tại</div>
+            <div class="mt-1.5 font-medium text-slate-900">{{ detailData.currentProvinceName || `#${detailData.idCurrentProvince || "-"}` }}</div>
+          </div>
+          <div class="rounded-xl border border-slate-100 bg-white p-4 shadow-sm">
+            <div class="text-[11px] font-bold uppercase tracking-widest text-slate-400">Phường/xã hiện tại</div>
+            <div class="mt-1.5 font-medium text-slate-900">{{ detailData.currentCommuneName || `#${detailData.idCurrentCommune || "-"}` }}</div>
+          </div>
+          <div class="rounded-xl border border-slate-100 bg-white p-4 shadow-sm md:col-span-2">
+            <div class="text-[11px] font-bold uppercase tracking-widest text-slate-400">Địa chỉ hiện tại</div>
+            <div class="mt-1.5 font-medium text-slate-900">{{ detailData.currentAddress || "-" }}</div>
+          </div>
+          <div v-if="detailData.note" class="rounded-xl border border-slate-100 bg-amber-50 p-4 shadow-sm md:col-span-2">
+            <div class="text-[11px] font-bold uppercase tracking-widest text-amber-600">Ghi chú</div>
+            <div class="mt-1.5 font-medium text-slate-900">{{ detailData.note }}</div>
+          </div>
+        </div>
 
-        <div>
-          <h3 class="mb-3 text-base font-semibold text-slate-900">Hồ sơ đính kèm</h3>
+        <div class="mt-8">
+          <div class="mb-6 flex items-center gap-3">
+            <div class="flex h-10 w-10 items-center justify-center rounded-2xl bg-indigo-50 text-indigo-600">
+              <Icon name="lucide:folder-open" class="text-xl" />
+            </div>
+            <h3 class="text-xl font-bold text-slate-900">Hồ sơ đính kèm</h3>
+          </div>
 
-          <div v-if="normalizedDocuments.length" class="space-y-4">
-            <div v-for="document in normalizedDocuments" :key="document.key" class="rounded-xl border border-slate-200 bg-slate-50 p-4">
-              <div class="mb-3 flex items-center justify-between gap-3">
-                <div class="font-medium text-slate-900">{{ document.displayName }}</div>
-                <div class="text-xs text-slate-500">{{ document.links.length }} file</div>
+          <div v-if="normalizedDocuments.length" class="space-y-5">
+            <div v-for="document in normalizedDocuments" :key="document.key" class="group overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm transition-all hover:border-blue-200 hover:shadow-md">
+              <div class="flex flex-col gap-5 p-6 lg:flex-row lg:items-start lg:justify-between">
+                <div class="flex-1">
+                  <div class="flex flex-wrap items-center gap-3">
+                    <h4 class="text-base font-bold text-slate-900">{{ document.displayName }}</h4>
+                  </div>
+                  <p class="mt-2 text-sm text-slate-500">{{ document.links.length }} file đính kèm.</p>
+                </div>
+
+                <div v-if="showEditAction" class="w-full shrink-0 lg:w-auto">
+                  <input :id="`edit-document-${document.idExamDocument}`" type="file" class="!hidden" :disabled="isDocumentUploading(document.idExamDocument) || isEditingProcessing" accept=".pdf,.png,.jpg,.jpeg,.webp" multiple @change="event => handleEditDocumentUpload(document.idExamDocument, event)" />
+
+                  <label :for="`edit-document-${document.idExamDocument}`" class="inline-flex w-full cursor-pointer items-center justify-center gap-2 rounded-xl bg-white px-5 py-2.5 text-sm font-semibold text-slate-700 shadow-sm ring-1 ring-inset ring-slate-200 transition-all focus-within:ring-2 focus-within:ring-blue-500 hover:bg-slate-50 hover:text-blue-600 lg:w-auto" :class="{ 'cursor-not-allowed opacity-50': isDocumentUploading(document.idExamDocument) || isEditingProcessing }">
+                    <Icon name="lucide:plus" class="text-lg" />
+                    <span>Thêm file</span>
+                  </label>
+                </div>
               </div>
 
-              <div v-if="showEditAction" class="mb-3">
-                <input type="file" class="block w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-600 file:mr-3 file:rounded-md file:border-0 file:bg-sky-600 file:px-3 file:py-2 file:text-sm file:font-medium file:text-white" :disabled="isDocumentUploading(document.idExamDocument) || isEditingProcessing" accept=".pdf,.png,.jpg,.jpeg,.webp" multiple @change="event => handleEditDocumentUpload(document.idExamDocument, event)" />
-                <div v-if="isDocumentUploading(document.idExamDocument)" class="mt-3 flex items-center gap-3 rounded-xl border border-sky-200 bg-sky-50 px-4 py-3 text-sm text-sky-700">
+              <div v-if="isDocumentUploading(document.idExamDocument)" class="border-t border-slate-100 bg-slate-50/50 p-6">
+                <div class="flex items-center justify-center gap-3 rounded-2xl border border-blue-100 bg-blue-50/50 p-4 text-sm font-medium text-blue-700">
                   <a-spin size="small" />
                   Đang upload hồ sơ...
                 </div>
               </div>
 
-              <div class="space-y-2 rounded-lg bg-white p-3">
-                <div v-for="(link, index) in document.links" :key="`${document.key}-${index}`" class="flex items-center justify-between gap-3 break-all text-sm text-slate-700">
-                  <div class="min-w-0 flex-1 break-all">
-                    <BaseImagePreviewLink v-if="getFileType(link) === 'image'" :src="link" />
-                    <BasePdfPreviewLink v-else-if="getFileType(link) === 'pdf'" :src="link" />
-                    <a v-else :href="link" target="_blank" rel="noopener noreferrer" class="text-blue-600 hover:underline">{{ getDisplayName(link) }}</a>
+              <div v-else-if="document.links.length" class="border-t border-slate-100 bg-slate-50/50 p-6">
+                <div class="grid gap-3 sm:grid-cols-2">
+                  <div v-for="(link, index) in document.links" :key="`${document.key}-${index}`" class="group/file relative flex items-center gap-3 rounded-2xl border border-slate-200 bg-white p-3 shadow-sm transition-all hover:border-blue-300">
+                    <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-slate-100 text-slate-500 transition-colors group-hover/file:bg-blue-50 group-hover/file:text-blue-600">
+                      <Icon v-if="getFileType(link) === 'image'" name="lucide:image" class="text-xl" />
+                      <Icon v-else-if="getFileType(link) === 'pdf'" name="lucide:file-text" class="text-xl" />
+                      <Icon v-else name="lucide:file" class="text-xl" />
+                    </div>
+
+                    <div class="min-w-0 flex-1">
+                      <BaseImagePreviewLink v-if="getFileType(link) === 'image'" :src="link" class="truncate text-sm font-medium text-slate-700 hover:text-blue-600" />
+                      <BasePdfPreviewLink v-else-if="getFileType(link) === 'pdf'" :src="link" class="truncate text-sm font-medium text-slate-700 hover:text-blue-600" />
+                      <a v-else :href="link" target="_blank" rel="noopener noreferrer" class="block truncate text-sm font-medium text-slate-700 hover:text-blue-600">{{ getDisplayName(link) }}</a>
+                    </div>
+
+                    <button v-if="showEditAction" type="button" class="flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 opacity-0 transition-all hover:bg-rose-50 hover:text-rose-500 disabled:opacity-50 group-hover/file:opacity-100" :disabled="isEditingProcessing" @click.prevent="removeEditDocumentFile(document.idExamDocument, index)" title="Xóa file">
+                      <Icon name="lucide:x" class="text-lg" />
+                    </button>
                   </div>
-                  <a-button v-if="showEditAction" type="link" danger size="small" :disabled="isEditingProcessing" @click="removeEditDocumentFile(document.idExamDocument, index)">
-                    Xóa
-                  </a-button>
                 </div>
+              </div>
+
+              <div v-else-if="!showEditAction" class="border-t border-slate-100 p-6 text-center">
+                <div class="inline-block rounded-2xl border border-dashed border-slate-200 bg-slate-50 px-6 py-4 text-sm text-slate-500">Hồ sơ này không có tài liệu đính kèm.</div>
               </div>
             </div>
           </div>
 
-          <div v-else class="rounded-xl border border-dashed border-slate-300 bg-slate-50 px-4 py-6 text-sm text-slate-500">Hồ sơ này chưa có tài liệu đính kèm.</div>
+          <div v-else class="flex flex-col items-center justify-center rounded-3xl border border-dashed border-slate-300 bg-slate-50 py-12 text-center">
+            <div class="mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-slate-100 text-slate-400">
+              <Icon name="lucide:folder-check" class="text-2xl" />
+            </div>
+            <p class="text-sm font-medium text-slate-500">Hồ sơ này chưa có tài liệu đính kèm.</p>
+          </div>
         </div>
 
         <div class="flex justify-end gap-2 border-t border-slate-100 pt-4">
@@ -886,6 +979,7 @@ const fetchDetailData = async (record, { resetData = true } = {}) => {
   try {
     const { data, error } = await applicationUser.getDetail({
       params: { id: recordId },
+      key: `user-application-detail-${recordId}-${Date.now()}`,
     });
 
     if (error.value || data.value?.success === false || !data.value?.data) {

@@ -186,9 +186,7 @@
             <a-form-item label="Ngày thanh toán">
               <a-date-picker v-model:value="paymentForm.payDate" show-time format="DD/MM/YYYY HH:mm:ss" class="w-full" placeholder="Chọn ngày thanh toán" />
             </a-form-item>
-            <a-form-item label="Ngân hàng" required>
-              <a-input v-model:value="paymentForm.bank" placeholder="Nhập tên ngân hàng" />
-            </a-form-item>
+            <AdminSelectBank v-model="paymentForm.bank" label="Ngân hàng" required />
             <a-form-item label="Chủ tài khoản" required>
               <a-input v-model:value="paymentForm.accountName" placeholder="Nhập tên chủ tài khoản" />
             </a-form-item>
@@ -589,10 +587,10 @@ const openPaymentDetail = async (record, fromDetail = false) => {
   paymentData.value = null;
 
   try {
-    const { data, error } = await adminPayment.getDetail({
+    const { data, error } = await adminPayment.getByRest("detail", {
       params: { idApplication: selectedRecord.value.id },
+      key: `admin-payment-detail-${selectedRecord.value.id}-${Date.now()}`,
     });
-
     if (error.value || data.value?.success === false || !data.value?.data) {
       throw new Error(error.value?.data?.message || data.value?.message || "Không thể tải thông tin thanh toán");
     }
