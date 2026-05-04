@@ -526,10 +526,10 @@ const openDetail = async recordOrId => {
   detailData.value = null;
 
   try {
-    const { data, error } = await adminApplication.getById({
+    const { data, error } = await adminApplication.getByRest("detail", {
       params: { id },
+      key: `admin-application-detail-${id}-${Date.now()}`,
     });
-
     if (error.value || data.value?.success === false || !data.value?.data) {
       throw new Error(error.value?.data?.message || data.value?.message || "Không thể tải thông tin chi tiết");
     }
@@ -627,7 +627,7 @@ const submitCompletePayment = async () => {
   completePaymentLoading.value = true;
 
   try {
-    const { data, error } = await adminApplication.completePayment({
+    const { data, error } = await adminApplication.putByRest("completePayment", {
       body: {
         id: Number(paymentData.value.id),
         idApplication: Number(paymentData.value.idApplication),
@@ -637,7 +637,6 @@ const submitCompletePayment = async () => {
         accountNumber: paymentForm.accountNumber.trim(),
       },
     });
-
     if (error.value || data.value?.success === false) {
       throw new Error(error.value?.data?.message || data.value?.message || "Xác nhận thanh toán thất bại");
     }
@@ -655,10 +654,9 @@ const submitCompletePayment = async () => {
 
 const approveItem = async (record, keepModal = false) => {
   try {
-    const { data, error } = await adminApplication.approve({
+    const { data, error } = await adminApplication.putByRest("approve", {
       params: { id: record.id },
     });
-
     if (error.value || data.value?.success === false) {
       throw new Error(error.value?.data?.message || data.value?.message || "Duyệt hồ sơ thất bại");
     }
@@ -705,13 +703,12 @@ const submitReject = async () => {
   rejectLoading.value = true;
 
   try {
-    const { data, error } = await adminApplication.reject({
+    const { data, error } = await adminApplication.putByRest("reject", {
       body: {
         id: selectedRecord.value.id,
         note: rejectNote.value.trim(),
       },
     });
-
     if (error.value || data.value?.success === false) {
       throw new Error(error.value?.data?.message || data.value?.message || "Từ chối hồ sơ thất bại");
     }
