@@ -1,4 +1,5 @@
 import { defineStore } from "pinia";
+import { PERMISSION_STATE } from "~/composables/useAdminRoutePermission";
 
 export const useAdminStore = defineStore("admin", {
   state: () => ({
@@ -37,16 +38,18 @@ export const useAdminStore = defineStore("admin", {
     menuPermissions: state => state.permissions,
     canViewCurrentPage: state => {
       if (state.admin?.isSuperAdmin) return true;
-      const PERMISSION_STATE = { NO_ACCESS: 0, VIEW: 1, EDIT: 2 };
-      return state.current_permission === PERMISSION_STATE.VIEW || state.current_permission === PERMISSION_STATE.EDIT;
+      return state.current_permission >= PERMISSION_STATE.VIEW;
+    },
+    canApproveCurrentPage: state => {
+      if (state.admin?.isSuperAdmin) return true;
+      return state.current_permission >= PERMISSION_STATE.APPROVE;
     },
     canEditCurrentPage: state => {
       if (state.admin?.isSuperAdmin) return true;
-      const PERMISSION_STATE = { NO_ACCESS: 0, VIEW: 1, EDIT: 2 };
       return state.current_permission === PERMISSION_STATE.EDIT;
     },
     currentPermission() {
-      return this.canEditCurrentPage;
+      return this.current_permission;
     },
   },
 

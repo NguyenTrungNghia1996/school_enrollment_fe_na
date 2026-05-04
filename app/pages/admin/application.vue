@@ -41,19 +41,19 @@
               </a-tooltip>
 
               <a-tooltip title="Duyệt hồ sơ">
-                <a-button type="link" size="small" class="text-emerald-600" :disabled="isActionDisabled(record) || !adminStore.canEditCurrentPage" @click="approveItem(record)">
+                <a-button type="link" size="small" class="text-emerald-600" :disabled="isActionDisabled(record) || !adminStore.canApproveCurrentPage" @click="approveItem(record)">
                   <template #icon><CheckOutlined /></template>
                 </a-button>
               </a-tooltip>
 
               <a-tooltip title="Từ chối hồ sơ">
-                <a-button type="link" size="small" danger :disabled="isActionDisabled(record) || !adminStore.canEditCurrentPage" @click="openReject(record)">
+                <a-button type="link" size="small" danger :disabled="isActionDisabled(record) || !adminStore.canApproveCurrentPage" @click="openReject(record)">
                   <template #icon><CloseOutlined /></template>
                 </a-button>
               </a-tooltip>
 
               <a-tooltip v-if="showPaymentInfoAction(record)" title="Thông tin thanh toán">
-                <a-button type="link" size="small" class="text-sky-600" :disabled="!adminStore.canEditCurrentPage" @click="openPaymentDetail(record)">
+                <a-button type="link" size="small" class="text-sky-600" :disabled="!adminStore.canApproveCurrentPage" @click="openPaymentDetail(record)">
                   <template #icon><CreditCardOutlined /></template>
                 </a-button>
               </a-tooltip>
@@ -143,9 +143,9 @@
 
         <div class="flex justify-end gap-2 border-t border-slate-100 pt-4">
           <a-button @click="closeDetail">Đóng</a-button>
-          <a-button v-if="showPaymentInfoAction(detailData)" :disabled="!adminStore.canEditCurrentPage" @click="openPaymentDetail(detailData, true)">Thông tin thanh toán</a-button>
-          <a-button type="primary" :disabled="!detailData || isActionDisabled(detailData) || !adminStore.canEditCurrentPage" @click="approveItem(detailData, true)">Duyệt hồ sơ</a-button>
-          <a-button danger :disabled="!detailData || isActionDisabled(detailData) || !adminStore.canEditCurrentPage" @click="openReject(detailData, true)">Từ chối</a-button>
+          <a-button v-if="showPaymentInfoAction(detailData)" :disabled="!adminStore.canApproveCurrentPage" @click="openPaymentDetail(detailData, true)">Thông tin thanh toán</a-button>
+          <a-button type="primary" :disabled="!detailData || isActionDisabled(detailData) || !adminStore.canApproveCurrentPage" @click="approveItem(detailData, true)">Duyệt hồ sơ</a-button>
+          <a-button danger :disabled="!detailData || isActionDisabled(detailData) || !adminStore.canApproveCurrentPage" @click="openReject(detailData, true)">Từ chối</a-button>
         </div>
       </div>
     </a-modal>
@@ -200,7 +200,7 @@
 
         <div class="flex justify-end gap-2 border-t border-slate-100 pt-4">
           <a-button @click="closePaymentDetail">Đóng</a-button>
-          <a-button type="primary" :loading="completePaymentLoading" :disabled="!adminStore.canEditCurrentPage" @click="submitCompletePayment">Xác nhận thanh toán</a-button>
+          <a-button type="primary" :loading="completePaymentLoading" :disabled="!adminStore.canApproveCurrentPage" @click="submitCompletePayment">Xác nhận thanh toán</a-button>
         </div>
       </div>
     </a-modal>
