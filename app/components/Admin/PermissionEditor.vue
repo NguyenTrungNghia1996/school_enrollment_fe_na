@@ -81,19 +81,26 @@ function buildMenuWithLevel(data, parentId = 0, level = 0) {
   return result
 }
 
-function normalizeInputPermissions(menuData, inputPermissions) {
-  // Tạo danh sách các key hợp lệ (các menu cha + key 'menu')
-  const validParentKeys = new Set(
-    menuData
-      .filter(d => (d.parentId ?? d.parent_Id) === 0 || (d.parentId ?? d.parent_Id) === null)
-      .map(d => d.keyCode || d.key)
-  )
-  validParentKeys.add('menu') // Luôn có key 'menu'
+function getParentKeys(menuData) {
+  return menuData
+    .filter(d => (d.parentId ?? d.parent_Id) === 0 || (d.parentId ?? d.parent_Id) === null)
+    .map(d => d.keyCode || d.key)
+}
 
-  // Lọc chỉ giữ lại các permission có key hợp lệ và giá trị là number
-  return inputPermissions.filter(item =>
-    validParentKeys.has(item.key) && typeof item.permissionValue === 'number'
-  )
+function normalizeInputPermissions(menuData, inputPermissions = []) {
+  const parentKeys = getParentKeys(menuData)
+  const orderedKeys = ['menu', ...parentKeys]
+  const validKeys = new Set(orderedKeys)
+
+  return inputPermissions
+    .map((item, index) => {
+      const resolvedKey = item.key || item.keyCode || orderedKeys[index]
+      return {
+        key: resolvedKey,
+        permissionValue: item.permissionValue
+      }
+    })
+    .filter(item => validKeys.has(item.key) && typeof item.permissionValue === 'number')
 }
 // Khởi tạo menuPermissions từ dữ liệu server
 function initMenuPermissions(menuData, serverPerms) {
@@ -106,9 +113,7 @@ function initMenuPermissions(menuData, serverPerms) {
     serverPermsMap[item.key] = item.permissionValue
   })
   menuPermissions.menu = serverPermsMap.menu || 0
-  const parentKeys = menuData
-    .filter(d => (d.parentId ?? d.parent_Id) === 0 || (d.parentId ?? d.parent_Id) === null)
-    .map(d => d.keyCode || d.key)
+  const parentKeys = getParentKeys(menuData)
   parentKeys.forEach(key => {
     menuPermissions[key] = serverPermsMap[key] || 0
   })
