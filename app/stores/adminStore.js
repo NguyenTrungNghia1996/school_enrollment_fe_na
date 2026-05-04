@@ -38,16 +38,13 @@ export const useAdminStore = defineStore("admin", {
     menuPermissions: state => state.permissions,
     canViewCurrentPage: state => {
       if (state.admin?.isSuperAdmin) return true;
-      // return [PERMISSION_STATE.VIEW, PERMISSION_STATE.APPROVE, PERMISSION_STATE.EDIT].includes(state.current_permission);
-      return state.current_permission === PERMISSION_STATE.VIEW;
+      return [PERMISSION_STATE.VIEW, PERMISSION_STATE.APPROVE, PERMISSION_STATE.EDIT].includes(state.current_permission);
+      // return state.current_permission === PERMISSION_STATE.VIEW;
     },
     canApproveCurrentPage: state => {
       if (state.admin?.isSuperAdmin) return true;
-      // return [
-      //   PERMISSION_STATE.APPROVE,
-      //   PERMISSION_STATE.EDIT,
-      // ].includes(state.current_permission);
-      return state.current_permission === PERMISSION_STATE.APPROVE;
+      return [PERMISSION_STATE.APPROVE, PERMISSION_STATE.EDIT].includes(state.current_permission);
+      // return state.current_permission === PERMISSION_STATE.APPROVE;
     },
     canEditCurrentPage: state => {
       if (state.admin?.isSuperAdmin) return true;
