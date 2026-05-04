@@ -36,12 +36,12 @@
                 <span>Hồ sơ cá nhân</span>
               </div>
             </a-menu-item> -->
-            <!-- <a-menu-item key="change_password" class="hover:bg-gray-700/50 !px-4 !py-2.5 !mx-0 text-gray-200 hover:text-white" @click="showChangePasswordModal">
+            <a-menu-item key="change_password" class="hover:bg-gray-700/50 !px-4 !py-2.5 !mx-0 text-gray-200 hover:text-white" @click="showChangePasswordModal">
               <div class="flex items-center gap-2">
                 <KeyOutlined class="text-blue-400" />
                 <span>Đổi mật khẩu</span>
               </div>
-            </a-menu-item> -->
+            </a-menu-item>
             <a-menu-item key="logout" class="text-gray-600 hover:bg-gray-700/50 hover:text-white" @click="signOut">
               <div class="flex items-center gap-2">
                 <LogoutOutlined class="text-error" />
@@ -52,11 +52,103 @@
         </template>
       </a-dropdown>
     </div>
+
+    <a-modal v-model:open="changePasswordOpen" title="Đổi mật khẩu" :footer="null" :destroy-on-close="true" @cancel="closeChangePasswordModal">
+      <a-form ref="changePasswordFormRef" :model="changePasswordForm" layout="vertical" autocomplete="off" class="mt-4" @finish="submitChangePassword">
+        <a-form-item label="Mật khẩu hiện tại" name="oldPassword" :rules="[{ required: true, message: 'Vui lòng nhập mật khẩu hiện tại' }]">
+          <a-input-password v-model:value="changePasswordForm.oldPassword" placeholder="Nhập mật khẩu hiện tại" />
+        </a-form-item>
+
+        <a-form-item
+          label="Mật khẩu mới"
+          name="newPassword"
+          :rules="[
+            { required: true, message: 'Vui lòng nhập mật khẩu mới' },
+            { min: 6, message: 'Mật khẩu mới cần tối thiểu 6 ký tự' },
+          ]">
+          <a-input-password v-model:value="changePasswordForm.newPassword" placeholder="Nhập mật khẩu mới" />
+        </a-form-item>
+
+        <a-form-item
+          label="Xác nhận mật khẩu mới"
+          name="confirmPassword"
+          :rules="[
+            { required: true, message: 'Vui lòng xác nhận mật khẩu mới' },
+            {
+              validator: async (_rule, value) => {
+                if (!value || value === changePasswordForm.newPassword) return;
+                throw new Error('Mật khẩu xác nhận không khớp');
+              },
+            },
+          ]">
+          <a-input-password v-model:value="changePasswordForm.confirmPassword" placeholder="Nhập lại mật khẩu mới" />
+        </a-form-item>
+
+        <div class="flex justify-end gap-2">
+          <a-button @click="closeChangePasswordModal">Hủy</a-button>
+          <a-button type="primary" html-type="submit" :loading="changePasswordLoading">Cập nhật mật khẩu</a-button>
+        </div>
+      </a-form>
+    </a-modal>
   </div>
 </template>
 <script setup>
 const unitStore = useUnitStore();
 const adminStore = useAdminStore();
+const { authAdmin } = useApi();
+
+const changePasswordOpen = ref(false);
+const changePasswordLoading = ref(false);
+const changePasswordFormRef = ref();
+const changePasswordForm = reactive({
+  oldPassword: "",
+  newPassword: "",
+  confirmPassword: "",
+});
+
+const resetChangePasswordForm = () => {
+  Object.assign(changePasswordForm, {
+    oldPassword: "",
+    newPassword: "",
+    confirmPassword: "",
+  });
+  changePasswordFormRef.value?.clearValidate?.();
+};
+
+const showChangePasswordModal = () => {
+  changePasswordOpen.value = true;
+};
+
+const closeChangePasswordModal = () => {
+  changePasswordOpen.value = false;
+  resetChangePasswordForm();
+};
+
+const submitChangePassword = async () => {
+  changePasswordLoading.value = true;
+
+  try {
+    const { data, error } = await authAdmin.changePassword({
+      body: {
+        oldPassword: changePasswordForm.oldPassword,
+        newPassword: changePasswordForm.newPassword,
+        confirmPassword: changePasswordForm.confirmPassword,
+      },
+    });
+
+    if (error.value || data.value?.status === "error" || data.value?.success === false) {
+      throw new Error(error.value?.data?.message || data.value?.message || "Đổi mật khẩu thất bại");
+    }
+
+    message.success(data.value?.message || "Đổi mật khẩu thành công");
+    closeChangePasswordModal();
+  } catch (error) {
+    message.error(error?.message || "Đổi mật khẩu thất bại");
+  } finally {
+    changePasswordLoading.value = false;
+  }
+};
+
 const signOut = () => {
   adminStore.logout();
   navigateTo("/login");

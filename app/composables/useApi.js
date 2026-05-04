@@ -47,6 +47,9 @@ export const useApi = () => {
       login(options) {
         return adminRequest.post("/api/admin/login", options ?? {});
       },
+      changePassword(options) {
+        return adminRequest.post("/api/admin/changePassword", options ?? {});
+      },
       permission(options) {
         return adminRequest.get("/api/admin/permission", options ?? {});
       },
