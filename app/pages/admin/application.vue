@@ -186,9 +186,7 @@
             <a-form-item label="Ngày thanh toán">
               <a-date-picker v-model:value="paymentForm.payDate" show-time format="DD/MM/YYYY HH:mm:ss" class="w-full" placeholder="Chọn ngày thanh toán" />
             </a-form-item>
-            <a-form-item label="Ngân hàng" required>
-              <a-input v-model:value="paymentForm.bank" placeholder="Nhập tên ngân hàng" />
-            </a-form-item>
+            <AdminSelectBank v-model="paymentForm.bank" label="Ngân hàng" required />
             <a-form-item label="Chủ tài khoản" required>
               <a-input v-model:value="paymentForm.accountName" placeholder="Nhập tên chủ tài khoản" />
             </a-form-item>

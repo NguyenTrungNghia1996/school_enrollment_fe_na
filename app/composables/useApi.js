@@ -58,6 +58,7 @@ export const useApi = () => {
     adminRoles: useCrudApiAdmin("/api/admin/roles"),
     adminManage: useCrudApiAdmin("/api/admin"),
     adminUser: useCrudApiAdmin("/api/users"),
+    adminBank: useCrudApiAdmin("/api/banks"),
     adminSubject: useCrudApiAdmin("/api/subject"),
     adminEnrollment: useCrudApiAdmin("/api/exam"),
     adminCandidate: {

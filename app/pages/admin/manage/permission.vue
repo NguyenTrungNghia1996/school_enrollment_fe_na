@@ -184,12 +184,17 @@ const handleOk = async () => {
     await formRef.value.validate();
     confirmLoading.value = true;
 
+    const payload = {
+      ...(isEdit.value ? { id: formState.id } : {}),
+      name: String(formState.name || "").trim(),
+      description: String(formState.description || "").trim(),
+      permission: Array.isArray(formState.permission) ? formState.permission : [],
+    };
+
     let res;
     if (isEdit.value) {
-      res = await adminRoles.put({ body: formState });
+      res = await adminRoles.put({ body: payload });
     } else {
-      const payload = { ...formState };
-      delete payload.id;
       res = await adminRoles.post({ body: payload });
     }
 
