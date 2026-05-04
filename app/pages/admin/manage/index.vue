@@ -24,6 +24,11 @@
               <a-button type="link" size="small" @click="editItem(record.id)" :disabled="!adminStore.canEditCurrentPage">
                 <template #icon><EditOutlined /></template>
               </a-button>
+              <a-popconfirm title="Bạn chắc chắn muốn đặt lại mật khẩu cho quản trị viên này?" ok-text="Đồng ý" cancel-text="Hủy" @confirm="resetPassword(record.id)">
+                <a-button type="link" size="small" :loading="resettingPasswordId === record.id" :disabled="!adminStore.canEditCurrentPage">
+                  <template #icon><KeyOutlined /></template>
+                </a-button>
+              </a-popconfirm>
               <a-popconfirm title="Bạn chắc chắn muốn xóa quản trị viên này?" ok-text="Đồng ý" cancel-text="Hủy" @confirm="deleteItem(record.id)">
                 <a-button type="link" danger size="small" :disabled="!adminStore.canEditCurrentPage">
                   <template #icon><DeleteOutlined /></template>
@@ -81,6 +86,7 @@ const visible = ref(false);
 const confirmLoading = ref(false);
 const isEdit = ref(false);
 const formRef = ref();
+const resettingPasswordId = ref(null);
 
 const pagination = reactive({
   current: 1,
@@ -98,7 +104,7 @@ const columns = [
   { title: "SĐT", dataIndex: "phoneNumber", key: "phoneNumber", width: 120 },
   { title: "Chức vụ", dataIndex: "position", key: "position", ellipsis: true },
   { title: "Trạng thái", dataIndex: "active", key: "active", width: 120, align: "center" },
-  { title: "Thao tác", key: "action", width: 100, align: "center", fixed: "right" },
+  { title: "Thao tác", key: "action", width: 140, align: "center", fixed: "right" },
 ];
 
 const formState = reactive({
@@ -247,6 +253,25 @@ const deleteItem = async id => {
     }
   } catch (err) {
     message.error("Lỗi khi xóa");
+  }
+};
+
+const resetPassword = async id => {
+  resettingPasswordId.value = id;
+  try {
+    const { data, error } = await adminManage.postByRest("resetPassword", {
+      params: { id },
+    });
+
+    if (data.value?.success) {
+      message.success(data.value?.message || "Đặt lại mật khẩu thành công");
+    } else {
+      throw new Error(error.value?.data?.message || data.value?.message || "Không thể đặt lại mật khẩu");
+    }
+  } catch (err) {
+    message.error(err.message || "Lỗi khi đặt lại mật khẩu");
+  } finally {
+    resettingPasswordId.value = null;
   }
 };
 
