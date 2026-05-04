@@ -6,7 +6,7 @@ const DEFAULT_UNIT = {
   email: "c2giangvo2-bd@hanoiedu.vn",
   phone: "088 699 5511",
   logo: "/images/logo.png",
-  logo_full: "https://c2giangvo2.giangvo.edu.vn/UploadFile/Images/2025/8/12/Hinh_anh_638905852601746196.png",
+  logo_full: "/images/logo-full.png",
 };
 
 export const useUnitStore = defineStore("unit", {
