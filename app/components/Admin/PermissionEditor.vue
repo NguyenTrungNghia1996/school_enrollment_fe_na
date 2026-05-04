@@ -5,7 +5,8 @@
         <a-radio-group size="small" option-type="button" button-style="solid" :value="getPermission(record.key, record.permissionBit)" @change="e => setPermission(record.key, record.permissionBit, e.target.value)">
           <a-radio :value="0">Ẩn</a-radio>
           <a-radio :value="1">Xem</a-radio>
-          <a-radio :value="2">Sửa</a-radio>
+          <a-radio :value="2">Duyệt</a-radio>
+          <a-radio :value="3">Sửa</a-radio>
         </a-radio-group>
       </template>
       <template v-else-if="column.dataIndex === 'title'">
@@ -163,7 +164,7 @@ const serverColumns = [
   { title: 'Permission Value', dataIndex: 'permissionValue' },
 ]
 
-const formatPermission = (val) => val === 0 ? 'Ẩn' : val === 1 ? 'Xem' : 'Sửa'
+const formatPermission = (val) => val === 0 ? 'Ẩn' : val === 1 ? 'Xem' : val === 2 ? 'Duyệt' : 'Sửa'
 
 const flattenPermissions = (nodes) =>
   nodes.flatMap(n => {

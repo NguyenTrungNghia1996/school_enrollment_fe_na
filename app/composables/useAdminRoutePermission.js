@@ -1,7 +1,8 @@
 export const PERMISSION_STATE = {
   NO_ACCESS: 0,
   VIEW: 1,
-  EDIT: 2,
+  APPROVE: 2,
+  EDIT: 3,
 };
 
 export const findAdminMenuPath = (items, path) => {
