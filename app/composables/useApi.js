@@ -87,11 +87,7 @@ export const useApi = () => {
         return adminRequest.post("/api/admin/exam/result/publish", options ?? {});
       },
     },
-    adminPayment: {
-      getDetail(options) {
-        return adminRequest.get("/api/admin/payment/detail", options ?? {});
-      },
-    },
+    adminPayment: useCrudApiAdmin("/api/admin/payment"),
     adminApplication: {
       get(options) {
         return adminRequest.get("/api/admin/application", options ?? {});

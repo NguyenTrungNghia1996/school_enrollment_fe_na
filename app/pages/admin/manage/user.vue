@@ -169,7 +169,11 @@ const showModal = () => {
 const editItem = async id => {
   isEdit.value = true;
   try {
-    const { data } = await adminUser.getByRest("detail", { params: { id: id } });
+    // key: `admin-permission-${Date.now()}`
+    const { data } = await adminUser.getByRest("detail", {
+      params: { id: id },
+      key: `admin-user-detail-${id}-${Date.now()}`,
+    });
     if (data.value?.success) {
       const detail = data.value.data;
       Object.assign(formState, {

@@ -589,10 +589,10 @@ const openPaymentDetail = async (record, fromDetail = false) => {
   paymentData.value = null;
 
   try {
-    const { data, error } = await adminPayment.getDetail({
+    const { data, error } = await adminPayment.getByRest("detail", {
       params: { idApplication: selectedRecord.value.id },
+      key: `admin-payment-detail-${selectedRecord.value.id}-${Date.now()}`,
     });
-
     if (error.value || data.value?.success === false || !data.value?.data) {
       throw new Error(error.value?.data?.message || data.value?.message || "Không thể tải thông tin thanh toán");
     }

@@ -74,7 +74,10 @@ export const useMenu = () => {
 
   const loadMenu = async () => {
     try {
-      const { data } = await adminMenus.get();
+      // key: `admin-permission-${Date.now()}`
+      const { data } = await adminMenus.get({
+        // key: `admin-menu-${Date.now}`,
+      });
       if (data.value?.success) {
         const tree = buildTree(data.value.data.items);
         adminStore.setMenu(tree);

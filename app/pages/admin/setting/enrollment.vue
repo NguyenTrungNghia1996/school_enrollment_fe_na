@@ -218,7 +218,10 @@ const showModal = () => {
 const editItem = async id => {
   isEdit.value = true;
   try {
-    const { data } = await adminEnrollment.getByRest("detail", { params: { id: id } });
+    const { data } = await adminEnrollment.getByRest("detail", {
+      params: { id: id },
+      key: `admin-enrollment-detail-${id}-${Date.now()}`,
+    });
     if (data.value?.success) {
       const detail = data.value.data;
       const startDate = detail.startDate ? dayjs(detail.startDate) : null;
