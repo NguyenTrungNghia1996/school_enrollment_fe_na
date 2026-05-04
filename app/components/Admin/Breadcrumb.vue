@@ -42,7 +42,7 @@ const updateBreadcrumb = () => {
 
   currentPermission.value = resolveAdminRoutePermission({
     menu: adminStore.menu,
-    permissions: adminStore.permissions,
+    permissions: adminStore.menuPermissions,
     path: route.path,
     isSuperAdmin: adminStore.isSuperAdmin,
   }).permission;
@@ -82,7 +82,7 @@ watch(() => route.path, updateBreadcrumb, { immediate: true });
 
 // Theo dõi thay đổi menu data
 watch(() => visibleMenu.value, updateBreadcrumb);
-watch(() => adminStore.permissions, updateBreadcrumb);
+watch(() => adminStore.menuPermissions, updateBreadcrumb);
 </script>
 
 <style>
