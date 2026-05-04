@@ -39,11 +39,11 @@
       <a-form ref="formRef" :model="formState" :rules="rules" layout="vertical" class="mt-4">
         <template v-if="!isEdit">
           <a-form-item label="Tên đăng nhập" name="username">
-            <a-input v-model:value="formState.username" placeholder="Nhập tên đăng nhập" />
+            <a-input v-model:value="formState.username" placeholder="Nhập email" :maxlength="100" show-count />
           </a-form-item>
 
           <a-form-item label="Mật khẩu" name="password">
-            <a-input-password v-model:value="formState.password" placeholder="Nhập mật khẩu" />
+            <a-input-password v-model:value="formState.password" placeholder="Nhập mật khẩu" :maxlength="100" />
           </a-form-item>
         </template>
 
@@ -110,8 +110,15 @@ const formState = reactive({
 });
 
 const rules = {
-  username: [{ required: true, message: "Vui lòng nhập tên đăng nhập", trigger: "blur" }],
-  password: [{ required: true, message: "Vui lòng nhập mật khẩu", trigger: "blur" }],
+  username: [
+    { required: true, message: "Vui lòng nhập tên đăng nhập", trigger: "blur" },
+    { max: 100, message: "Tên đăng nhập tối đa 100 ký tự", trigger: "blur" },
+    { type: "email", message: "Tên đăng nhập phải là email hợp lệ", trigger: "blur" },
+  ],
+  password: [
+    { required: true, message: "Vui lòng nhập mật khẩu", trigger: "blur" },
+    { min: 6, message: "Mật khẩu tối thiểu 6 ký tự", trigger: "blur" },
+  ],
 };
 
 const param = ref({ PageIndex: 1, PageSize: 10, search: "" });
