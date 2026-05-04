@@ -39,11 +39,11 @@
       <a-form ref="formRef" :model="formState" :rules="rules" layout="vertical" class="mt-4">
         <div class="grid grid-cols-1 gap-x-4 md:grid-cols-2">
           <a-form-item label="Tên đăng nhập" name="username" v-if="!isEdit">
-            <a-input v-model:value="formState.username" placeholder="Nhập tên đăng nhập" />
+            <a-input v-model:value="formState.username" placeholder="Nhập tên đăng nhập" :maxlength="10" show-count />
           </a-form-item>
 
           <a-form-item label="Họ và tên" name="name">
-            <a-input v-model:value="formState.name" placeholder="Nhập họ tên" />
+            <a-input v-model:value="formState.name" placeholder="Nhập họ tên" :maxlength="100" show-count />
           </a-form-item>
 
           <a-form-item label="Số điện thoại" name="phoneNumber">
@@ -51,11 +51,11 @@
           </a-form-item>
 
           <a-form-item label="Chức vụ" name="position">
-            <a-input v-model:value="formState.position" placeholder="Nhập chức vụ" />
+            <a-input v-model:value="formState.position" placeholder="Nhập chức vụ" :maxlength="100" show-count />
           </a-form-item>
 
           <div class="md:col-span-2">
-            <AdminSelectRoles v-model="formState.idRoles" multiple label="Vai trò" placeholder="Chọn vai trò gán cho admin" name="idRoles" />
+            <AdminSelectRoles v-model="formState.idRoles" required multiple label="Vai trò" placeholder="Chọn vai trò gán cho admin" name="idRoles" />
           </div>
 
           <a-form-item label="Trạng thái" name="active" class="md:col-span-2">
@@ -112,9 +112,16 @@ const formState = reactive({
 });
 
 const rules = {
-  username: [{ required: true, message: "Vui lòng nhập tên đăng nhập", trigger: "blur" }],
-  name: [{ required: true, message: "Vui lòng nhập họ tên", trigger: "blur" }],
+  username: [
+    { required: true, message: "Vui lòng nhập tên đăng nhập", trigger: "blur" },
+    { max: 10, message: "Tên đăng nhập tối đa 10 ký tự", trigger: "blur" },
+  ],
+  name: [
+    { required: true, message: "Vui lòng nhập họ tên", trigger: "blur" },
+    { max: 100, message: "Họ và tên tối đa 100 ký tự", trigger: "blur" },
+  ],
   phoneNumber: [{ pattern: /^[0-9]+$/, message: "Số điện thoại không hợp lệ", trigger: "blur" }],
+  position: [{ max: 100, message: "Chức vụ tối đa 100 ký tự", trigger: "blur" }],
   idRoles: [{ required: true, type: "array", message: "Vui lòng chọn ít nhất một vai trò", trigger: "change" }],
 };
 
