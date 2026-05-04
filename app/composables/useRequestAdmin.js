@@ -20,6 +20,7 @@ export class RequestAdmin {
   // =========================
   handlers() {
     const adminStore = useAdminStore();
+    const safeMessage = useSafeMessage();
 
     return {
       onRequest: ctx => {
@@ -29,7 +30,7 @@ export class RequestAdmin {
 
         const isValid = this.isTokenValid(token);
         if (!isValid) {
-          message.info("Phiên đăng nhập đã hết hạn");
+          safeMessage.info("Phiên đăng nhập đã hết hạn");
           adminStore.logout();
           navigateTo("/admin/login");
           return;
@@ -46,7 +47,7 @@ export class RequestAdmin {
 
       async onResponseError(ctx) {
         if (ctx.response.status === 401) {
-          message.info("Phiên đăng nhập đã hết hạn");
+          safeMessage.info("Phiên đăng nhập đã hết hạn");
           adminStore.logout();
           await navigateTo("/admin/login");
         }

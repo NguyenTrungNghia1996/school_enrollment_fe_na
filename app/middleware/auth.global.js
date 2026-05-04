@@ -4,6 +4,7 @@ import { PERMISSION_STATE, resolveAdminRoutePermission } from "~/composables/use
 export default defineNuxtRouteMiddleware(async to => {
   const adminStore = useAdminStore();
   const userStore = useUserStore();
+  const safeMessage = useSafeMessage();
 
   const publicRoutes = ["/login", "/", "/activate"]; // Thêm các route công khai tại đây
   const publicStartWithRoutes = ["/test/"];
@@ -54,7 +55,7 @@ export default defineNuxtRouteMiddleware(async to => {
     adminStore.setCurrentPermission(permission);
 
     if (permission === PERMISSION_STATE.NO_ACCESS) {
-      message.warning("Bạn không có quyền truy cập trang này");
+      safeMessage.warning("Bạn không có quyền truy cập trang này");
       return navigateTo("/admin");
     }
 

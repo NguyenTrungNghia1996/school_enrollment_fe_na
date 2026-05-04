@@ -20,6 +20,7 @@ export class RequestUser {
   // =========================
   handlers() {
     const userStore = useUserStore();
+    const safeMessage = useSafeMessage();
 
     return {
       onRequest: ctx => {
@@ -29,7 +30,7 @@ export class RequestUser {
 
         const isValid = this.isTokenValid(token);
         if (!isValid) {
-          message.info("Phiên đăng nhập đã hết hạn");
+          safeMessage.info("Phiên đăng nhập đã hết hạn");
           userStore.logout();
           navigateTo("/");
           return;
@@ -46,7 +47,7 @@ export class RequestUser {
 
       async onResponseError(ctx) {
         if (ctx.response.status === 401) {
-          message.info("Phiên đăng nhập đã hết hạn");
+          safeMessage.info("Phiên đăng nhập đã hết hạn");
           userStore.logout();
           await navigateTo("/");
         }
