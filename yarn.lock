@@ -633,6 +633,13 @@
   dependencies:
     "@iconify/types" "*"
 
+"@iconify-json/lucide@^1.2.105":
+  version "1.2.105"
+  resolved "https://registry.yarnpkg.com/@iconify-json/lucide/-/lucide-1.2.105.tgz#c1b8520bb563e4860e66a9e7c14e46738b1f3ff9"
+  integrity sha512-tbE+cGEixWcRFtW8xkzX1HaGRqp7CDhZb01uPBh7PnRoxXzVET9E73rHOXDdsLKUGoTuYGZKhhX6oirvoy5NDg==
+  dependencies:
+    "@iconify/types" "*"
+
 "@iconify-json/ph@^1.2.2":
   version "1.2.2"
   resolved "https://registry.yarnpkg.com/@iconify-json/ph/-/ph-1.2.2.tgz#eac734e80f4639df6ade990690a825540b4259c4"
