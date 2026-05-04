@@ -60,7 +60,7 @@
           </a-form-item>
 
           <div class="md:col-span-2">
-            <AdminSelectRoles v-model="formState.idRoles" required multiple label="Vai trò" placeholder="Chọn vai trò gán cho admin" name="idRoles" />
+            <AdminSelectRoles v-model="formState.idRoles" :rules="rules.idRoles" multiple label="Vai trò" placeholder="Chọn vai trò gán cho admin" name="idRoles" />
           </div>
 
           <a-form-item label="Trạng thái" name="active" class="md:col-span-2">
@@ -210,10 +210,9 @@ const editItem = async id => {
 };
 
 const handleOk = async () => {
+  await formRef.value.validate();
   try {
-    await formRef.value.validate();
     confirmLoading.value = true;
-
     let res;
     if (isEdit.value) {
       const payload = { ...formState };
