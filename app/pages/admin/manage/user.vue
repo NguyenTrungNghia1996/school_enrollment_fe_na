@@ -94,9 +94,9 @@ const columns = [
   { title: "STT", key: "stt", width: 60, align: "center" },
   { title: "Tên đăng nhập", dataIndex: "username", key: "username", ellipsis: true },
   { title: "Họ tên", dataIndex: "name", key: "name", ellipsis: true },
-  { title: "Số điện thoại", dataIndex: "phoneNumber", key: "phoneNumber", width: 130 },
-  { title: "Chức vụ", dataIndex: "position", key: "position", ellipsis: true },
-  { title: "Site", dataIndex: "site", key: "site", width: 80, align: "center" },
+  // { title: "Số điện thoại", dataIndex: "phoneNumber", key: "phoneNumber", width: 130 },
+  // { title: "Chức vụ", dataIndex: "position", key: "position", ellipsis: true },
+  // { title: "Site", dataIndex: "site", key: "site", width: 80, align: "center" },
   { title: "Trạng thái", dataIndex: "active", key: "active", width: 120, align: "center" },
   { title: "Thao tác", key: "action", width: 100, align: "center", fixed: "right" },
 ];
