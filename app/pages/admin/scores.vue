@@ -214,7 +214,10 @@ const submitImport = async () => {
     const formData = new FormData();
     formData.append("file", selectedImportFile.value);
 
-    const { data, error } = await adminScore.import({
+    // const { data, error } = await adminScore.import({
+    //   body: formData,
+    // });
+    const { data, error } = await adminScore.postByRest("import", {
       body: formData,
     });
 
@@ -241,12 +244,16 @@ const publishScores = async () => {
   publishLoading.value = true;
 
   try {
-    const { data, error } = await adminScore.publish({
+    // const { data, error } = await adminScore.publish({
+    //   params: {
+    //     idExam: Number(selectedExamId.value),
+    //   },
+    // });
+    const { data, error } = await adminScore.postByRest("publish", {
       params: {
         idExam: Number(selectedExamId.value),
       },
     });
-
     if (error.value || data.value?.success === false) {
       throw new Error(error.value?.data?.message || data.value?.message || "Công bố điểm thi thất bại");
     }

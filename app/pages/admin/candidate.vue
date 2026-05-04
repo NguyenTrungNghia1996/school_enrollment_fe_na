@@ -234,11 +234,9 @@ const submitImport = async () => {
   try {
     const formData = new FormData();
     formData.append("file", selectedImportFile.value);
-
-    const { data, error } = await adminCandidate.import({
+    const { data, error } = await adminCandidate.postByRest("import", {
       body: formData,
     });
-
     if (error.value || data.value?.success === false) {
       throw new Error(error.value?.data?.message || data.value?.message || "Import danh sách thí sinh thất bại");
     }
@@ -262,7 +260,7 @@ const publishCandidates = async () => {
   publishLoading.value = true;
 
   try {
-    const { data, error } = await adminCandidate.publish({
+    const { data, error } = await adminCandidate.postByRest("publish", {
       params: {
         idExam: Number(selectedExamId.value),
       },

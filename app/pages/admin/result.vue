@@ -6,13 +6,9 @@
         <AdminSelectEnrollment v-model="selectedExamId" no-form-item :inlineLabel="false" placeholder="Lọc theo kỳ tuyển sinh" label="" />
       </div>
       <div class="flex w-full flex-initial gap-2 md:w-auto">
-        <a-button type="primary" ghost :loading="calculateLoading" :disabled="!selectedExamId || calculateLoading" @click="calculateResults">
-          Tính toán kết quả
-        </a-button>
+        <a-button type="primary" ghost :loading="calculateLoading" :disabled="!selectedExamId || calculateLoading" @click="calculateResults">Tính toán kết quả</a-button>
         <a-popconfirm title="Bạn chắc chắn muốn công bố kết quả cho kỳ tuyển sinh đã chọn?" ok-text="Công bố" cancel-text="Hủy" @confirm="publishResults">
-          <a-button type="primary" :loading="publishLoading" :disabled="!selectedExamId || publishLoading">
-            Công bố kết quả
-          </a-button>
+          <a-button type="primary" :loading="publishLoading" :disabled="!selectedExamId || publishLoading">Công bố kết quả</a-button>
         </a-popconfirm>
         <a-button @click="resetFilters" class="flex-1 md:flex-none">Đặt lại</a-button>
       </div>
@@ -184,7 +180,7 @@ const calculateResults = async () => {
   calculateLoading.value = true;
 
   try {
-    const { data, error } = await adminResult.calculator({
+    const { data, error } = await adminResult.getByRest("calculate", {
       params: {
         pageIndex: params.value.pageIndex,
         pageSize: params.value.pageSize,
@@ -215,12 +211,11 @@ const publishResults = async () => {
   publishLoading.value = true;
 
   try {
-    const { data, error } = await adminResult.publish({
+    const { data, error } = await adminResult.postByRest("publish", {
       params: {
         idExam: Number(selectedExamId.value),
       },
     });
-
     if (error.value || data.value?.success === false) {
       throw new Error(error.value?.data?.message || data.value?.message || "Công bố kết quả thất bại");
     }
