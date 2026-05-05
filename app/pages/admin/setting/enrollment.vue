@@ -48,12 +48,12 @@
     <a-modal v-model:open="visible" :title="isEdit ? 'Chỉnh sửa kỳ tuyển sinh' : 'Thêm mới kỳ tuyển sinh'" @cancel="handleCancel" :width="700" :confirm-loading="confirmLoading" @ok="handleOk" centered>
       <a-form ref="formRef" :model="formState" :rules="rules" layout="vertical" class="mt-4 max-h-[70vh] overflow-y-auto pr-2" @submit.prevent>
         <div class="grid grid-cols-1 gap-x-4 md:grid-cols-2">
-          <a-form-item label="Tên kỳ tuyển sinh" name="examName" class="md:col-span-2">
-            <a-input v-model:value="formState.examName" placeholder="Nhập tên kỳ tuyển sinh" />
+          <a-form-item label="Tên đợt tuyển sinh" name="examName" class="md:col-span-2">
+            <a-input v-model:value="formState.examName" placeholder="Nhập tên đợt tuyển sinh" :maxlength="300" show-count />
           </a-form-item>
 
           <a-form-item label="Khoảng thời gian" name="dateRange" class="md:col-span-2">
-            <a-range-picker v-model:value="formState.dateRange" format="DD/MM/YYYY" class="w-full" :placeholder="['Chọn ngày bắt đầu', 'Chọn ngày kết thúc']" />
+            <a-range-picker v-model:value="formState.dateRange" format="DD/MM/YYYY HH:mm" show-time class="w-full" :placeholder="['Chọn ngày giờ bắt đầu', 'Chọn ngày giờ kết thúc']" />
           </a-form-item>
 
           <a-form-item label="Link đăng ký" name="url" class="md:col-span-2">
@@ -69,7 +69,7 @@
           </a-form-item>
 
           <a-form-item label="Thời gian phúc khảo" name="reviewDateRange" class="md:col-span-2">
-            <a-range-picker v-model:value="formState.reviewDateRange" format="DD/MM/YYYY" class="w-full" :placeholder="['Chọn ngày bắt đầu phúc khảo', 'Chọn ngày kết thúc phúc khảo']" />
+            <a-range-picker v-model:value="formState.reviewDateRange" format="DD/MM/YYYY HH:mm" show-time class="w-full" :disabled-date="disabledReviewDate" :placeholder="['Chọn ngày giờ bắt đầu phúc khảo', 'Chọn ngày giờ kết thúc phúc khảo']" />
           </a-form-item>
 
           <a-form-item label="Lệ phí phúc khảo (VNĐ)" name="reviewFee">
@@ -91,7 +91,7 @@
           </a-form-item>
 
           <div class="md:col-span-2">
-            <AdminSelectSubject v-model="formState.subjectIds" multiple label="Danh sách môn thi" placeholder="Chọn các môn thi" />
+            <AdminSelectSubject v-model="formState.subjectIds" :rules="rules.subjectIds" multiple label="Danh sách môn thi" name="subjectIds" placeholder="Chọn các môn thi" />
           </div>
 
           <div class="mt-2 md:col-span-2">
@@ -159,7 +159,7 @@ const columns = [
   { title: "Thao tác", key: "action", width: 100, align: "center", fixed: "right" },
 ];
 
-const formState = reactive({
+const createInitialFormState = () => ({
   id: null,
   dateRange: [],
   reviewDateRange: [],
@@ -168,10 +168,10 @@ const formState = reactive({
   endDate: null,
   reviewStartDate: null,
   reviewEndDate: null,
-  fee: 0,
-  quantity: 0,
+  fee: null,
+  quantity: null,
   url: "",
-  reviewFee: 0,
+  reviewFee: null,
   idBank: undefined,
   accountNumber: "",
   accountName: "",
@@ -179,17 +179,63 @@ const formState = reactive({
   documents: [],
 });
 
+const formState = reactive(createInitialFormState());
+
+const validateRequiredNumber = fieldLabel => ({
+  validator: async (_, value) => {
+    // if (value === null || value === undefined || value === "") {
+    //   throw new Error(`Vui lòng nhập ${fieldLabel}`);
+    // }
+  },
+  trigger: "change",
+});
+
+const validateDateRange = async (_, value) => {
+  // if (!Array.isArray(value) || value.length !== 2 || !value[0] || !value[1]) {
+  //   throw new Error("Vui lòng chọn khoảng thời gian");
+  // }
+};
+
+const disabledReviewDate = current => {
+  const enrollmentEnd = formState.dateRange?.[1];
+  if (!current || !enrollmentEnd) return false;
+  return !current.endOf("day").isAfter(enrollmentEnd);
+};
+
+const validateReviewDateRange = async (_, value) => {
+  // if (!Array.isArray(value) || value.length !== 2 || !value[0] || !value[1]) {
+  //   throw new Error("Vui lòng chọn thời gian phúc khảo");
+  // }
+
+  const enrollmentEnd = formState.dateRange?.[1];
+  if (enrollmentEnd && !dayjs(value[0]).isAfter(enrollmentEnd)) {
+    throw new Error("Thời gian phúc khảo phải sau thời gian nộp hồ sơ");
+  }
+};
+
 const rules = {
-  examName: [{ required: true, message: "Vui lòng nhập tên kỳ tuyển sinh", trigger: "blur" }],
+  examName: [
+    { required: true, message: "Vui lòng nhập tên đợt tuyển sinh", trigger: "blur" },
+    { max: 300, message: "Tên đợt tuyển sinh không được vượt quá 300 ký tự", trigger: "blur" },
+  ],
   dateRange: [
+    { required: true, message: "Vui lòng chọn khoảng thời gian", trigger: "change" },
     {
-      required: true,
-      type: "array",
-      message: "Vui lòng chọn khoảng thời gian",
+      validator: validateDateRange,
       trigger: "change",
     },
   ],
-  url: [{ required: true, message: "Vui lòng nhập link đăng ký", trigger: "blur" }],
+  reviewDateRange: [
+    { required: true, message: "Vui lòng chọn thời gian phúc khảo", trigger: "change" },
+    {
+      validator: validateReviewDateRange,
+      trigger: "change",
+    },
+  ],
+  fee: [{ required: true, message: "Vui lòng nhập lệ phí thi", trigger: "blur" }, validateRequiredNumber("lệ phí thi")],
+  quantity: [{ required: true, message: "Vui lòng nhập chỉ tiêu", trigger: "blur" }, validateRequiredNumber("chỉ tiêu")],
+  subjectIds: [{ required: true, type: "array", min: 1, message: "Vui lòng chọn ít nhất 1 môn thi", trigger: "change" }],
+  reviewFee: [{ required: true, message: "Vui lòng nhập lệ phí phúc khảo", trigger: "blur" }, validateRequiredNumber("lệ phí phúc khảo")],
   accountNumber: [{ required: true, message: "Vui lòng nhập số tài khoản", trigger: "blur" }],
   accountName: [{ required: true, message: "Vui lòng nhập chủ tài khoản", trigger: "blur" }],
 };
@@ -236,26 +282,9 @@ const handleSearch = () => {
 
 const showModal = () => {
   isEdit.value = false;
-  Object.assign(formState, {
-    id: null,
-    dateRange: [],
-    reviewDateRange: [],
-    examName: "",
-    startDate: null,
-    endDate: null,
-    reviewStartDate: null,
-    reviewEndDate: null,
-    fee: 0,
-    quantity: 0,
-    url: "",
-    reviewFee: 0,
-    idBank: undefined,
-    accountNumber: "",
-    accountName: "",
-    subjectIds: [],
-    documents: [],
-  });
+  Object.assign(formState, createInitialFormState());
   visible.value = true;
+  nextTick(() => formRef.value?.clearValidate());
 };
 
 const editItem = async id => {
@@ -291,6 +320,7 @@ const editItem = async id => {
         documents: detail.documents ? JSON.parse(JSON.stringify(detail.documents)) : [],
       });
       visible.value = true;
+      nextTick(() => formRef.value?.clearValidate());
     }
   } catch (err) {
     message.error("Không thể lấy thông tin chi tiết");
