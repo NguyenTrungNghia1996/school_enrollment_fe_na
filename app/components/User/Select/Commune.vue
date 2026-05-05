@@ -1,28 +1,21 @@
 <template>
   <a-form-item :label="label" :name="name" :rules="rules" :label-col="labelCol" :wrapper-col="wrapperCol">
     <a-select
-      v-if="hasProvince"
       :value="normalizedModelValue"
       @update:value="handleUpdateValue"
       v-model:searchValue="search"
       :mode="multiple ? 'multiple' : undefined"
       show-search
-      :placeholder="placeholder"
+      :placeholder="resolvedPlaceholder"
       :size="size"
       :loading="loading"
-      :disabled="disabled"
+      :disabled="isSelectDisabled"
       allow-clear
       class="w-full"
       :options="options"
       @search="onSearch"
       @clear="onClear"
       :filter-option="false" />
-    <a-input
-      v-else
-      :value="selectPlaceholder"
-      :size="size"
-      disabled
-      class="w-full" />
   </a-form-item>
 </template>
 
@@ -64,6 +57,8 @@ const normalizedProvinceId = computed(() => {
 
 const hasProvince = computed(() => normalizedProvinceId.value !== null);
 const selectPlaceholder = computed(() => "Vui lòng chọn tỉnh / thành phố trước");
+const isSelectDisabled = computed(() => props.disabled || !hasProvince.value);
+const resolvedPlaceholder = computed(() => (hasProvince.value ? props.placeholder : selectPlaceholder.value));
 const normalizeOptionValue = value => {
   if (value === null || value === undefined || value === "") {
     return undefined;
