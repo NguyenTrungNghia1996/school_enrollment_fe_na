@@ -20,12 +20,6 @@ export const useApi = () => {
       activateToken(options) {
         return userRequest.get("/api/users/activate", options ?? {});
       },
-      activate(options) {
-        return userRequest.post("/api/v1/auth/activate", options ?? {});
-      },
-      resendActivation(options) {
-        return userRequest.post("/api/v1/auth/resend-activation", options ?? {});
-      },
     },
     ethnicityUser: useCrudApiUser("/api/ethnicity"),
     provinceUser: useCrudApiUser("/api/province"),
@@ -60,55 +54,11 @@ export const useApi = () => {
     adminUser: useCrudApiAdmin("/api/users"),
     adminBank: useCrudApiAdmin("/api/banks"),
     adminSubject: useCrudApiAdmin("/api/subject"),
-    adminEnrollment: useCrudApiAdmin("/api/exam"),
-    adminCandidate: {
-      ...useCrudApiAdmin("/api/admin/examList"),
-      // import(options) {
-      //   return adminRequest.post("/api/admin/examList/import", options ?? {});
-      // },
-      // publish(options) {
-      //   return adminRequest.post("/api/admin/examList/publish", options ?? {});
-      // },
-    },
-    adminScore: {
-      ...useCrudApiAdmin("/api/admin/examScore"),
-      // import(options) {
-      //   return adminRequest.post("/api/admin/examScore/import", options ?? {});
-      // },
-      // publish(options) {
-      //   return adminRequest.post("/api/admin/examScore/publish", options ?? {});
-      // },
-    },
-    adminResult: {
-      ...useCrudApiAdmin("/api/admin/exam/result"),
-      // calculator(options) {
-      //   return adminRequest.get("/api/admin/exam/result/caculator", options ?? {});
-      // },
-      // publish(options) {
-      //   return adminRequest.post("/api/admin/exam/result/publish", options ?? {});
-      // },
-    },
+    adminEnrollment: useCrudApiAdmin("/api/admin/exam"),
+    adminCandidate: useCrudApiAdmin("/api/admin/examList"),
+    adminScore: useCrudApiAdmin("/api/admin/examScore"),
+    adminResult: useCrudApiAdmin("/api/admin/exam/result"),
     adminPayment: useCrudApiAdmin("/api/admin/payment"),
-    adminApplication: {
-      ...useCrudApiAdmin("/api/admin/application"),
-      // get(options) {
-      //   return adminRequest.get("/api/admin/application", options ?? {});
-      // },
-      // delete(options) {
-      //   return adminRequest.delete("/api/admin/application", options ?? {});
-      // },
-      // getById(options) {
-      //   return adminRequest.get("/api/admin/application/detail", options ?? {});
-      // },
-      // approve(options) {
-      //   return adminRequest.put("/api/admin/application/approve", options ?? {});
-      // },
-      // reject(options) {
-      //   return adminRequest.put("/api/admin/application/reject", options ?? {});
-      // },
-      // completePayment(options) {
-      //   return adminRequest.put("/api/admin/application/completePayment", options ?? {});
-      // },
-    },
+    adminApplication: useCrudApiAdmin("/api/admin/application"),
   };
 };
