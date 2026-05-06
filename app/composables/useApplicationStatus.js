@@ -15,6 +15,7 @@ export const APPLICATION_STATUS_LABELS = Object.freeze({
 });
 
 export const getApplicationStatus = value => Number(value?.idStatus ?? value);
+export const getApplicationStatusLabel = value => APPLICATION_STATUS_LABELS[getApplicationStatus(value)] || "Không xác định";
 
 export const isDraftApplicationStatus = value => getApplicationStatus(value) === APPLICATION_STATUS.DRAFT;
 export const isPendingReviewApplicationStatus = value => getApplicationStatus(value) === APPLICATION_STATUS.PENDING_REVIEW;
