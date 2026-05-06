@@ -6,8 +6,8 @@
         <AdminSelectEnrollment v-model="selectedExamId" no-form-item :inlineLabel="false" placeholder="Lọc theo kỳ tuyển sinh" label="" />
       </div>
       <div class="flex w-full flex-initial gap-2 md:w-auto">
-        <a-button v-if="adminStore.canApproveCurrentPage" type="primary" ghost :loading="calculateLoading" :disabled="!selectedExamId || calculateLoading" @click="calculateResults">Tính toán kết quả</a-button>
-        <a-popconfirm v-if="adminStore.canApproveCurrentPage" title="Bạn chắc chắn muốn công bố kết quả cho kỳ tuyển sinh đã chọn?" ok-text="Công bố" cancel-text="Hủy" @confirm="publishResults">
+        <a-button v-if="adminStore.canEditCurrentPage" type="primary" ghost :loading="calculateLoading" :disabled="!selectedExamId || calculateLoading" @click="calculateResults">Tính toán kết quả</a-button>
+        <a-popconfirm v-if="adminStore.canEditCurrentPage" title="Bạn chắc chắn muốn công bố kết quả cho kỳ tuyển sinh đã chọn?" ok-text="Công bố" cancel-text="Hủy" @confirm="publishResults">
           <a-button type="primary" :loading="publishLoading" :disabled="!selectedExamId || publishLoading">Công bố kết quả</a-button>
         </a-popconfirm>
         <a-button @click="resetFilters" class="flex-1 md:flex-none">Đặt lại</a-button>
@@ -173,7 +173,7 @@ const resetFilters = () => {
 };
 
 const calculateResults = async () => {
-  if (!adminStore.canApproveCurrentPage) {
+  if (!adminStore.canEditCurrentPage) {
     message.warning("Bạn không có quyền tính toán kết quả");
     return;
   }
@@ -209,7 +209,7 @@ const calculateResults = async () => {
 };
 
 const publishResults = async () => {
-  if (!adminStore.canApproveCurrentPage) {
+  if (!adminStore.canEditCurrentPage) {
     message.warning("Bạn không có quyền công bố dữ liệu");
     return;
   }
