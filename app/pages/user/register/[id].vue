@@ -916,9 +916,11 @@ const fetchExamDetail = async () => {
     if (!examId.value) {
       throw new Error("Mã kỳ khảo thí không hợp lệ.");
     }
-
-    const { data, error } = await applicationUser.getDetailExam({ params: { id: examId.value } });
-
+    const { data, error } = await examUser.getByRest("detail", {
+      params: {
+        id: examId.value,
+      },
+    });
     if (error.value || data.value?.success === false || !data.value?.data) {
       throw new Error(error.value?.data?.message || data.value?.message || "Không thể tải thông tin kỳ khảo thí.");
     }
