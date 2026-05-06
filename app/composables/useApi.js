@@ -28,10 +28,10 @@ export const useApi = () => {
     applicationUser: {
       ...useCrudApiUser("/api/application"),
       getDetail(options) {
-        return userRequest.get("/api/admin/application/detail", options ?? {});
+        return userRequest.get("/api/application/detail", options ?? {});
       },
       getDetailExam(options) {
-        return userRequest.get("/api/admin/exam/detail", options ?? {});
+        return userRequest.get("/api/exam/detail", options ?? {});
       },
       getQr(options) {
         return userRequest.get("/api/application/qr", options ?? {});
