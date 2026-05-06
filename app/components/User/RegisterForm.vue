@@ -56,14 +56,11 @@ const handleRegister = async () => {
   loading.value = true;
 
   try {
-    const { data, error } = await authUser.register({
-      body: {
-        username: form.username,
-        password: form.password,
-        confirmPassword: form.confirmPassword,
-      },
+    const { data, error } = await authUser.postByRest("register", {
+      username: form.username,
+      password: form.password,
+      confirmPassword: form.confirmPassword,
     });
-
     if (error.value || data.value?.success === false) {
       throw new Error(error.value?.data?.message || data.value?.message || "Đăng ký thất bại");
     }

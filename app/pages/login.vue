@@ -92,7 +92,7 @@ onMounted(() => {
 const handleLogin = async values => {
   loading.value = true;
   try {
-    const { data, error } = await authAdmin.login({
+    const { data, error } = await authAdmin.postByRest("login", {
       body: {
         username: values.username,
         password: values.password,

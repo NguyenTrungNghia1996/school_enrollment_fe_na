@@ -1123,10 +1123,13 @@ const openPaymentModal = async () => {
   qrLoading.value = true;
 
   try {
-    const { data, error } = await applicationUser.getQr({
+    // const { data, error } = await applicationUser.getQr({
+    //   params: { id: applicationId },
+    // });
+    const { data, error } = await applicationUser.getByRest("qr", {
       params: { id: applicationId },
+      key: `user-application-qr-${applicationId}-${Date.now()}`,
     });
-
     if (error.value || data.value?.success === false || !data.value?.data) {
       throw new Error(error.value?.data?.message || data.value?.message || "Không tải được thông tin thanh toán");
     }
@@ -1166,14 +1169,13 @@ const confirmPayment = async () => {
   confirmPaymentLoading.value = true;
 
   try {
-    const { data, error } = await applicationUser.confirmPayment({
+    const { data, error } = await applicationUser.putByRest("confirmPayment", {
       body: {
         idApplication: Number(detailData.value.id),
         amount: Number(qrData.value.fee || 0),
         transCode: String(qrData.value.code).trim(),
       },
     });
-
     if (error.value || data.value?.success === false) {
       throw new Error(error.value?.data?.message || data.value?.message || "Xác nhận thanh toán thất bại");
     }

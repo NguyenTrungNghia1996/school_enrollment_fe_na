@@ -36,7 +36,7 @@
                 <span>Hồ sơ cá nhân</span>
               </div>
             </a-menu-item> -->
-            <a-menu-item key="change_password" class="hover:bg-gray-700/50 !px-4 !py-2.5 !mx-0 text-gray-200 hover:text-white" @click="showChangePasswordModal">
+            <a-menu-item key="change_password" class="!mx-0 !px-4 !py-2.5 text-gray-200 hover:bg-gray-700/50 hover:text-white" @click="showChangePasswordModal">
               <div class="flex items-center gap-2">
                 <KeyOutlined class="text-blue-400" />
                 <span>Đổi mật khẩu</span>
@@ -128,14 +128,13 @@ const submitChangePassword = async () => {
   changePasswordLoading.value = true;
 
   try {
-    const { data, error } = await authAdmin.changePassword({
+    const { data, error } = await authAdmin.postByRest("changePassword", {
       body: {
         oldPassword: changePasswordForm.oldPassword,
         newPassword: changePasswordForm.newPassword,
         confirmPassword: changePasswordForm.confirmPassword,
       },
     });
-
     if (error.value || data.value?.status === "error" || data.value?.success === false) {
       throw new Error(error.value?.data?.message || data.value?.message || "Đổi mật khẩu thất bại");
     }

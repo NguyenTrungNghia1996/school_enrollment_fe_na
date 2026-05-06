@@ -36,15 +36,15 @@ watch(
   () => props.initialEmail,
   value => {
     form.email = value || "";
-  }
+  },
 );
 
 const handleSubmit = async () => {
   loading.value = true;
 
   try {
-    const { data, error } = await authUser.forgotPassword({
-      query: { email: form.email },
+    const { data, error } = await authUser.postByRest("forgotPassword", {
+      email: form.email,
     });
 
     if (error.value || data.value?.status === "error" || data.value?.success === false) {

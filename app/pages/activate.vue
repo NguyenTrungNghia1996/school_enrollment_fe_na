@@ -84,13 +84,11 @@ const activateAccount = async () => {
     if (!token.value) {
       throw new Error("Liên kết kích hoạt không hợp lệ");
     }
-
-    const { data, error } = await authUser.activateToken({
+    const { data, error } = await authUser.getByRest("activate", {
       query: {
         token: token.value,
       },
     });
-
     if (error.value || data.value?.success === false || data.value?.status === "error") {
       throw new Error(error.value?.data?.message || data.value?.message || "Kích hoạt tài khoản thất bại.");
     }
