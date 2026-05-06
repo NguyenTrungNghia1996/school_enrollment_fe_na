@@ -65,8 +65,8 @@
                   </div>
                 </div>
                 <div class="mt-8">
-                  <a-button block type="primary" class="h-11 rounded-lg bg-primary font-bold hover:bg-primary/90" :disabled="!exam.hasApplication && exam.isClosed" @click="handleRegistration(exam)">
-                    {{ exam.hasApplication ? "XEM HỒ SƠ" : "ĐĂNG KÝ NGAY" }}
+                  <a-button block type="primary" class="h-11 rounded-lg bg-primary font-bold hover:bg-primary/90" :disabled="isExamActionDisabled(exam)" @click="handleRegistration(exam)">
+                    {{ getExamActionLabel(exam) }}
                   </a-button>
                 </div>
               </article>
@@ -300,6 +300,7 @@ const getExamStatus = exam => {
       label: exam?.examStatusName || EXAM_STATUS_CONFIG[examStatus].label,
       badgeClass: EXAM_STATUS_CONFIG[examStatus].badgeClass,
       isClosed: EXAM_STATUS_CONFIG[examStatus].isClosed,
+      isActionDisabled: EXAM_STATUS_CONFIG[examStatus].isClosed,
     };
   }
 
@@ -312,6 +313,7 @@ const getExamStatus = exam => {
       label: "Sắp mở",
       badgeClass: "bg-sky-50 text-sky-700 ring-sky-200",
       isClosed: true,
+      isActionDisabled: false,
     };
   }
 
@@ -320,6 +322,7 @@ const getExamStatus = exam => {
       label: "Đã đóng",
       badgeClass: "bg-slate-100 text-slate-600 ring-slate-200",
       isClosed: true,
+      isActionDisabled: true,
     };
   }
 
@@ -327,6 +330,7 @@ const getExamStatus = exam => {
     label: "Đang mở",
     badgeClass: "bg-primary/10 text-primary ring-primary/10",
     isClosed: false,
+    isActionDisabled: false,
   };
 };
 
@@ -336,11 +340,14 @@ const mapExamItem = exam => {
   return {
     id: exam.id,
     title: exam.examName,
+    startDate: exam.startDate,
+    endDate: exam.endDate,
     start: $dayjs(exam.startDate).format("DD/MM/YYYY"),
     end: $dayjs(exam.endDate).format("DD/MM/YYYY"),
     status: status.label,
     badgeClass: status.badgeClass,
     isClosed: status.isClosed,
+    isActionDisabled: status.isActionDisabled,
     hasApplication: Boolean(exam?.hasApplication),
     idExamStatus: Number(exam?.idExamStatus),
   };
@@ -507,6 +514,40 @@ const handleExamPageChange = async page => {
   await fetchExams();
 };
 
+const hasExamApplication = exam => Boolean(exam?.hasApplication);
+
+const isExamWithinRegistrationWindow = exam => {
+  const startDate = $dayjs(exam?.startDate);
+  const endDate = $dayjs(exam?.endDate);
+
+  if (!startDate.isValid() || !endDate.isValid()) {
+    return false;
+  }
+
+  const now = $dayjs();
+  return !now.isBefore(startDate) && !now.isAfter(endDate);
+};
+
+const isExamActionDisabled = exam => {
+  if (userStore.token) {
+    if (hasExamApplication(exam)) {
+      return false;
+    }
+
+    return !isExamWithinRegistrationWindow(exam);
+  }
+
+  return !isExamWithinRegistrationWindow(exam);
+};
+
+const getExamActionLabel = exam => {
+  if (userStore.token && hasExamApplication(exam)) {
+    return "XEM HỒ SƠ";
+  }
+
+  return "ĐĂNG KÝ NGAY";
+};
+
 const openApplicationDetail = async examId => {
   const normalizedExamId = Number(examId);
   if (!Number.isFinite(normalizedExamId) || normalizedExamId <= 0) {
@@ -544,13 +585,13 @@ const closeApplicationDetail = () => {
 };
 
 const handleRegistration = exam => {
-  if (!userStore.token) {
+  if (userStore.token && hasExamApplication(exam)) {
+    openApplicationDetail(exam.id);
+  } else if (isExamActionDisabled(exam)) {
+    safeMessage.warning("Kỳ khảo thí này hiện chưa mở hoặc đã kết thúc");
+  } else if (!userStore.token) {
     safeMessage.warning("Bạn cần phải đăng nhập để thực hiện thao tác này");
     userStore.openLogin();
-  } else if (exam.hasApplication) {
-    openApplicationDetail(exam.id);
-  } else if (exam.isClosed) {
-    safeMessage.warning("Kỳ khảo thí này hiện chưa mở hoặc đã kết thúc");
   } else {
     navigateTo(`/user/register/${exam.id}`);
   }
