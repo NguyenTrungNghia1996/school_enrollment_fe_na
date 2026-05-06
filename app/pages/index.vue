@@ -160,6 +160,7 @@
 const { $dayjs } = useNuxtApp();
 const unitStore = useUnitStore();
 const userStore = useUserStore();
+const safeMessage = useSafeMessage();
 const { examUser } = useApi();
 
 const INITIAL_PAGE_SIZE = 3;
@@ -213,7 +214,6 @@ const mapExamItem = exam => {
     status: status.label,
     badgeClass: status.badgeClass,
     isClosed: status.isClosed,
-    raw: exam,
   };
 };
 
@@ -239,7 +239,7 @@ const fetchExams = async () => {
   } catch (error) {
     exams.value = [];
     examTotal.value = 0;
-    message.error(error?.message || "Không tải được danh sách kỳ khảo thí");
+    safeMessage.error(error?.message || "Không tải được danh sách kỳ khảo thí");
   } finally {
     loading.value = false;
   }
@@ -278,10 +278,10 @@ await fetchExams();
 
 const handleRegistration = exam => {
   if (!userStore.token) {
-    message.warning("Bạn cần phàn đăng nhập để thực hiện thao tác này");
+    safeMessage.warning("Bạn cần phàn đăng nhập để thực hiện thao tác này");
     userStore.openLogin();
   } else if (exam.isClosed) {
-    message.warning("Kỳ khảo thí này hiện chưa mở hoặc đã kết thúc");
+    safeMessage.warning("Kỳ khảo thí này hiện chưa mở hoặc đã kết thúc");
   } else {
     navigateTo(`/user/register/${exam.id}`);
   }
@@ -291,7 +291,7 @@ const handleCta = () => {
   if (!userStore.token) {
     userStore.openLogin();
   } else {
-    message.success("Chào mừng bạn quay lại!");
+    safeMessage.success("Chào mừng bạn quay lại!");
   }
 };
 </script>
