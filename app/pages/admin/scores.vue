@@ -6,10 +6,10 @@
         <AdminSelectEnrollment v-model="selectedExamId" no-form-item :inlineLabel="false" placeholder="Lọc theo kỳ tuyển sinh" label="" />
       </div>
       <div class="flex w-full flex-initial gap-2 md:w-auto">
-        <a-popconfirm title="Bạn chắc chắn muốn công bố điểm thi cho kỳ tuyển sinh đã chọn?" ok-text="Công bố" cancel-text="Hủy" @confirm="publishScores">
+        <a-popconfirm v-if="adminStore.canApproveCurrentPage" title="Bạn chắc chắn muốn công bố điểm thi cho kỳ tuyển sinh đã chọn?" ok-text="Công bố" cancel-text="Hủy" @confirm="publishScores">
           <a-button type="primary" :loading="publishLoading" :disabled="!selectedExamId || publishLoading">Công bố</a-button>
         </a-popconfirm>
-        <a-button type="primary" ghost @click="openImportModal">Import</a-button>
+        <a-button v-if="adminStore.canApproveCurrentPage" type="primary" ghost @click="openImportModal">Import</a-button>
         <a-button @click="resetFilters" class="flex-1 md:flex-none">Đặt lại</a-button>
       </div>
     </div>
@@ -89,6 +89,7 @@ definePageMeta({
 });
 
 const { adminScore } = useApi();
+const adminStore = useAdminStore();
 
 const searchText = ref("");
 const selectedExamId = ref(null);
@@ -182,6 +183,10 @@ const resetFilters = () => {
 };
 
 const openImportModal = () => {
+  if (!adminStore.canApproveCurrentPage) {
+    message.warning("Bạn không có quyền import dữ liệu");
+    return;
+  }
   importVisible.value = true;
 };
 
@@ -203,6 +208,11 @@ const handleImportFileChange = event => {
 };
 
 const submitImport = async () => {
+  if (!adminStore.canApproveCurrentPage) {
+    message.warning("Bạn không có quyền import dữ liệu");
+    return;
+  }
+
   if (!selectedImportFile.value) {
     message.warning("Vui lòng chọn file import");
     return;
@@ -236,6 +246,11 @@ const submitImport = async () => {
 };
 
 const publishScores = async () => {
+  if (!adminStore.canApproveCurrentPage) {
+    message.warning("Bạn không có quyền công bố dữ liệu");
+    return;
+  }
+
   if (!selectedExamId.value) {
     message.warning("Vui lòng chọn kỳ tuyển sinh");
     return;

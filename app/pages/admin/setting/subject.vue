@@ -21,7 +21,7 @@
           </template>
           <template v-if="column.key === 'action'">
             <div class="flex justify-center space-x-2">
-              <a-button type="link" size="small" @click="editItem(record.id)" :disabled="!adminStore.canEditCurrentPage">
+              <a-button type="link" size="small" @click="editItem(record.id)" :disabled="!adminStore.canViewCurrentPage">
                 <template #icon><EditOutlined /></template>
               </a-button>
               <a-popconfirm title="Bạn chắc chắn muốn xóa môn học này?" ok-text="Đồng ý" cancel-text="Hủy" @confirm="deleteItem(record.id)">
@@ -35,7 +35,15 @@
       </a-table>
     </ClientOnly>
 
-    <a-modal v-model:open="visible" :title="isEdit ? 'Chỉnh sửa môn học' : 'Thêm mới môn học'" @cancel="handleCancel" :width="400" :confirm-loading="confirmLoading" @ok="handleOk">
+    <a-modal
+      v-model:open="visible"
+      :title="isEdit ? 'Chỉnh sửa môn học' : 'Thêm mới môn học'"
+      @cancel="handleCancel"
+      :width="400"
+      :confirm-loading="confirmLoading"
+      :ok-button-props="{ disabled: isEdit && !adminStore.canEditCurrentPage }"
+      @ok="handleOk"
+    >
       <a-form ref="formRef" :model="formState" :rules="rules" layout="vertical" class="mt-4">
         <a-form-item label="Tên môn học" name="subjectName">
           <a-input v-model:value="formState.subjectName" placeholder="Nhập tên môn học" />
@@ -161,6 +169,10 @@ const editItem = async id => {
 };
 
 const handleOk = async () => {
+  if (isEdit.value && !adminStore.canEditCurrentPage) {
+    message.warning("Bạn không có quyền cập nhật thông tin");
+    return;
+  }
   try {
     await formRef.value.validate();
     confirmLoading.value = true;

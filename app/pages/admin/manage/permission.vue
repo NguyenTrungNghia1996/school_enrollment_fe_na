@@ -19,7 +19,7 @@
           <template v-if="column.key === 'action'">
             <div class="flex justify-center">
               <div class="space-x-2 md:flex">
-                <a-button type="link" size="small" @click="editItem(record.id)" :disabled="!adminStore.canEditCurrentPage">
+                <a-button type="link" size="small" @click="editItem(record.id)" :disabled="!adminStore.canViewCurrentPage">
                   <template #icon>
                     <EditOutlined />
                   </template>
@@ -55,7 +55,7 @@
       <template #footer>
         <div class="flex justify-end space-x-2">
           <a-button @click="handleCancel">Hủy</a-button>
-          <a-button type="primary" @click="handleOk" :loading="confirmLoading">
+          <a-button type="primary" @click="handleOk" :loading="confirmLoading" :disabled="isEdit && !adminStore.canEditCurrentPage">
             {{ isEdit ? "Cập nhật" : "Thêm mới" }}
           </a-button>
         </div>
@@ -180,6 +180,10 @@ const editItem = async id => {
 };
 
 const handleOk = async () => {
+  if (isEdit.value && !adminStore.canEditCurrentPage) {
+    message.warning("Bạn không có quyền cập nhật thông tin");
+    return;
+  }
   try {
     await formRef.value.validate();
     confirmLoading.value = true;

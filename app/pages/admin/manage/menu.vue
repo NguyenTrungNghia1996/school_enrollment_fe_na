@@ -21,7 +21,7 @@
               </a-button>
             </a-tooltip>
             <a-tooltip title="Sửa">
-              <a-button type="link" size="small" @click="editItem(record)" :disabled="!adminStore.canEditCurrentPage">
+              <a-button type="link" size="small" @click="editItem(record)" :disabled="!adminStore.canViewCurrentPage">
                 <EditOutlined />
               </a-button>
             </a-tooltip>
@@ -61,7 +61,7 @@
         </a-form-item> -->
         <div class="mt-6 flex justify-end gap-2">
           <a-button @click="handleCancel">Hủy</a-button>
-          <a-button type="primary" @click="handleOk" :loading="confirmLoading">
+          <a-button type="primary" @click="handleOk" :loading="confirmLoading" :disabled="isEdit && !adminStore.canEditCurrentPage">
             {{ isEdit ? "Cập nhật" : "Thêm mới" }}
           </a-button>
         </div>
@@ -234,6 +234,10 @@ const editItem = record => {
 
 // 📌 Lưu dữ liệu
 const handleOk = async () => {
+  if (isEdit.value && !adminStore.canEditCurrentPage) {
+    message.warning("Bạn không có quyền cập nhật thông tin");
+    return;
+  }
   try {
     await formRef.value.validate();
     confirmLoading.value = true;
