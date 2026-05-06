@@ -174,7 +174,7 @@
           <div class="rounded-xl border border-slate-200 bg-slate-50 px-4 py-3">
             <div class="text-xs uppercase tracking-[0.2em] text-slate-400">Trạng thái hồ sơ</div>
             <div class="mt-2">
-              <a-tag :color="getApplicationStatusColor(applicationDetail)">{{ applicationDetail.statusName || `#${applicationDetail.idStatus}` }}</a-tag>
+              <a-tag :color="getApplicationStatusColor(applicationDetail)">{{ getStatusLabel(applicationDetail) }}</a-tag>
             </div>
           </div>
           <div class="rounded-xl border border-slate-200 bg-slate-50 px-4 py-3">
@@ -277,6 +277,10 @@ const EXAM_STATUS_CONFIG = Object.freeze({
   },
 });
 
+const getStatusLabel = record => {
+  const status = getApplicationStatus(record);
+  return APPLICATION_STATUS_LABELS[status] || record?.statusName || "Không xác định";
+};
 const INITIAL_PAGE_SIZE = 3;
 const EXPANDED_PAGE_SIZE = 6;
 const pageIndex = ref(1);
