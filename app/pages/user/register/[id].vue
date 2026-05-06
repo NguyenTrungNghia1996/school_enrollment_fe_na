@@ -317,7 +317,7 @@
 
         <!-- Sidebar -->
         <aside v-if="false" class="space-y-6">
-          <div class="relative sticky top-6 overflow-hidden rounded-[2rem] bg-slate-900 p-8 text-white shadow-xl">
+          <div class="relative top-6 overflow-hidden rounded-[2rem] bg-slate-900 p-8 text-white shadow-xl">
             <!-- Decorative background elements -->
             <div class="absolute -right-10 -top-10 h-40 w-40 rounded-full bg-white/5 blur-3xl"></div>
             <div class="absolute -bottom-10 -left-10 h-40 w-40 rounded-full bg-blue-500/20 blur-3xl"></div>
