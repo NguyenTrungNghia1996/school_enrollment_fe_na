@@ -30,6 +30,9 @@ export const useApi = () => {
       getDetail(options) {
         return userRequest.get("/api/admin/application/detail", options ?? {});
       },
+      getDetailExam(options) {
+        return userRequest.get("/api/admin/exam/detail", options ?? {});
+      },
       getQr(options) {
         return userRequest.get("/api/application/qr", options ?? {});
       },

@@ -466,6 +466,7 @@ definePageMeta({
 });
 
 const userStore = useUserStore();
+const route = useRoute();
 const { applicationUser, s3 } = useApi();
 
 if (!userStore.token) {
@@ -473,8 +474,14 @@ if (!userStore.token) {
   await navigateTo("/");
 }
 
+const toPositiveNumber = value => {
+  const parsedValue = Number(value);
+  return Number.isFinite(parsedValue) && parsedValue > 0 ? parsedValue : undefined;
+};
+
+const initialExamId = toPositiveNumber(route.query.idExam);
 const searchText = ref("");
-const selectedExamId = ref(undefined);
+const selectedExamId = ref(initialExamId);
 const loadError = ref("");
 const detailVisible = ref(false);
 const detailData = ref(null);
@@ -504,7 +511,7 @@ const params = ref({
   pageIndex: 1,
   pageSize: 10,
   search: "",
-  idExam: undefined,
+  idExam: initialExamId,
 });
 
 const columns = [
@@ -949,9 +956,9 @@ const buildApplicationPayload = ({ includeAvatar = true } = {}) => {
 };
 
 const fetchDetailData = async (record, { resetData = true } = {}) => {
-  const recordId = Number(record?.id);
-  if (!Number.isFinite(recordId) || recordId <= 0) {
-    throw new Error("Id hồ sơ không hợp lệ, vui lòng kiểm tra lại");
+  const examId = Number(record?.idExam || selectedExamId.value);
+  if (!Number.isFinite(examId) || examId <= 0) {
+    throw new Error("Id kỳ khảo thí không hợp lệ, vui lòng kiểm tra lại");
   }
 
   if (resetData) {
@@ -962,8 +969,8 @@ const fetchDetailData = async (record, { resetData = true } = {}) => {
 
   try {
     const { data, error } = await applicationUser.getDetail({
-      params: { id: recordId },
-      key: `user-application-detail-${recordId}-${Date.now()}`,
+      params: { idExam: examId },
+      key: `user-application-detail-${examId}-${Date.now()}`,
     });
 
     if (error.value || data.value?.success === false || !data.value?.data) {
@@ -989,6 +996,38 @@ const openDetail = async record => {
     message.error(error?.message || "Không thể tải thông tin chi tiết");
   }
 };
+
+const openDetailByExamId = async examId => {
+  detailVisible.value = true;
+
+  try {
+    await fetchDetailData({ idExam: examId });
+  } catch (error) {
+    detailVisible.value = false;
+    message.error(error?.message || "Không thể tải thông tin chi tiết");
+  }
+};
+
+watch(
+  () => route.query,
+  async query => {
+    const queryExamId = toPositiveNumber(query.idExam);
+
+    if (queryExamId === selectedExamId.value && query.openDetail !== "1") {
+      return;
+    }
+
+    selectedExamId.value = queryExamId;
+    params.value.idExam = queryExamId;
+    params.value.pageIndex = 1;
+    pagination.current = 1;
+
+    if (queryExamId && query.openDetail === "1") {
+      await openDetailByExamId(queryExamId);
+    }
+  },
+  { immediate: route.query.openDetail === "1" },
+);
 
 const closeDetail = () => {
   detailVisible.value = false;

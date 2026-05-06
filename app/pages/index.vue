@@ -65,7 +65,9 @@
                   </div>
                 </div>
                 <div class="mt-8">
-                  <a-button block type="primary" class="h-11 rounded-lg bg-primary font-bold hover:bg-primary/90" :disabled="exam.isClosed" @click="handleRegistration(exam)">ĐĂNG KÝ NGAY</a-button>
+                  <a-button block type="primary" class="h-11 rounded-lg bg-primary font-bold hover:bg-primary/90" :disabled="isExamActionDisabled(exam)" @click="handleRegistration(exam)">
+                    {{ getExamActionLabel(exam) }}
+                  </a-button>
                 </div>
               </article>
             </div>
@@ -153,21 +155,136 @@
         </aside>
       </div>
     </div>
+
+    <a-modal v-model:open="applicationDetailVisible" title="Chi tiết hồ sơ" :width="1000" :footer="null" @cancel="closeApplicationDetail">
+      <div v-if="applicationDetailLoading" class="py-12 text-center">
+        <a-spin size="large" />
+      </div>
+
+      <div v-else-if="applicationDetail" class="space-y-6">
+        <div class="grid gap-4 md:grid-cols-4">
+          <div class="rounded-xl border border-slate-200 bg-slate-50 px-4 py-3">
+            <div class="text-xs uppercase tracking-[0.2em] text-slate-400">Mã hồ sơ</div>
+            <div class="mt-2 font-bold text-slate-900">{{ applicationDetail.applicationCode || `#${applicationDetail.id}` }}</div>
+          </div>
+          <div class="rounded-xl border border-slate-200 bg-slate-50 px-4 py-3">
+            <div class="text-xs uppercase tracking-[0.2em] text-slate-400">Kỳ tuyển sinh</div>
+            <div class="mt-2 font-bold text-slate-900">{{ applicationDetail.examName || `#${applicationDetail.idExam}` }}</div>
+          </div>
+          <div class="rounded-xl border border-slate-200 bg-slate-50 px-4 py-3">
+            <div class="text-xs uppercase tracking-[0.2em] text-slate-400">Trạng thái hồ sơ</div>
+            <div class="mt-2">
+              <a-tag :color="getApplicationStatusColor(applicationDetail)">{{ applicationDetail.statusName || `#${applicationDetail.idStatus}` }}</a-tag>
+            </div>
+          </div>
+          <div class="rounded-xl border border-slate-200 bg-slate-50 px-4 py-3">
+            <div class="text-xs uppercase tracking-[0.2em] text-slate-400">Ảnh 3x4</div>
+            <div class="mt-2">
+              <a-image v-if="applicationDetail.avatar" :src="applicationDetail.avatar" :width="72" class="overflow-hidden rounded-lg" :preview="{ src: applicationDetail.avatar }" />
+              <span v-else class="text-sm text-slate-500">-</span>
+            </div>
+          </div>
+        </div>
+
+        <a-descriptions bordered :column="2" size="small">
+          <a-descriptions-item label="Họ tên">{{ applicationDetail.fullName || "-" }}</a-descriptions-item>
+          <a-descriptions-item label="Ngày sinh">{{ formatDate(applicationDetail.dateOfBirth) }}</a-descriptions-item>
+          <a-descriptions-item label="Số CCCD">{{ applicationDetail.identityNumber || "-" }}</a-descriptions-item>
+          <a-descriptions-item label="Ngày cấp CCCD">{{ formatDate(applicationDetail.identityIssueDate) }}</a-descriptions-item>
+          <a-descriptions-item label="Nơi cấp CCCD">{{ applicationDetail.identityIssuePlace || "-" }}</a-descriptions-item>
+          <a-descriptions-item label="Giới tính">{{ formatGender(applicationDetail.gender) }}</a-descriptions-item>
+          <a-descriptions-item label="Dân tộc">{{ applicationDetail.ethnicityName || `#${applicationDetail.idEthnicity || "-"}` }}</a-descriptions-item>
+          <a-descriptions-item label="Nơi sinh">{{ applicationDetail.provinceName || `#${applicationDetail.idProvince || "-"}` }}</a-descriptions-item>
+          <a-descriptions-item label="Tỉnh thường trú">{{ applicationDetail.permanentProvinceName || `#${applicationDetail.idPermanentProvince || "-"}` }}</a-descriptions-item>
+          <a-descriptions-item label="Phường/xã thường trú">{{ applicationDetail.permanentCommuneName || `#${applicationDetail.idCommune || "-"}` }}</a-descriptions-item>
+          <a-descriptions-item label="Địa chỉ thường trú" :span="2">{{ applicationDetail.permanentAddress || "-" }}</a-descriptions-item>
+          <a-descriptions-item label="Số điện thoại">{{ applicationDetail.phoneNumber || "-" }}</a-descriptions-item>
+          <a-descriptions-item label="Tỉnh hiện tại">{{ applicationDetail.currentProvinceName || `#${applicationDetail.idCurrentProvince || "-"}` }}</a-descriptions-item>
+          <a-descriptions-item label="Phường/xã hiện tại">{{ applicationDetail.currentCommuneName || `#${applicationDetail.idCurrentCommune || "-"}` }}</a-descriptions-item>
+          <a-descriptions-item label="Địa chỉ hiện tại" :span="2">{{ applicationDetail.currentAddress || "-" }}</a-descriptions-item>
+          <a-descriptions-item label="Ghi chú" :span="2">{{ applicationDetail.note || "-" }}</a-descriptions-item>
+        </a-descriptions>
+
+        <div>
+          <h3 class="mb-3 text-base font-semibold text-slate-900">Hồ sơ đính kèm</h3>
+
+          <div v-if="normalizedApplicationDocuments.length" class="space-y-4">
+            <div v-for="document in normalizedApplicationDocuments" :key="document.key" class="rounded-xl border border-slate-200 bg-slate-50 p-4">
+              <div class="mb-3 flex items-center justify-between gap-3">
+                <div class="font-medium text-slate-900">{{ document.documentName }}</div>
+                <div class="text-xs text-slate-500">{{ document.links.length }} file</div>
+              </div>
+
+              <div class="space-y-2 rounded-lg bg-white p-3">
+                <div v-for="(link, index) in document.links" :key="`${document.key}-${index}`" class="break-all text-sm text-slate-700">
+                  <BaseImagePreviewLink v-if="getFileType(link) === 'image'" :src="link" />
+                  <BasePdfPreviewLink v-else-if="getFileType(link) === 'pdf'" :src="link" />
+                  <a v-else :href="link" target="_blank" rel="noopener noreferrer" class="text-blue-600 hover:underline">{{ getDisplayName(link) }}</a>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div v-else class="rounded-xl border border-dashed border-slate-300 bg-slate-50 px-4 py-6 text-sm text-slate-500">Hồ sơ này chưa có tài liệu đính kèm.</div>
+        </div>
+
+        <div class="flex justify-end border-t border-slate-100 pt-4">
+          <a-button @click="closeApplicationDetail">Đóng</a-button>
+        </div>
+      </div>
+    </a-modal>
   </div>
 </template>
 
 <script setup>
+import dayjs from "dayjs";
+
+import { getApplicationStatusColor } from "~/composables/useApplicationStatus";
+
 const { $dayjs } = useNuxtApp();
 const unitStore = useUnitStore();
 const userStore = useUserStore();
 const safeMessage = useSafeMessage();
-const { examUser } = useApi();
+const { examUser, applicationUser } = useApi();
+
+const EXAM_STATUS = Object.freeze({
+  SUBMITTING: 1,
+  ORGANIZING: 2,
+  SUMMARIZED: 3,
+  COMPLETED: 4,
+});
+
+const EXAM_STATUS_CONFIG = Object.freeze({
+  [EXAM_STATUS.SUBMITTING]: {
+    label: "Nộp hồ sơ",
+    badgeClass: "bg-primary/10 text-primary ring-primary/10",
+    isClosed: false,
+  },
+  [EXAM_STATUS.ORGANIZING]: {
+    label: "Tổ chức thi",
+    badgeClass: "bg-amber-50 text-amber-700 ring-amber-200",
+    isClosed: true,
+  },
+  [EXAM_STATUS.SUMMARIZED]: {
+    label: "Tổng kết",
+    badgeClass: "bg-slate-100 text-slate-600 ring-slate-200",
+    isClosed: true,
+  },
+  [EXAM_STATUS.COMPLETED]: {
+    label: "Hoàn thành",
+    badgeClass: "bg-emerald-50 text-emerald-700 ring-emerald-200",
+    isClosed: true,
+  },
+});
 
 const INITIAL_PAGE_SIZE = 3;
 const EXPANDED_PAGE_SIZE = 6;
 const pageIndex = ref(1);
 const examsExpanded = ref(false);
 const examSearchText = ref("");
+const applicationDetailVisible = ref(false);
+const applicationDetailLoading = ref(false);
+const applicationDetail = ref(null);
 const pageSize = computed(() => (examsExpanded.value ? EXPANDED_PAGE_SIZE : INITIAL_PAGE_SIZE));
 const expandedPageSize = computed(() => EXPANDED_PAGE_SIZE);
 const query = ref({
@@ -177,6 +294,16 @@ const query = ref({
 });
 
 const getExamStatus = exam => {
+  const examStatus = Number(exam?.idExamStatus);
+  if (EXAM_STATUS_CONFIG[examStatus]) {
+    return {
+      label: exam?.examStatusName || EXAM_STATUS_CONFIG[examStatus].label,
+      badgeClass: EXAM_STATUS_CONFIG[examStatus].badgeClass,
+      isClosed: EXAM_STATUS_CONFIG[examStatus].isClosed,
+      isActionDisabled: EXAM_STATUS_CONFIG[examStatus].isClosed,
+    };
+  }
+
   const now = $dayjs();
   const startDate = $dayjs(exam.startDate);
   const endDate = $dayjs(exam.endDate);
@@ -186,6 +313,7 @@ const getExamStatus = exam => {
       label: "Sắp mở",
       badgeClass: "bg-sky-50 text-sky-700 ring-sky-200",
       isClosed: true,
+      isActionDisabled: false,
     };
   }
 
@@ -194,6 +322,7 @@ const getExamStatus = exam => {
       label: "Đã đóng",
       badgeClass: "bg-slate-100 text-slate-600 ring-slate-200",
       isClosed: true,
+      isActionDisabled: true,
     };
   }
 
@@ -201,6 +330,7 @@ const getExamStatus = exam => {
     label: "Đang mở",
     badgeClass: "bg-primary/10 text-primary ring-primary/10",
     isClosed: false,
+    isActionDisabled: false,
   };
 };
 
@@ -210,11 +340,16 @@ const mapExamItem = exam => {
   return {
     id: exam.id,
     title: exam.examName,
+    startDate: exam.startDate,
+    endDate: exam.endDate,
     start: $dayjs(exam.startDate).format("DD/MM/YYYY"),
     end: $dayjs(exam.endDate).format("DD/MM/YYYY"),
     status: status.label,
     badgeClass: status.badgeClass,
     isClosed: status.isClosed,
+    isActionDisabled: status.isActionDisabled,
+    hasApplication: Boolean(exam?.hasApplication),
+    idExamStatus: Number(exam?.idExamStatus),
   };
 };
 
@@ -225,7 +360,7 @@ const {
   refresh: refreshExams,
 } = await examUser.get({
   query,
-  key: "home-exam-list",
+  key: `home-exam-list`,
 });
 
 const exams = computed(() => {
@@ -234,12 +369,102 @@ const exams = computed(() => {
   return items.map(mapExamItem);
 });
 
+const normalizedApplicationDocuments = computed(() => {
+  const documents = Array.isArray(applicationDetail.value?.documents) ? applicationDetail.value.documents : [];
+
+  return documents
+    .map((document, index) => {
+      if (typeof document === "string") {
+        return {
+          key: `document-${index}`,
+          documentName: `Hồ sơ #${index + 1}`,
+          links: splitDocumentLinks(document),
+        };
+      }
+
+      const idExamDocument = document?.idExamDocument || document?.id || index + 1;
+
+      return {
+        key: `${idExamDocument || "document"}-${index}`,
+        documentName: document?.documentName || `Hồ sơ #${idExamDocument}`,
+        links: splitDocumentLinks(document?.url || document?.fileUrl || document?.link || document?.path),
+      };
+    })
+    .filter(document => document.links.length);
+});
+
 const examTotal = computed(() => {
   if (!examResponse.value?.success) return 0;
   return Number(examResponse.value?.data?.total || 0);
 });
 
 const showViewMoreButton = computed(() => !examsExpanded.value && examTotal.value > INITIAL_PAGE_SIZE);
+
+const formatDate = value => {
+  if (!value) return "-";
+  const parsed = dayjs(value);
+  return parsed.isValid() ? parsed.format("DD/MM/YYYY") : "-";
+};
+
+const formatGender = value => {
+  if (value === true) return "Nam";
+  if (value === false) return "Nữ";
+  return "-";
+};
+
+const normalizeApplicationDetail = detail => {
+  if (!detail || typeof detail !== "object") {
+    return null;
+  }
+
+  return {
+    ...detail,
+    dateOfBirth: detail.dateOfBirth ? dayjs(detail.dateOfBirth) : null,
+    identityIssueDate: detail.identityIssueDate ? dayjs(detail.identityIssueDate) : null,
+    fullName: detail.fullName || detail.fullname || null,
+    documents: Array.isArray(detail.documents) ? detail.documents : [],
+  };
+};
+
+const splitDocumentLinks = value => {
+  if (!value) return [];
+  return String(value)
+    .split(",")
+    .map(item => item.trim())
+    .filter(Boolean);
+};
+
+const getFileName = link => {
+  if (!link) return "";
+
+  try {
+    const { pathname } = new URL(link);
+    const segments = pathname.split("/").filter(Boolean);
+    return decodeURIComponent(segments.at(-1) || link);
+  } catch {
+    const cleanUrl = link.split("?")[0].split("#")[0];
+    const segments = cleanUrl.split("/").filter(Boolean);
+    return decodeURIComponent(segments.at(-1) || link);
+  }
+};
+
+const getDisplayName = link => {
+  return getFileName(link).replace(/^[0-9a-f-]+-/i, "");
+};
+
+const getFileType = link => {
+  const fileName = getFileName(link).toLowerCase();
+
+  if (/\.(jpg|jpeg|png|gif|webp|bmp|svg)$/.test(fileName)) {
+    return "image";
+  }
+
+  if (fileName.endsWith(".pdf")) {
+    return "pdf";
+  }
+
+  return "unsupported";
+};
 
 const fetchExams = async () => {
   try {
@@ -289,12 +514,84 @@ const handleExamPageChange = async page => {
   await fetchExams();
 };
 
+const hasExamApplication = exam => Boolean(exam?.hasApplication);
+
+const isExamWithinRegistrationWindow = exam => {
+  const startDate = $dayjs(exam?.startDate);
+  const endDate = $dayjs(exam?.endDate);
+
+  if (!startDate.isValid() || !endDate.isValid()) {
+    return false;
+  }
+
+  const now = $dayjs();
+  return !now.isBefore(startDate) && !now.isAfter(endDate);
+};
+
+const isExamActionDisabled = exam => {
+  if (userStore.token) {
+    if (hasExamApplication(exam)) {
+      return false;
+    }
+
+    return !isExamWithinRegistrationWindow(exam);
+  }
+
+  return !isExamWithinRegistrationWindow(exam);
+};
+
+const getExamActionLabel = exam => {
+  if (userStore.token && hasExamApplication(exam)) {
+    return "XEM HỒ SƠ";
+  }
+
+  return "ĐĂNG KÝ NGAY";
+};
+
+const openApplicationDetail = async examId => {
+  const normalizedExamId = Number(examId);
+  if (!Number.isFinite(normalizedExamId) || normalizedExamId <= 0) {
+    safeMessage.error("Id kỳ khảo thí không hợp lệ");
+    return;
+  }
+
+  applicationDetailVisible.value = true;
+  applicationDetailLoading.value = true;
+  applicationDetail.value = null;
+
+  try {
+    const { data, error } = await applicationUser.getByRest("detail", {
+      params: { idExam: normalizedExamId },
+      key: `home-application-detail-${normalizedExamId}-${Date.now()}`,
+    });
+
+    if (error.value || data.value?.success === false || !data.value?.data) {
+      throw new Error(error.value?.data?.message || data.value?.message || "Không thể tải thông tin hồ sơ");
+    }
+
+    applicationDetail.value = normalizeApplicationDetail(data.value.data);
+  } catch (error) {
+    applicationDetailVisible.value = false;
+    safeMessage.error(error?.message || "Không thể tải thông tin hồ sơ");
+  } finally {
+    applicationDetailLoading.value = false;
+  }
+};
+
+const closeApplicationDetail = () => {
+  applicationDetailVisible.value = false;
+  applicationDetailLoading.value = false;
+  applicationDetail.value = null;
+};
+
 const handleRegistration = exam => {
-  if (!userStore.token) {
-    safeMessage.warning("Bạn cần phàn đăng nhập để thực hiện thao tác này");
-    userStore.openLogin();
-  } else if (exam.isClosed) {
+  if (userStore.token && hasExamApplication(exam)) {
+    openApplicationDetail(exam.id);
+  } else if (isExamActionDisabled(exam)) {
     safeMessage.warning("Kỳ khảo thí này hiện chưa mở hoặc đã kết thúc");
+  } else if (!userStore.token) {
+    safeMessage.warning("Bạn cần phải đăng nhập để thực hiện thao tác này");
+    userStore.openLogin();
   } else {
     navigateTo(`/user/register/${exam.id}`);
   }

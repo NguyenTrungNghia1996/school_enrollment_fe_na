@@ -317,7 +317,7 @@
 
         <!-- Sidebar -->
         <aside v-if="false" class="space-y-6">
-          <div class="relative sticky top-6 overflow-hidden rounded-[2rem] bg-slate-900 p-8 text-white shadow-xl">
+          <div class="relative top-6 overflow-hidden rounded-[2rem] bg-slate-900 p-8 text-white shadow-xl">
             <!-- Decorative background elements -->
             <div class="absolute -right-10 -top-10 h-40 w-40 rounded-full bg-white/5 blur-3xl"></div>
             <div class="absolute -bottom-10 -left-10 h-40 w-40 rounded-full bg-blue-500/20 blur-3xl"></div>
@@ -917,7 +917,7 @@ const fetchExamDetail = async () => {
       throw new Error("Mã kỳ khảo thí không hợp lệ.");
     }
 
-    const { data, error } = await examUser.getByRest("detail", { params: { id: examId.value } });
+    const { data, error } = await applicationUser.getDetailExam({ params: { id: examId.value } });
 
     if (error.value || data.value?.success === false || !data.value?.data) {
       throw new Error(error.value?.data?.message || data.value?.message || "Không thể tải thông tin kỳ khảo thí.");
