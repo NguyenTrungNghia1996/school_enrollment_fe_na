@@ -4,50 +4,13 @@ export const useApi = () => {
 
   return {
     s3: useS3Upload("/api/upload"),
-    authUser: {
-      register(options) {
-        return userRequest.post("/api/users/register", options ?? {});
-      },
-      login(options) {
-        return userRequest.post("/api/users/login", options ?? {});
-      },
-      changePassword(options) {
-        return userRequest.post("/api/users/changePassword", options ?? {});
-      },
-      forgotPassword(options) {
-        return userRequest.post("/api/users/forgotPassword", options ?? {});
-      },
-      activateToken(options) {
-        return userRequest.get("/api/users/activate", options ?? {});
-      },
-    },
+    authUser: useCrudApiUser("/api/users"),
     ethnicityUser: useCrudApiUser("/api/ethnicity"),
     provinceUser: useCrudApiUser("/api/province"),
     communeUser: useCrudApiUser("/api/commune"),
     examUser: useCrudApiUser("/api/exam"),
-    applicationUser: {
-      ...useCrudApiUser("/api/application"),
-      getDetailExam(options) {
-        return userRequest.get("/api/application/detail/exam", options ?? {});
-      },
-      getQr(options) {
-        return userRequest.get("/api/application/qr", options ?? {});
-      },
-      confirmPayment(options) {
-        return userRequest.put("/api/application/confirmPayment", options ?? {});
-      },
-    },
-    authAdmin: {
-      login(options) {
-        return adminRequest.post("/api/admin/login", options ?? {});
-      },
-      changePassword(options) {
-        return adminRequest.post("/api/admin/changePassword", options ?? {});
-      },
-      permission(options) {
-        return adminRequest.get("/api/admin/permission", options ?? {});
-      },
-    },
+    applicationUser: useCrudApiUser("/api/application"),
+    authAdmin: useCrudApiAdmin("/api/admin"),
     adminMenus: useCrudApiAdmin("/api/admin/menus"),
     adminRoles: useCrudApiAdmin("/api/admin/roles"),
     adminManage: useCrudApiAdmin("/api/admin"),

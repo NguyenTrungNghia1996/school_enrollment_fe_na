@@ -51,8 +51,10 @@ const handleLogin = async () => {
   loading.value = true;
 
   try {
-    const { data, error } = await authUser.login({ body: { ...form } });
-
+    const { data, error } = await authUser.postByRest("login", {
+      username: form.username,
+      password: form.password,
+    });
     if (error.value || !data.value?.success) {
       throw new Error(error.value?.data?.message || data.value?.message || "Đăng nhập thất bại");
     }

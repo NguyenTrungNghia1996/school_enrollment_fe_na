@@ -564,7 +564,7 @@ const openApplicationDetail = async examId => {
   applicationDetail.value = null;
 
   try {
-    const { data, error } = await applicationUser.getByRest("detail", {
+    const { data, error } = await applicationUser.getByRest("detail/exam", {
       params: { idExam: normalizedExamId },
       key: `home-application-detail-${normalizedExamId}-${Date.now()}`,
     });
