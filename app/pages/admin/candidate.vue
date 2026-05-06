@@ -6,10 +6,10 @@
         <AdminSelectEnrollment v-model="selectedExamId" no-form-item :inlineLabel="false" placeholder="Lọc theo kỳ tuyển sinh" label="" />
       </div>
       <div class="flex w-full flex-initial gap-2 md:w-auto">
-        <a-popconfirm v-if="adminStore.canApproveCurrentPage" title="Bạn chắc chắn muốn công bố kết quả cho kỳ tuyển sinh đã chọn?" ok-text="Công bố" cancel-text="Hủy" @confirm="publishCandidates">
+        <a-popconfirm v-if="adminStore.canEditCurrentPage" title="Bạn chắc chắn muốn công bố kết quả cho kỳ tuyển sinh đã chọn?" ok-text="Công bố" cancel-text="Hủy" @confirm="publishCandidates">
           <a-button type="primary" :loading="publishLoading" :disabled="!selectedExamId || publishLoading">Công bố</a-button>
         </a-popconfirm>
-        <a-button v-if="adminStore.canApproveCurrentPage" type="primary" ghost @click="openImportModal">Import</a-button>
+        <a-button v-if="adminStore.canEditCurrentPage" type="primary" ghost @click="openImportModal">Import</a-button>
         <a-button @click="resetFilters" class="flex-1 md:flex-none">Đặt lại</a-button>
       </div>
     </div>
@@ -204,7 +204,7 @@ const resetFilters = () => {
 };
 
 const openImportModal = () => {
-  if (!adminStore.canApproveCurrentPage) {
+  if (!adminStore.canEditCurrentPage) {
     message.warning("Bạn không có quyền import dữ liệu");
     return;
   }
@@ -229,7 +229,7 @@ const handleImportFileChange = event => {
 };
 
 const submitImport = async () => {
-  if (!adminStore.canApproveCurrentPage) {
+  if (!adminStore.canEditCurrentPage) {
     message.warning("Bạn không có quyền import dữ liệu");
     return;
   }
@@ -262,7 +262,7 @@ const submitImport = async () => {
 };
 
 const publishCandidates = async () => {
-  if (!adminStore.canApproveCurrentPage) {
+  if (!adminStore.canEditCurrentPage) {
     message.warning("Bạn không có quyền công bố dữ liệu");
     return;
   }
