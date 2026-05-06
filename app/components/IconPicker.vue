@@ -1,7 +1,7 @@
 <template>
   <a-form-item :label="label" :name="name" :rules="rules">
     <div class="flex items-center gap-2 w-full">
-      <a-select show-search class="flex-1" :value="modelValue" @update:value="val => $emit('update:modelValue', val)" :placeholder="placeholder" allow-clear :options="filteredOptions" :filter-option="false" @search="onSearch">
+      <a-select show-search class="flex-1" :value="modelValue" @update:value="val => $emit('update:modelValue', val)" :placeholder="placeholder" allow-clear :options="filteredOptions" :filter-option="false" :disabled="disabled" @search="onSearch">
         <template #option="{ value }">
           <div class="flex items-center gap-2">
             <Icon :name="value" />
@@ -23,7 +23,8 @@ const props = defineProps({
   label: { type: String, default: 'Icon' },
   name: { type: String, default: 'icon' },
   placeholder: { type: String, default: 'Chọn icon' },
-  rules: { type: Array, default: () => [] }
+  rules: { type: Array, default: () => [] },
+  disabled: { type: Boolean, default: false }
 })
 
 const emit = defineEmits(['update:modelValue'])

@@ -39,17 +39,17 @@
 
     <!-- 📝 Modal tạo / sửa menu -->
     <a-modal v-model:open="visible" :title="isEdit ? 'Chỉnh sửa menu' : currentParentId ? 'Thêm menu con' : 'Thêm menu mới'" @cancel="handleCancel" :width="700" :footer="null">
-      <a-form ref="formRef" :model="formState" layout="vertical" :rules="rules">
+      <a-form ref="formRef" :model="formState" :disabled="isEditReadOnly" layout="vertical" :rules="rules">
         <a-form-item label="Tiêu đề menu" name="title">
-          <a-input v-model:value="formState.title" placeholder="Nhập tiêu đề menu" @input="onTitleInput" />
+          <a-input v-model:value="formState.title" placeholder="Nhập tiêu đề menu" :disabled="isEditReadOnly" @input="onTitleInput" />
         </a-form-item>
         <a-form-item label="Key menu" name="key">
           <a-input v-model:value="formState.key" :disabled="true" placeholder="Tự động sinh từ tiêu đề" />
         </a-form-item>
         <a-form-item label="Đường dẫn" name="url">
-          <a-input v-model:value="formState.url" />
+          <a-input v-model:value="formState.url" :disabled="isEditReadOnly" />
         </a-form-item>
-        <IconPicker v-model="formState.icon" />
+        <IconPicker v-model="formState.icon" :disabled="isEditReadOnly" />
         <!-- <a-form-item label="Menu cha" v-if="!currentParentId">
           <a-tree-select
             v-model:value="formState.parent_Id"
@@ -83,6 +83,7 @@ const confirmLoading = ref(false);
 const isEdit = ref(false);
 const currentId = ref(null);
 const currentParentId = ref(null);
+const isEditReadOnly = computed(() => isEdit.value && !adminStore.canEditCurrentPage);
 
 // --- Dữ liệu & biểu mẫu ---
 const formRef = ref();

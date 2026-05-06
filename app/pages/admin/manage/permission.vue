@@ -40,16 +40,16 @@
 
     <a-modal v-model:open="visible" :title="isEdit ? 'Chỉnh sửa Nhóm quyền' : 'Thêm mới Nhóm quyền'" @cancel="handleCancel" :width="modalWidth" :bodyStyle="{ maxHeight: '70vh', overflowY: 'auto' }">
       <div class="grid grid-cols-1 gap-2 md:grid-cols-2">
-        <a-form ref="formRef" :model="formState" layout="vertical">
+        <a-form ref="formRef" :model="formState" :disabled="isEditReadOnly" layout="vertical">
           <a-form-item label="Tên Nhóm quyền" name="name" :label-col="{ span: 24 }" :wrapper-col="{ span: 24 }" :rules="rules.name">
-            <a-input v-model:value="formState.name" placeholder="Nhập tên Nhóm quyền" :maxlength="50" show-count />
+            <a-input v-model:value="formState.name" placeholder="Nhập tên Nhóm quyền" :maxlength="50" show-count :disabled="isEditReadOnly" />
           </a-form-item>
 
           <a-form-item label="Mô tả" name="description" :label-col="{ span: 24 }" :wrapper-col="{ span: 24 }">
-            <a-textarea v-model:value="formState.description" :rows="4" placeholder="Nhập mô tả (nếu có)" :maxlength="250" show-count />
+            <a-textarea v-model:value="formState.description" :rows="4" placeholder="Nhập mô tả (nếu có)" :maxlength="250" show-count :disabled="isEditReadOnly" />
           </a-form-item>
         </a-form>
-        <AdminPermissionEditor v-model="formState.permission" />
+        <AdminPermissionEditor v-model="formState.permission" :disabled="isEditReadOnly" />
       </div>
 
       <template #footer>
@@ -81,6 +81,7 @@ const visible = ref(false);
 const confirmLoading = ref(false);
 const isEdit = ref(false);
 const formRef = ref();
+const isEditReadOnly = computed(() => isEdit.value && !adminStore.canEditCurrentPage);
 
 const pagination = reactive({
   current: 1,
