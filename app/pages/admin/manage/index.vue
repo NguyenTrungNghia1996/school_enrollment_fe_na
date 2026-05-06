@@ -21,7 +21,7 @@
           </template>
           <template v-if="column.key === 'action'">
             <div class="flex justify-center space-x-2">
-              <a-button type="link" size="small" @click="editItem(record.id)" :disabled="!adminStore.canEditCurrentPage">
+              <a-button type="link" size="small" @click="editItem(record.id)" :disabled="!adminStore.canViewCurrentPage">
                 <template #icon><EditOutlined /></template>
               </a-button>
               <a-popconfirm title="Bạn chắc chắn muốn đặt lại mật khẩu cho quản trị viên này?" ok-text="Đồng ý" cancel-text="Hủy" @confirm="resetPassword(record.id)">
@@ -40,7 +40,15 @@
       </a-table>
     </ClientOnly>
 
-    <a-modal v-model:open="visible" :title="isEdit ? 'Chỉnh sửa Quản trị viên' : 'Thêm mới Quản trị viên'" @cancel="handleCancel" :width="600" :confirm-loading="confirmLoading" @ok="handleOk">
+    <a-modal
+      v-model:open="visible"
+      :title="isEdit ? 'Chỉnh sửa Quản trị viên' : 'Thêm mới Quản trị viên'"
+      @cancel="handleCancel"
+      :width="600"
+      :confirm-loading="confirmLoading"
+      :ok-button-props="{ disabled: isEdit && !adminStore.canEditCurrentPage }"
+      @ok="handleOk"
+    >
       <a-form ref="formRef" :model="formState" :rules="rules" layout="vertical" class="mt-4">
         <div class="grid grid-cols-1 gap-x-4 md:grid-cols-2">
           <a-form-item label="Tên đăng nhập" name="username" v-if="!isEdit">
@@ -210,6 +218,10 @@ const editItem = async id => {
 };
 
 const handleOk = async () => {
+  if (isEdit.value && !adminStore.canEditCurrentPage) {
+    message.warning("Bạn không có quyền cập nhật thông tin");
+    return;
+  }
   await formRef.value.validate();
   try {
     confirmLoading.value = true;
