@@ -36,7 +36,7 @@
                   </template>
 
                   <template v-else-if="column.key === 'statusName'">
-                    <a-tag :color="getStatusColor(record.statusName)">
+                    <a-tag :color="getStatusColor(record)">
                       {{ record.statusName || "Không xác định" }}
                     </a-tag>
                   </template>
@@ -58,7 +58,7 @@
                   <div class="text-xs uppercase tracking-[0.2em] text-slate-400">{{ record.applicationCode || `#${record.id}` }}</div>
                   <h2 class="mt-2 text-lg font-bold text-slate-900">{{ record.fullname || "-" }}</h2>
                 </div>
-                <a-tag :color="getStatusColor(record.statusName)">
+                <a-tag :color="getStatusColor(record)">
                   {{ record.statusName || "Không xác định" }}
                 </a-tag>
               </div>
@@ -104,7 +104,7 @@
           <div class="rounded-xl border border-slate-200 bg-slate-50 px-4 py-3">
             <div class="text-xs uppercase tracking-[0.2em] text-slate-400">Trạng thái</div>
             <div class="mt-2">
-              <a-tag :color="getStatusColor(detailData.statusName)">{{ detailData.statusName || `#${detailData.idStatus}` }}</a-tag>
+              <a-tag :color="getStatusColor(detailData)">{{ detailData.statusName || `#${detailData.idStatus}` }}</a-tag>
             </div>
           </div>
           <div class="rounded-xl border border-slate-200 bg-slate-50 px-4 py-3">
@@ -455,6 +455,11 @@
 
 <script setup>
 import dayjs from "dayjs";
+import {
+  getApplicationStatusColor,
+  isApprovedPendingPaymentApplicationStatus,
+  isDraftApplicationStatus,
+} from "~/composables/useApplicationStatus";
 
 definePageMeta({
   layout: "default",
@@ -556,20 +561,17 @@ const normalizedDocuments = computed(() => {
     .filter(document => document.links.length);
 });
 
-const showSubmitAction = computed(() => Number(detailData.value?.idStatus) < 2);
-const showEditAction = computed(() => Number(detailData.value?.idStatus) === 1);
-const showPaymentAction = computed(() => {
-  const status = Number(detailData.value?.idStatus);
-  return status === 3 && status !== 4;
-});
+const showSubmitAction = computed(() => isDraftApplicationStatus(detailData.value));
+const showEditAction = computed(() => isDraftApplicationStatus(detailData.value));
+const showPaymentAction = computed(() => isApprovedPendingPaymentApplicationStatus(detailData.value));
 const hasUploadingEditDocuments = computed(() => Object.values(documentUploadingMap.value).some(Boolean));
 const isEditingProcessing = computed(() => saveLoading.value || submitLoading.value || avatarUploading.value || hasUploadingEditDocuments.value);
 
-const canEditCurrentApplication = () => Number(detailData.value?.idStatus) === 1;
+const canEditCurrentApplication = () => isDraftApplicationStatus(detailData.value);
 
 const ensureEditableApplication = () => {
   if (!canEditCurrentApplication()) {
-    throw new Error("Hồ sơ có trạng thái lớn hơn 1 nên không thể chỉnh sửa");
+    throw new Error("Chỉ hồ sơ ở trạng thái nháp mới có thể chỉnh sửa");
   }
 };
 
@@ -662,25 +664,7 @@ const formatGender = value => {
   return "-";
 };
 
-const getStatusColor = statusName => {
-  const normalized = String(statusName || "")
-    .trim()
-    .toLowerCase();
-
-  if (normalized.includes("duyệt") || normalized.includes("đạt") || normalized.includes("thành công")) {
-    return "success";
-  }
-
-  if (normalized.includes("từ chối") || normalized.includes("hủy")) {
-    return "error";
-  }
-
-  if (normalized.includes("nháp") || normalized.includes("chờ")) {
-    return "processing";
-  }
-
-  return "default";
-};
+const getStatusColor = value => getApplicationStatusColor(value);
 
 const normalizeApplicationDetail = (detail, fallbackRecord = null) => {
   if (!detail || typeof detail !== "object") {

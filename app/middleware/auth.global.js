@@ -64,7 +64,7 @@ export default defineNuxtRouteMiddleware(async to => {
   if (isUserRoute) {
     if (!isUserAuthenticated) {
       userStore.logout();
-      return navigateTo("/login");
+      return navigateTo("/");
     }
     return;
   }

@@ -216,6 +216,12 @@
 <script setup>
 import DateBody from "ant-design-vue/es/vc-picker/panels/DatePanel/DateBody";
 import dayjs from "dayjs";
+import {
+  getApplicationStatusColor,
+  isDraftApplicationStatus,
+  isPendingReviewApplicationStatus,
+  isPaidPendingVerificationApplicationStatus,
+} from "~/composables/useApplicationStatus";
 
 definePageMeta({
   layout: "admin",
@@ -441,36 +447,18 @@ const formatGender = value => {
   return "-";
 };
 
-const getStatusColor = record => {
-  const normalized = String(record?.statusName || "")
-    .trim()
-    .toLowerCase();
-
-  if (normalized.includes("duyệt") || normalized.includes("đạt") || normalized.includes("thành công")) {
-    return "success";
-  }
-
-  if (normalized.includes("từ chối") || normalized.includes("hủy")) {
-    return "error";
-  }
-
-  if (normalized.includes("nháp") || normalized.includes("chờ")) {
-    return "processing";
-  }
-
-  return "default";
-};
+const getStatusColor = record => getApplicationStatusColor(record);
 
 const isActionDisabled = record => {
-  return Number(record?.idStatus) !== 2;
+  return !isPendingReviewApplicationStatus(record);
 };
 
 const isDeleteDisabled = record => {
-  return Number(record?.idStatus) >= 2;
+  return !isDraftApplicationStatus(record);
 };
 
 const showPaymentInfoAction = record => {
-  return Number(record?.idStatus) === 4;
+  return isPaidPendingVerificationApplicationStatus(record);
 };
 
 const getFileName = link => {

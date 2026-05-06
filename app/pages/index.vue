@@ -160,19 +160,21 @@
 const { $dayjs } = useNuxtApp();
 const unitStore = useUnitStore();
 const userStore = useUserStore();
+const safeMessage = useSafeMessage();
 const { examUser } = useApi();
 
 const INITIAL_PAGE_SIZE = 3;
 const EXPANDED_PAGE_SIZE = 6;
-const exams = ref([]);
-const examTotal = ref(0);
 const pageIndex = ref(1);
-const loading = ref(false);
 const examsExpanded = ref(false);
 const examSearchText = ref("");
 const pageSize = computed(() => (examsExpanded.value ? EXPANDED_PAGE_SIZE : INITIAL_PAGE_SIZE));
 const expandedPageSize = computed(() => EXPANDED_PAGE_SIZE);
-const showViewMoreButton = computed(() => !examsExpanded.value && examTotal.value > INITIAL_PAGE_SIZE);
+const query = ref({
+  pageIndex: 1,
+  pageSize: INITIAL_PAGE_SIZE,
+  search: "",
+});
 
 const getExamStatus = exam => {
   const now = $dayjs();
@@ -213,35 +215,48 @@ const mapExamItem = exam => {
     status: status.label,
     badgeClass: status.badgeClass,
     isClosed: status.isClosed,
-    raw: exam,
   };
 };
 
+const {
+  data: examResponse,
+  error: examError,
+  pending: loading,
+  refresh: refreshExams,
+} = await examUser.get({
+  query,
+  key: "home-exam-list",
+});
+
+const exams = computed(() => {
+  if (!examResponse.value?.success) return [];
+  const items = Array.isArray(examResponse.value?.data?.items) ? examResponse.value.data.items : [];
+  return items.map(mapExamItem);
+});
+
+const examTotal = computed(() => {
+  if (!examResponse.value?.success) return 0;
+  return Number(examResponse.value?.data?.total || 0);
+});
+
+const showViewMoreButton = computed(() => !examsExpanded.value && examTotal.value > INITIAL_PAGE_SIZE);
+
 const fetchExams = async () => {
-  loading.value = true;
-
   try {
-    const { data, error } = await examUser.get({
-      query: {
-        pageIndex: pageIndex.value,
-        pageSize: pageSize.value,
-        search: examSearchText.value.trim(),
-      },
-    });
+    query.value.pageIndex = pageIndex.value;
+    query.value.pageSize = pageSize.value;
+    query.value.search = examSearchText.value.trim();
+    await refreshExams();
 
-    if (error.value || data.value?.success === false) {
-      throw new Error(error.value?.data?.message || data.value?.message || "Không tải được danh sách kỳ khảo thí");
+    if (examError.value) {
+      throw new Error(examError.value?.data?.message || examError.value?.message || "Không tải được danh sách kỳ khảo thí");
     }
 
-    const items = Array.isArray(data.value?.data?.items) ? data.value.data.items : [];
-    exams.value = items.map(mapExamItem);
-    examTotal.value = Number(data.value?.data?.total || 0);
+    if (examResponse.value?.success === false) {
+      throw new Error(examResponse.value?.message || "Không tải được danh sách kỳ khảo thí");
+    }
   } catch (error) {
-    exams.value = [];
-    examTotal.value = 0;
-    message.error(error?.message || "Không tải được danh sách kỳ khảo thí");
-  } finally {
-    loading.value = false;
+    safeMessage.error(error?.message || "Không tải được danh sách kỳ khảo thí");
   }
 };
 
@@ -274,14 +289,12 @@ const handleExamPageChange = async page => {
   await fetchExams();
 };
 
-await fetchExams();
-
 const handleRegistration = exam => {
   if (!userStore.token) {
-    message.warning("Bạn cần phàn đăng nhập để thực hiện thao tác này");
+    safeMessage.warning("Bạn cần phàn đăng nhập để thực hiện thao tác này");
     userStore.openLogin();
   } else if (exam.isClosed) {
-    message.warning("Kỳ khảo thí này hiện chưa mở hoặc đã kết thúc");
+    safeMessage.warning("Kỳ khảo thí này hiện chưa mở hoặc đã kết thúc");
   } else {
     navigateTo(`/user/register/${exam.id}`);
   }
@@ -291,7 +304,7 @@ const handleCta = () => {
   if (!userStore.token) {
     userStore.openLogin();
   } else {
-    message.success("Chào mừng bạn quay lại!");
+    safeMessage.success("Chào mừng bạn quay lại!");
   }
 };
 </script>
