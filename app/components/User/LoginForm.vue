@@ -61,6 +61,7 @@ const handleLogin = async () => {
       saveCredentials(form.username, form.password, "user");
     }
     userStore.setUser(data.value.data);
+    await refreshNuxtData();
     message.success(data.value.message || "Đăng nhập thành công");
     emit("authenticated");
   } catch (error) {

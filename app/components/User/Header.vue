@@ -56,8 +56,9 @@
 const unitStore = useUnitStore();
 const userStore = useUserStore();
 
-const handleLogout = () => {
+const handleLogout = async () => {
   userStore.logout();
+  await refreshNuxtData();
   message.success("Đã đăng xuất thành công");
 };
 </script>
