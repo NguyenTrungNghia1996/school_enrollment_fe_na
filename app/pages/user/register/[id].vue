@@ -384,6 +384,8 @@
 </template>
 
 <script setup>
+import { APPLICATION_STATUS, APPLICATION_STATUS_LABELS } from "~/composables/useApplicationStatus";
+
 definePageMeta({
   layout: "default",
 });
@@ -686,7 +688,7 @@ const saveDraft = async () => {
       throw new Error(error.value?.data?.message || data.value?.message || "Lưu hồ sơ thất bại");
     }
 
-    message.success(data.value?.message || "Lưu hồ sơ thành công");
+    message.success(data.value?.message || `Lưu ${APPLICATION_STATUS_LABELS[APPLICATION_STATUS.DRAFT].toLowerCase()} thành công`);
   } catch (error) {
     message.error(error?.message || "Lưu hồ sơ thất bại");
   } finally {
@@ -881,7 +883,7 @@ const handleSubmit = async () => {
     }
 
     clearDraftStorage();
-    message.success(data.value?.message || "Nộp hồ sơ thành công");
+    message.success(data.value?.message || `Nộp hồ sơ thành công, trạng thái: ${APPLICATION_STATUS_LABELS[APPLICATION_STATUS.PENDING_REVIEW]}`);
     navigateTo("/");
   } catch (error) {
     message.error(error?.message || "Nộp hồ sơ thất bại");
