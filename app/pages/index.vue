@@ -735,11 +735,8 @@ const confirmPayment = async () => {
 
   try {
     const { data, error } = await applicationUser.putByRest("confirmPayment", {
-      body: {
-        idApplication: Number(applicationDetail.value.id),
-        amount: Number(qrData.value.fee || 0),
-        transCode: String(qrData.value.code).trim(),
-      },
+      params: { idApplication: Number(applicationDetail.value.id) },
+      key: `home-application-confirm-payment-${applicationDetail.value.id}-${Date.now()}`,
     });
     if (error.value || data.value?.success === false) {
       throw new Error(error.value?.data?.message || data.value?.message || "Xác nhận thanh toán thất bại");
