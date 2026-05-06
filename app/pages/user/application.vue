@@ -455,11 +455,7 @@
 
 <script setup>
 import dayjs from "dayjs";
-import {
-  getApplicationStatusColor,
-  isApprovedPendingPaymentApplicationStatus,
-  isDraftApplicationStatus,
-} from "~/composables/useApplicationStatus";
+import { getApplicationStatusColor, isApprovedPendingPaymentApplicationStatus, isDraftApplicationStatus } from "~/composables/useApplicationStatus";
 
 definePageMeta({
   layout: "default",
@@ -956,11 +952,6 @@ const buildApplicationPayload = ({ includeAvatar = true } = {}) => {
 };
 
 const fetchDetailData = async (record, { resetData = true } = {}) => {
-  const examId = Number(record?.idExam || selectedExamId.value);
-  if (!Number.isFinite(examId) || examId <= 0) {
-    throw new Error("Id kỳ khảo thí không hợp lệ, vui lòng kiểm tra lại");
-  }
-
   if (resetData) {
     detailData.value = null;
   }
@@ -968,11 +959,10 @@ const fetchDetailData = async (record, { resetData = true } = {}) => {
   detailLoading.value = true;
 
   try {
-    const { data, error } = await applicationUser.getDetail({
-      params: { idExam: examId },
-      key: `user-application-detail-${examId}-${Date.now()}`,
+    const { data, error } = await applicationUser.getByRest("detail", {
+      params: { id: Number(record?.id) },
+      key: `user-application-detail-${Number(record?.id)}-${Date.now()}`,
     });
-
     if (error.value || data.value?.success === false || !data.value?.data) {
       throw new Error(error.value?.data?.message || data.value?.message || "Không thể tải thông tin chi tiết");
     }
