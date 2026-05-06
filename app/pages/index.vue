@@ -228,9 +228,82 @@
           <div v-else class="rounded-xl border border-dashed border-slate-300 bg-slate-50 px-4 py-6 text-sm text-slate-500">Hồ sơ này chưa có tài liệu đính kèm.</div>
         </div>
 
-        <div class="flex justify-end border-t border-slate-100 pt-4">
+        <div class="flex justify-end gap-3 border-t border-slate-100 pt-4">
+          <a-button v-if="showPaymentAction" type="primary" :loading="qrLoading" @click="openPaymentModal">Thanh toán ngay</a-button>
           <a-button @click="closeApplicationDetail">Đóng</a-button>
         </div>
+      </div>
+    </a-modal>
+
+    <a-modal v-model:open="paymentVisible" title="Thanh toán hồ sơ" :width="960" :footer="null" @cancel="closePaymentModal">
+      <div v-if="qrLoading" class="py-12 text-center">
+        <a-spin size="large" />
+      </div>
+
+      <div v-else-if="qrData" class="grid gap-6 lg:grid-cols-[380px_minmax(0,1fr)]">
+        <section class="rounded-3xl border border-slate-200 bg-slate-50 p-5">
+          <h3 class="text-lg font-bold text-slate-900">Thông tin chuyển khoản</h3>
+
+          <div class="mt-5 overflow-hidden rounded-2xl border border-slate-200 bg-white p-4">
+            <img :src="qrData.url" :alt="`QR thanh toán ${qrData.applicationCode}`" class="mx-auto h-auto w-full max-w-[280px]" />
+          </div>
+
+          <p class="mt-4 text-sm leading-6 text-slate-500">Quét mã QR bằng ứng dụng ngân hàng để thanh toán. Vui lòng giữ nguyên nội dung chuyển khoản để hệ thống đối soát chính xác.</p>
+
+          <div class="mt-4 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3">
+            <div class="text-xs uppercase tracking-[0.15em] text-amber-600">Nội dung chuyển khoản</div>
+            <div class="mt-2 text-center text-xl font-bold tracking-[0.35em] text-amber-700">{{ qrData.code || "-" }}</div>
+          </div>
+
+          <div class="mt-4 space-y-3">
+            <div class="rounded-2xl bg-white px-4 py-3">
+              <div class="text-xs uppercase tracking-[0.15em] text-slate-400">Ngân hàng</div>
+              <div class="mt-2 font-semibold text-slate-800">{{ qrData.bank || "-" }}</div>
+            </div>
+            <div class="rounded-2xl bg-white px-4 py-3">
+              <div class="text-xs uppercase tracking-[0.15em] text-slate-400">Số tài khoản</div>
+              <div class="mt-2 font-semibold text-slate-800">{{ qrData.accountNo || "-" }}</div>
+            </div>
+            <div class="rounded-2xl bg-white px-4 py-3">
+              <div class="text-xs uppercase tracking-[0.15em] text-slate-400">Chủ tài khoản</div>
+              <div class="mt-2 font-semibold uppercase text-slate-800">{{ qrData.accountName || "-" }}</div>
+            </div>
+          </div>
+        </section>
+
+        <section class="rounded-3xl border border-slate-200 bg-white p-5">
+          <h3 class="text-lg font-bold text-slate-900">Thông tin đợt tuyển sinh / kỳ thi</h3>
+
+          <div class="mt-5 overflow-hidden rounded-2xl border border-slate-200">
+            <div class="grid grid-cols-[160px_1fr] border-b border-slate-200">
+              <div class="bg-slate-50 px-4 py-3 text-sm font-medium text-slate-500">Tên đợt</div>
+              <div class="px-4 py-3 text-sm font-semibold text-slate-900">{{ qrData.examName || "-" }}</div>
+            </div>
+            <div class="grid grid-cols-[160px_1fr] border-b border-slate-200">
+              <div class="bg-slate-50 px-4 py-3 text-sm font-medium text-slate-500">Mã hồ sơ</div>
+              <div class="px-4 py-3 text-sm font-semibold text-slate-900">{{ qrData.applicationCode || "-" }}</div>
+            </div>
+            <div class="grid grid-cols-[160px_1fr] border-b border-slate-200">
+              <div class="bg-slate-50 px-4 py-3 text-sm font-medium text-slate-500">Tên thí sinh</div>
+              <div class="px-4 py-3 text-sm font-semibold text-slate-900">{{ qrData.fullName || "-" }}</div>
+            </div>
+            <div class="grid grid-cols-[160px_1fr] border-b border-slate-200">
+              <div class="bg-slate-50 px-4 py-3 text-sm font-medium text-slate-500">Lệ phí</div>
+              <div class="px-4 py-3 text-sm font-semibold text-slate-900">{{ formatCurrency(qrData.fee) }}</div>
+            </div>
+            <div class="grid grid-cols-[160px_1fr]">
+              <div class="bg-emerald-50 px-4 py-3 text-sm font-bold text-emerald-700">Tổng thanh toán</div>
+              <div class="px-4 py-3 text-base font-bold text-emerald-700">{{ formatCurrency(qrData.fee) }}</div>
+            </div>
+          </div>
+
+          <div class="mt-6 rounded-2xl bg-slate-50 px-4 py-4 text-sm leading-6 text-slate-500">Sau khi chuyển khoản thành công, hồ sơ sẽ được nhà trường xác nhận theo quy trình đối soát.</div>
+
+          <div class="mt-6 flex justify-end gap-3">
+            <a-button class="min-w-32" @click="closePaymentModal">Quay lại</a-button>
+            <a-button type="primary" class="min-w-40" :loading="confirmPaymentLoading" @click="confirmPayment">Xác nhận thanh toán</a-button>
+          </div>
+        </section>
       </div>
     </a-modal>
   </div>
@@ -239,7 +312,7 @@
 <script setup>
 import dayjs from "dayjs";
 
-import { getApplicationStatusColor } from "~/composables/useApplicationStatus";
+import { APPLICATION_STATUS_LABELS, getApplicationStatus, getApplicationStatusColor, isApprovedPendingPaymentApplicationStatus } from "~/composables/useApplicationStatus";
 
 const { $dayjs } = useNuxtApp();
 const unitStore = useUnitStore();
@@ -289,8 +362,13 @@ const examSearchText = ref("");
 const applicationDetailVisible = ref(false);
 const applicationDetailLoading = ref(false);
 const applicationDetail = ref(null);
+const paymentVisible = ref(false);
+const qrData = ref(null);
+const qrLoading = ref(false);
+const confirmPaymentLoading = ref(false);
 const pageSize = computed(() => (examsExpanded.value ? EXPANDED_PAGE_SIZE : INITIAL_PAGE_SIZE));
 const expandedPageSize = computed(() => EXPANDED_PAGE_SIZE);
+const showPaymentAction = computed(() => isApprovedPendingPaymentApplicationStatus(applicationDetail.value));
 const query = ref({
   pageIndex: 1,
   pageSize: INITIAL_PAGE_SIZE,
@@ -414,6 +492,14 @@ const formatGender = value => {
   if (value === true) return "Nam";
   if (value === false) return "Nữ";
   return "-";
+};
+
+const formatCurrency = value => {
+  if (value === undefined || value === null) return "0 VND";
+  return new Intl.NumberFormat("vi-VN", {
+    style: "currency",
+    currency: "VND",
+  }).format(value);
 };
 
 const normalizeApplicationDetail = detail => {
@@ -586,6 +672,88 @@ const closeApplicationDetail = () => {
   applicationDetailVisible.value = false;
   applicationDetailLoading.value = false;
   applicationDetail.value = null;
+};
+
+const openPaymentModal = async () => {
+  if (!applicationDetail.value?.id) {
+    safeMessage.error("Không xác định được hồ sơ thanh toán");
+    return;
+  }
+
+  const applicationId = Number(applicationDetail.value.id);
+  if (!Number.isFinite(applicationId) || applicationId <= 0) {
+    safeMessage.error("Id hồ sơ không hợp lệ, vui lòng kiểm tra lại");
+    return;
+  }
+
+  qrData.value = null;
+  paymentVisible.value = true;
+  qrLoading.value = true;
+
+  try {
+    const { data, error } = await applicationUser.getByRest("qr", {
+      params: { id: applicationId },
+      key: `home-application-qr-${applicationId}-${Date.now()}`,
+    });
+    if (error.value || data.value?.success === false || !data.value?.data) {
+      throw new Error(error.value?.data?.message || data.value?.message || "Không tải được thông tin thanh toán");
+    }
+
+    qrData.value = data.value.data;
+  } catch (error) {
+    paymentVisible.value = false;
+    safeMessage.error(error?.message || "Không tải được thông tin thanh toán");
+  } finally {
+    qrLoading.value = false;
+  }
+};
+
+const closePaymentModal = () => {
+  paymentVisible.value = false;
+  qrData.value = null;
+  qrLoading.value = false;
+  confirmPaymentLoading.value = false;
+};
+
+const confirmPayment = async () => {
+  if (!applicationDetail.value?.id) {
+    safeMessage.error("Không xác định được hồ sơ thanh toán");
+    return;
+  }
+
+  if (!qrData.value) {
+    safeMessage.error("Không có thông tin thanh toán để xác nhận");
+    return;
+  }
+
+  if (!qrData.value.code) {
+    safeMessage.error("Không có nội dung chuyển khoản để xác nhận");
+    return;
+  }
+
+  confirmPaymentLoading.value = true;
+
+  try {
+    const { data, error } = await applicationUser.putByRest("confirmPayment", {
+      body: {
+        idApplication: Number(applicationDetail.value.id),
+        amount: Number(qrData.value.fee || 0),
+        transCode: String(qrData.value.code).trim(),
+      },
+    });
+    if (error.value || data.value?.success === false) {
+      throw new Error(error.value?.data?.message || data.value?.message || "Xác nhận thanh toán thất bại");
+    }
+
+    safeMessage.success(data.value?.message || "Xác nhận thanh toán thành công");
+    closePaymentModal();
+    closeApplicationDetail();
+    await fetchExams();
+  } catch (error) {
+    safeMessage.error(error?.message || "Xác nhận thanh toán thất bại");
+  } finally {
+    confirmPaymentLoading.value = false;
+  }
 };
 
 const handleRegistration = exam => {
