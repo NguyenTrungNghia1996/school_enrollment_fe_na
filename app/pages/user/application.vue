@@ -116,7 +116,7 @@
           </div>
         </div>
 
-        <a-form v-if="showEditAction" layout="vertical">
+        <a-form v-if="showEditAction" ref="detailFormRef" :model="detailData" layout="vertical" @submit.prevent>
           <div class="grid gap-x-6 gap-y-5 md:grid-cols-2">
             <a-form-item label="Ảnh 3x4" class="md:col-span-2">
               <div class="rounded-3xl border border-slate-100 bg-slate-50/50 p-6 transition-colors hover:bg-slate-50">
@@ -170,63 +170,63 @@
               </div>
             </a-form-item>
 
-            <a-form-item label="Họ tên">
+            <a-form-item label="Họ tên" name="fullName" :rules="detailFormRules.fullName">
               <a-input v-model:value="detailData.fullName" placeholder="Nhập họ tên đầy đủ" size="large" class="rounded-xl" />
             </a-form-item>
 
-            <a-form-item label="Ngày sinh">
+            <a-form-item label="Ngày sinh" name="dateOfBirth" :rules="detailFormRules.dateOfBirth">
               <a-date-picker v-model:value="detailData.dateOfBirth" format="DD/MM/YYYY" class="w-full rounded-xl" size="large" placeholder="Chọn ngày sinh" />
             </a-form-item>
 
             <div>
-              <UserSelectProvince v-model="detailData.idProvince" label="Nơi sinh" name="idProvince" placeholder="Chọn tỉnh thành phố" size="large" class="rounded-xl" />
+              <UserSelectProvince v-model="detailData.idProvince" label="Nơi sinh" name="idProvince" placeholder="Chọn tỉnh thành phố" :rules="detailFormRules.idProvince" size="large" class="rounded-xl" />
             </div>
 
-            <a-form-item label="Số CCCD">
+            <a-form-item label="Số CCCD" name="identityNumber" :rules="detailFormRules.identityNumber">
               <a-input v-model:value="detailData.identityNumber" placeholder="Nhập số CCCD" size="large" class="rounded-xl" />
             </a-form-item>
 
-            <a-form-item label="Ngày cấp CCCD">
+            <a-form-item label="Ngày cấp CCCD" name="identityIssueDate" :rules="detailFormRules.identityIssueDate">
               <a-date-picker v-model:value="detailData.identityIssueDate" format="DD/MM/YYYY" class="w-full rounded-xl" size="large" placeholder="Chọn ngày cấp CCCD" />
             </a-form-item>
 
-            <a-form-item label="Nơi cấp CCCD">
+            <a-form-item label="Nơi cấp CCCD" name="identityIssuePlace" :rules="detailFormRules.identityIssuePlace">
               <a-input v-model:value="detailData.identityIssuePlace" placeholder="Nhập nơi cấp CCCD" size="large" class="rounded-xl" />
             </a-form-item>
 
             <div>
-              <UserSelectEthnicity v-model="detailData.idEthnicity" label="Dân tộc" name="idEthnicity" placeholder="Chọn dân tộc" size="large" class="rounded-xl" />
+              <UserSelectEthnicity v-model="detailData.idEthnicity" label="Dân tộc" name="idEthnicity" placeholder="Chọn dân tộc" :rules="detailFormRules.idEthnicity" size="large" class="rounded-xl" />
             </div>
 
-            <a-form-item label="Giới tính">
+            <a-form-item label="Giới tính" name="gender" :rules="detailFormRules.gender">
               <a-select v-model:value="detailData.gender" :options="genderOptions" placeholder="Chọn giới tính" size="large" class="rounded-xl" />
             </a-form-item>
 
             <div>
-              <UserSelectProvince v-model="detailData.idPermanentProvince" label="Tỉnh thường trú" name="idPermanentProvince" placeholder="Chọn tỉnh thành phố" size="large" class="rounded-xl" />
+              <UserSelectProvince v-model="detailData.idPermanentProvince" label="Tỉnh thường trú" name="idPermanentProvince" placeholder="Chọn tỉnh thành phố" :rules="detailFormRules.idPermanentProvince" size="large" class="rounded-xl" />
             </div>
 
             <div>
-              <UserSelectCommune v-model="detailData.idCommune" :id-province="detailData.idPermanentProvince" label="Phường/xã thường trú" name="idCommune" placeholder="Chọn phường/xã" size="large" class="rounded-xl" />
+              <UserSelectCommune v-model="detailData.idCommune" :id-province="detailData.idPermanentProvince" label="Phường/xã thường trú" name="idCommune" placeholder="Chọn phường/xã" :rules="detailFormRules.idCommune" size="large" class="rounded-xl" />
             </div>
 
-            <a-form-item label="Địa chỉ thường trú" class="md:col-span-2">
+            <a-form-item label="Địa chỉ thường trú" name="permanentAddress" class="md:col-span-2" :rules="detailFormRules.permanentAddress">
               <a-input v-model:value="detailData.permanentAddress" placeholder="Nhập địa chỉ thường trú" size="large" class="rounded-xl" />
             </a-form-item>
 
-            <a-form-item label="Số điện thoại">
+            <a-form-item label="Số điện thoại" name="phoneNumber" :rules="detailFormRules.phoneNumber">
               <a-input v-model:value="detailData.phoneNumber" placeholder="Nhập số điện thoại" size="large" class="rounded-xl" />
             </a-form-item>
 
             <div>
-              <UserSelectProvince v-model="detailData.idCurrentProvince" label="Tỉnh hiện tại" name="idCurrentProvince" placeholder="Chọn tỉnh thành phố" size="large" class="rounded-xl" />
+              <UserSelectProvince v-model="detailData.idCurrentProvince" label="Tỉnh hiện tại" name="idCurrentProvince" placeholder="Chọn tỉnh thành phố" :rules="detailFormRules.idCurrentProvince" size="large" class="rounded-xl" />
             </div>
 
             <div>
-              <UserSelectCommune v-model="detailData.idCurrentCommune" :id-province="detailData.idCurrentProvince" label="Phường/xã hiện tại" name="idCurrentCommune" placeholder="Chọn phường/xã" size="large" class="rounded-xl" />
+              <UserSelectCommune2 v-model="detailData.idCurrentCommune" :id-province="detailData.idCurrentProvince" label="Phường/xã hiện tại" name="idCurrentCommune" placeholder="Chọn phường/xã" :rules="detailFormRules.idCurrentCommune" size="large" class="rounded-xl" />
             </div>
 
-            <a-form-item label="Địa chỉ hiện tại" class="md:col-span-2">
+            <a-form-item label="Địa chỉ hiện tại" name="currentAddress" class="md:col-span-2" :rules="detailFormRules.currentAddress">
               <a-input v-model:value="detailData.currentAddress" placeholder="Nhập địa chỉ hiện tại" size="large" class="rounded-xl" />
             </a-form-item>
           </div>
@@ -483,6 +483,7 @@ const detailVisible = ref(false);
 const detailData = ref(null);
 const detailLoading = ref(false);
 const selectedRecord = ref(null);
+const detailFormRef = ref();
 const saveLoading = ref(false);
 const submitLoading = ref(false);
 const avatarUploading = ref(false);
@@ -496,6 +497,29 @@ const genderOptions = [
   { label: "Nam", value: true },
   { label: "Nữ", value: false },
 ];
+const detailFormRules = {
+  fullName: [{ required: true, message: "Vui lòng nhập họ tên đầy đủ" }],
+  dateOfBirth: [{ required: true, message: "Vui lòng chọn ngày sinh" }],
+  idProvince: [{ required: true, message: "Vui lòng chọn nơi sinh" }],
+  identityNumber: [
+    { required: true, message: "Vui lòng nhập số CCCD" },
+    { pattern: /^\d{9,12}$/, message: "Số CCCD phải gồm 9 đến 12 chữ số" },
+  ],
+  identityIssueDate: [{ required: true, message: "Vui lòng chọn ngày cấp CCCD" }],
+  identityIssuePlace: [{ required: true, message: "Vui lòng nhập nơi cấp CCCD" }],
+  idEthnicity: [{ required: true, message: "Vui lòng chọn dân tộc" }],
+  gender: [{ required: true, message: "Vui lòng chọn giới tính" }],
+  idPermanentProvince: [{ required: true, message: "Vui lòng chọn tỉnh/thành phố cư trú" }],
+  idCommune: [{ required: true, message: "Vui lòng chọn phường/xã cư trú" }],
+  permanentAddress: [{ required: true, message: "Vui lòng nhập địa chỉ thường trú" }],
+  phoneNumber: [
+    { required: true, message: "Vui lòng nhập số điện thoại" },
+    { pattern: /^(0|\+84)\d{9,10}$/, message: "Số điện thoại không hợp lệ" },
+  ],
+  idCurrentProvince: [{ required: true, message: "Vui lòng chọn tỉnh/thành phố hiện tại" }],
+  idCurrentCommune: [{ required: true, message: "Vui lòng chọn phường/xã hiện tại" }],
+  currentAddress: [{ required: true, message: "Vui lòng nhập địa chỉ nơi ở hiện tại" }],
+};
 
 const pagination = reactive({
   current: 1,
@@ -1046,6 +1070,13 @@ const saveApplication = async () => {
     return;
   }
 
+  try {
+    await detailFormRef.value?.validate();
+  } catch {
+    message.warning("Vui lòng kiểm tra lại thông tin hồ sơ");
+    return;
+  }
+
   const payload = buildApplicationPayload();
   if (!payload) {
     message.error("Không có dữ liệu hồ sơ để lưu");
@@ -1076,6 +1107,13 @@ const saveApplication = async () => {
 const submitApplication = async () => {
   if (avatarUploading.value || hasUploadingEditDocuments.value) {
     message.warning("Vui lòng chờ upload hồ sơ hoàn tất");
+    return;
+  }
+
+  try {
+    await detailFormRef.value?.validate();
+  } catch {
+    message.warning("Vui lòng kiểm tra lại thông tin hồ sơ");
     return;
   }
 
