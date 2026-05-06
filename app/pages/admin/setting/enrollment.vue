@@ -55,7 +55,7 @@
       @ok="handleOk"
       centered
     >
-      <a-form ref="formRef" :model="formState" :rules="rules" layout="vertical" class="mt-4 max-h-[70vh] overflow-y-auto pr-2" @submit.prevent>
+      <a-form ref="formRef" :model="formState" :rules="rules" :disabled="isFormReadOnly" layout="vertical" class="mt-4 max-h-[70vh] overflow-y-auto pr-2" @submit.prevent>
         <a-alert
           v-if="isEnrollmentLocked"
           type="info"
@@ -66,55 +66,55 @@
 
         <div class="grid grid-cols-1 gap-x-4 md:grid-cols-2">
           <a-form-item label="Tên đợt tuyển sinh" name="examName" class="md:col-span-2">
-            <a-input v-model:value="formState.examName" placeholder="Nhập tên đợt tuyển sinh" :maxlength="300" show-count :disabled="isEnrollmentLocked" />
+            <a-input v-model:value="formState.examName" placeholder="Nhập tên đợt tuyển sinh" :maxlength="300" show-count :disabled="isFormReadOnly" />
           </a-form-item>
 
           <a-form-item label="Khoảng thời gian" name="dateRange" class="md:col-span-2">
-            <a-range-picker v-model:value="formState.dateRange" format="DD/MM/YYYY HH:mm" show-time class="w-full" :placeholder="['Chọn ngày giờ bắt đầu', 'Chọn ngày giờ kết thúc']" :disabled="isEnrollmentLocked" />
+            <a-range-picker v-model:value="formState.dateRange" format="DD/MM/YYYY HH:mm" show-time class="w-full" :placeholder="['Chọn ngày giờ bắt đầu', 'Chọn ngày giờ kết thúc']" :disabled="isFormReadOnly" />
           </a-form-item>
 
           <a-form-item label="Link đăng ký" name="url" class="md:col-span-2">
-            <a-input v-model:value="formState.url" placeholder="Nhập đường dẫn đăng ký hoặc thông tin liên quan" :disabled="isEnrollmentLocked" />
+            <a-input v-model:value="formState.url" placeholder="Nhập đường dẫn đăng ký hoặc thông tin liên quan" :disabled="isFormReadOnly" />
           </a-form-item>
 
           <a-form-item label="Lệ phí (VNĐ)" name="fee">
-            <a-input-number v-model:value="formState.fee" :min="0" :step="10000" class="w-full" :formatter="value => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')" :parser="value => value.replace(/\$\s?|(,*)/g, '')" :disabled="isEnrollmentLocked" />
+            <a-input-number v-model:value="formState.fee" :min="0" :step="10000" class="w-full" :formatter="value => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')" :parser="value => value.replace(/\$\s?|(,*)/g, '')" :disabled="isFormReadOnly" />
           </a-form-item>
 
           <a-form-item label="Số lượng chỉ tiêu" name="quantity">
-            <a-input-number v-model:value="formState.quantity" :min="0" class="w-full" :disabled="isEnrollmentLocked" />
+            <a-input-number v-model:value="formState.quantity" :min="0" class="w-full" :disabled="isFormReadOnly" />
           </a-form-item>
 
           <a-form-item label="Thời gian phúc khảo" name="reviewDateRange" class="md:col-span-2">
-            <a-range-picker v-model:value="formState.reviewDateRange" format="DD/MM/YYYY HH:mm" show-time class="w-full" :disabled-date="disabledReviewDate" :placeholder="['Chọn ngày giờ bắt đầu phúc khảo', 'Chọn ngày giờ kết thúc phúc khảo']" />
+            <a-range-picker v-model:value="formState.reviewDateRange" format="DD/MM/YYYY HH:mm" show-time class="w-full" :disabled-date="disabledReviewDate" :placeholder="['Chọn ngày giờ bắt đầu phúc khảo', 'Chọn ngày giờ kết thúc phúc khảo']" :disabled="isFormReadOnly" />
           </a-form-item>
 
           <a-form-item label="Lệ phí phúc khảo (VNĐ)" name="reviewFee">
-            <a-input-number v-model:value="formState.reviewFee" :min="0" :step="10000" class="w-full" :formatter="value => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')" :parser="value => value.replace(/\$\s?|(,*)/g, '')" />
+            <a-input-number v-model:value="formState.reviewFee" :min="0" :step="10000" class="w-full" :formatter="value => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')" :parser="value => value.replace(/\$\s?|(,*)/g, '')" :disabled="isFormReadOnly" />
           </a-form-item>
 
           <div />
 
           <div class="md:col-span-2">
-            <AdminSelectBank v-model="formState.idBank" label="Ngân hàng" name="idBank" placeholder="Chọn ngân hàng" :rules="[{ required: true, message: 'Vui lòng chọn ngân hàng', trigger: 'change' }]" :disabled="isEnrollmentLocked" />
+            <AdminSelectBank v-model="formState.idBank" label="Ngân hàng" name="idBank" placeholder="Chọn ngân hàng" :rules="[{ required: true, message: 'Vui lòng chọn ngân hàng', trigger: 'change' }]" :disabled="isFormReadOnly" />
           </div>
 
           <a-form-item label="Số tài khoản" name="accountNumber">
-            <a-input v-model:value="formState.accountNumber" placeholder="Nhập số tài khoản" :disabled="isEnrollmentLocked" />
+            <a-input v-model:value="formState.accountNumber" placeholder="Nhập số tài khoản" :disabled="isFormReadOnly" />
           </a-form-item>
 
           <a-form-item label="Chủ tài khoản" name="accountName">
-            <a-input v-model:value="formState.accountName" placeholder="Nhập tên chủ tài khoản" :disabled="isEnrollmentLocked" />
+            <a-input v-model:value="formState.accountName" placeholder="Nhập tên chủ tài khoản" :disabled="isFormReadOnly" />
           </a-form-item>
 
           <div class="md:col-span-2">
-            <AdminSelectSubject v-model="formState.subjectIds" :rules="rules.subjectIds" multiple label="Danh sách môn thi" name="subjectIds" placeholder="Chọn các môn thi" :disabled="isEnrollmentLocked" />
+            <AdminSelectSubject v-model="formState.subjectIds" :rules="rules.subjectIds" multiple label="Danh sách môn thi" name="subjectIds" placeholder="Chọn các môn thi" :disabled="isFormReadOnly" />
           </div>
 
           <div class="mt-2 md:col-span-2">
             <div class="mb-2 flex items-center justify-between">
               <span class="font-medium text-gray-700">Hồ sơ yêu cầu</span>
-              <a-button type="dashed" size="small" @click="addDocument" html-type="button" :disabled="isEnrollmentLocked">
+              <a-button type="dashed" size="small" @click="addDocument" html-type="button" :disabled="isFormReadOnly">
                 <template #icon><PlusOutlined /></template>
                 Thêm hồ sơ
               </a-button>
@@ -124,14 +124,14 @@
 
             <div v-for="(doc, index) in formState.documents" :key="index" class="group relative mb-2 flex items-start gap-2 rounded bg-slate-50 p-2">
               <a-form-item :name="['documents', index, 'documentName']" :rules="{ required: true, message: 'Nhập tên hồ sơ', trigger: 'blur' }" class="mb-0 flex-1">
-                <a-input v-model:value="doc.documentName" placeholder="Tên loại hồ sơ (vd: Giấy khai sinh)" size="small" :disabled="isEnrollmentLocked" />
+                <a-input v-model:value="doc.documentName" placeholder="Tên loại hồ sơ (vd: Giấy khai sinh)" size="small" :disabled="isFormReadOnly" />
               </a-form-item>
 
               <div class="flex h-8 items-center px-2">
-                <a-checkbox v-model:checked="doc.isRequired" class="text-xs" :disabled="isEnrollmentLocked">Bắt buộc</a-checkbox>
+                <a-checkbox v-model:checked="doc.isRequired" class="text-xs" :disabled="isFormReadOnly">Bắt buộc</a-checkbox>
               </div>
 
-              <a-button type="text" danger size="small" @click="removeDocument(index)" class="opacity-0 transition-opacity group-hover:opacity-100" html-type="button" :disabled="isEnrollmentLocked">
+              <a-button type="text" danger size="small" @click="removeDocument(index)" class="opacity-0 transition-opacity group-hover:opacity-100" html-type="button" :disabled="isFormReadOnly">
                 <template #icon><DeleteOutlined /></template>
               </a-button>
             </div>
@@ -157,6 +157,7 @@ const visible = ref(false);
 const confirmLoading = ref(false);
 const isEdit = ref(false);
 const formRef = ref();
+const isEditReadOnly = computed(() => isEdit.value && !adminStore.canEditCurrentPage);
 
 const pagination = reactive({
   current: 1,
@@ -199,6 +200,7 @@ const createInitialFormState = () => ({
 
 const formState = reactive(createInitialFormState());
 const isEnrollmentLocked = computed(() => isEdit.value && formState.hasApplications);
+const isFormReadOnly = computed(() => isEnrollmentLocked.value || isEditReadOnly.value);
 
 const validateRequiredNumber = fieldLabel => ({
   validator: async (_, value) => {

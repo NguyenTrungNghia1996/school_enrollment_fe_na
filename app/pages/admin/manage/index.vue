@@ -49,7 +49,7 @@
       :ok-button-props="{ disabled: isEdit && !adminStore.canEditCurrentPage }"
       @ok="handleOk"
     >
-      <a-form ref="formRef" :model="formState" :rules="rules" layout="vertical" class="mt-4">
+      <a-form ref="formRef" :model="formState" :rules="rules" :disabled="isEditReadOnly" layout="vertical" class="mt-4">
         <div class="grid grid-cols-1 gap-x-4 md:grid-cols-2">
           <a-form-item label="Tên đăng nhập" name="username" v-if="!isEdit">
             <a-input v-model:value="formState.username" placeholder="Nhập tên đăng nhập" :maxlength="10" show-count />
@@ -95,6 +95,7 @@ const confirmLoading = ref(false);
 const isEdit = ref(false);
 const formRef = ref();
 const resettingPasswordId = ref(null);
+const isEditReadOnly = computed(() => isEdit.value && !adminStore.canEditCurrentPage);
 
 const pagination = reactive({
   current: 1,

@@ -44,7 +44,7 @@
       :ok-button-props="{ disabled: isEdit && !adminStore.canEditCurrentPage }"
       @ok="handleOk"
     >
-      <a-form ref="formRef" :model="formState" :rules="rules" layout="vertical" class="mt-4">
+      <a-form ref="formRef" :model="formState" :rules="rules" :disabled="isEditReadOnly" layout="vertical" class="mt-4">
         <template v-if="!isEdit">
           <a-form-item label="Tên đăng nhập" name="username">
             <a-input v-model:value="formState.username" placeholder="Nhập email" :maxlength="100" show-count />
@@ -88,6 +88,7 @@ const visible = ref(false);
 const confirmLoading = ref(false);
 const isEdit = ref(false);
 const formRef = ref();
+const isEditReadOnly = computed(() => isEdit.value && !adminStore.canEditCurrentPage);
 
 const pagination = reactive({
   current: 1,

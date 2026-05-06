@@ -2,7 +2,7 @@
   <a-table :columns="menuColumns" :data-source="flatMenuData" size="small" bordered :pagination="false" :scroll="{ y: '60vh' }" :loading="loading">
     <template #bodyCell="{ column, record }">
       <template v-if="column.dataIndex === 'permission' && record.permissionBit !== undefined">
-        <a-radio-group size="small" option-type="button" button-style="solid" :value="getPermission(record.key, record.permissionBit)" @change="e => setPermission(record.key, record.permissionBit, e.target.value)">
+        <a-radio-group size="small" option-type="button" button-style="solid" :value="getPermission(record.key, record.permissionBit)" :disabled="disabled" @change="e => setPermission(record.key, record.permissionBit, e.target.value)">
           <a-radio :value="0">Ẩn</a-radio>
           <a-radio :value="1">Xem</a-radio>
           <a-radio :value="2">Duyệt</a-radio>
@@ -27,7 +27,11 @@ const props = defineProps({
   modelValue: {
     type: Array,
     default: () => []
-  }
+  },
+  disabled: {
+    type: Boolean,
+    default: false
+  },
 })
 
 const emit = defineEmits(['update:modelValue'])
