@@ -419,7 +419,7 @@ const getFileName = link => {
 };
 
 const getDisplayName = link => {
-  return getFileName(link).replace(/^[0-9a-f-]+-/i, "");
+  return getDisplayFileName(getFileName(link));
 };
 
 const getFileType = link => {
