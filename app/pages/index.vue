@@ -12,7 +12,7 @@
         <p class="mx-auto mt-6 max-w-2xl text-xl text-blue-100">Hệ thống quản lý hồ sơ đăng ký và theo dõi thông tin thi dành cho thí sinh và phụ huynh của {{ unitStore.name }}.</p>
         <div class="mt-10 flex justify-center gap-4">
           <a-button v-if="!userStore.token" type="primary" size="large" class="h-12 rounded-lg bg-primary px-8 font-bold hover:bg-primary/90" @click="handleCta">BẮT ĐẦU ĐĂNG KÝ</a-button>
-          <a-button ghost size="large" class="h-12 rounded-lg border-white px-8 font-bold hover:bg-white hover:text-[#071f41]">HƯỚNG DẪN THỦ TỤC</a-button>
+          <!-- <a-button ghost size="large" class="h-12 rounded-lg border-white px-8 font-bold hover:bg-white hover:text-[#071f41]">HƯỚNG DẪN THỦ TỤC</a-button> -->
         </div>
       </div>
     </section>
@@ -108,7 +108,7 @@
                 </div>
               </div>
             </div>
-            <a-button block ghost class="mt-8 h-12 rounded-lg border-white/20 font-bold hover:bg-white hover:text-slate-900">GỬI YÊU CẦU HỖ TRỢ</a-button>
+            <!-- <a-button block ghost class="mt-8 h-12 rounded-lg border-white/20 font-bold hover:bg-white hover:text-slate-900">GỬI YÊU CẦU HỖ TRỢ</a-button> -->
           </div>
         </aside>
       </div>
