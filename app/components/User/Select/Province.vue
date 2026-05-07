@@ -24,6 +24,7 @@
 import debounce from "lodash/debounce";
 
 const { provinceUser } = useApi();
+const instance = getCurrentInstance();
 
 const props = defineProps({
   modelValue: [Array, Number, String],
@@ -47,13 +48,15 @@ const params = ref({
   search: "",
 });
 
+const asyncDataKey = `user-province-select-${instance?.uid ?? Math.random().toString(36).slice(2)}`;
+
 const {
   data: response,
   refresh: refreshData,
   pending: loading,
 } = await provinceUser.get({
   params: params,
-  key: "user-province-select",
+  key: asyncDataKey,
 });
 
 const options = computed(() => {
