@@ -54,7 +54,7 @@
 
           <a-form v-if="showEditAction" ref="detailFormRef" :model="detailData" layout="vertical" @submit.prevent>
             <div class="grid gap-x-6 gap-y-5 md:grid-cols-2">
-              <a-form-item label="Ảnh 3x4" class="md:col-span-2">
+              <a-form-item label="Ảnh 3x4" name="avatar" class="md:col-span-2" :rules="detailFormRules.avatar">
                 <div class="rounded-3xl border border-slate-100 bg-slate-50/50 p-6 transition-colors hover:bg-slate-50">
                   <div class="flex flex-col gap-6 md:flex-row md:items-start">
                     <button type="button" class="group relative flex h-[192px] w-[144px] shrink-0 items-center justify-center overflow-hidden rounded-2xl border-2 border-dashed border-slate-200 bg-white transition-all hover:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2" :class="detailData.avatar ? 'cursor-pointer border-solid border-slate-200' : 'cursor-default'" :disabled="!detailData.avatar" @click="openAvatarPreview">
@@ -71,7 +71,7 @@
                     <div class="flex-1 space-y-4">
                       <div>
                         <input id="edit-avatar-upload" type="file" class="!hidden" :disabled="avatarUploading || isEditingProcessing" accept=".png,.jpg,.jpeg,.webp" @change="handleAvatarUpload" />
-                        <label for="edit-avatar-upload" class="inline-flex cursor-pointer items-center justify-center gap-2 rounded-xl bg-white px-5 py-2.5 text-sm font-semibold text-slate-700 shadow-sm ring-1 ring-inset ring-slate-200 transition-all focus-within:ring-2 focus-within:ring-blue-500 hover:bg-slate-50 hover:text-blue-600" :class="{ 'cursor-not-allowed opacity-50': avatarUploading || isEditingProcessing }">
+                        <label for="edit-avatar-upload" tabindex="0" class="inline-flex cursor-pointer items-center justify-center gap-2 rounded-xl bg-white px-5 py-2.5 text-sm font-semibold text-slate-700 shadow-sm ring-1 ring-inset ring-slate-200 transition-all focus-within:ring-2 focus-within:ring-blue-500 hover:bg-slate-50 hover:text-blue-600" :class="{ 'cursor-not-allowed opacity-50': avatarUploading || isEditingProcessing }">
                           <Icon name="lucide:upload-cloud" class="text-lg" />
                           <span>Chọn ảnh tải lên</span>
                         </label>
@@ -235,7 +235,7 @@
             </div>
           </div>
 
-          <div class="mt-8">
+          <div ref="documentsSectionRef" class="mt-8">
             <div class="mb-6 flex items-center gap-3">
               <div class="flex h-10 w-10 items-center justify-center rounded-2xl bg-indigo-50 text-indigo-600">
                 <Icon name="lucide:folder-open" class="text-xl" />
@@ -244,13 +244,18 @@
             </div>
 
             <div v-if="normalizedDocuments.length" class="space-y-5">
-              <div v-for="document in normalizedDocuments" :key="document.key" class="group overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm transition-all hover:border-blue-200 hover:shadow-md">
+              <div :id="`edit-document-card-${index}`" v-for="(document, index) in normalizedDocuments" :key="document.key" tabindex="-1" class="group overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm transition-all hover:border-blue-200 hover:shadow-md">
                 <div class="flex flex-col gap-5 p-6 lg:flex-row lg:items-start lg:justify-between">
                   <div class="flex-1">
                     <div class="flex flex-wrap items-center gap-3">
                       <h4 class="text-base font-bold text-slate-900">{{ document.displayName }}</h4>
+                      <span class="rounded-full px-2.5 py-1 text-[10px] font-bold uppercase tracking-widest" :class="document.isRequired ? 'bg-rose-50 text-rose-600 ring-1 ring-inset ring-rose-100' : 'bg-emerald-50 text-emerald-600 ring-1 ring-inset ring-emerald-100'">
+                        {{ document.isRequired ? "Bắt buộc" : "Tùy chọn" }}
+                      </span>
                     </div>
-                    <p class="mt-2 text-sm text-slate-500">{{ document.links.length }} file đính kèm.</p>
+                    <p class="mt-2 text-sm text-slate-500">
+                      {{ document.links.length ? `${document.links.length} file đính kèm.` : (document.isRequired ? "Bạn cần phải tải lên ít nhất 1 file cho hồ sơ bắt buộc này." : "Bạn có thể bỏ qua nếu không có hồ sơ này.") }}
+                    </p>
                   </div>
 
                   <div v-if="showEditAction" class="w-full shrink-0 lg:w-auto">
@@ -294,6 +299,11 @@
 
                 <div v-else-if="!showEditAction" class="border-t border-slate-100 p-6 text-center">
                   <div class="inline-block rounded-2xl border border-dashed border-slate-200 bg-slate-50 px-6 py-4 text-sm text-slate-500">Hồ sơ này không có tài liệu đính kèm.</div>
+                </div>
+                <div v-else class="border-t border-slate-100 p-6 text-center">
+                  <div class="inline-block rounded-2xl border border-dashed border-slate-200 bg-slate-50 px-6 py-4 text-sm text-slate-500">
+                    {{ document.isRequired ? "Bạn cần phải tải lên ít nhất 1 file cho hồ sơ bắt buộc này." : "Bạn có thể bỏ qua nếu không có hồ sơ này." }}
+                  </div>
                 </div>
               </div>
             </div>
@@ -416,6 +426,7 @@ const loadError = ref("");
 const detailData = ref(null);
 const detailLoading = ref(false);
 const detailFormRef = ref();
+const documentsSectionRef = ref();
 const saveLoading = ref(false);
 const submitLoading = ref(false);
 const avatarUploading = ref(false);
@@ -456,6 +467,7 @@ const genderValue = computed({
   },
 });
 const detailFormRules = {
+  avatar: [{ required: true, message: "Vui lòng tải lên ảnh 3x4" }],
   fullName: [{ required: true, message: "Vui lòng nhập họ tên đầy đủ" }],
   dateOfBirth: [{ required: true, message: "Vui lòng chọn ngày sinh" }],
   idProvince: [{ required: true, message: "Vui lòng chọn nơi sinh" }],
@@ -506,6 +518,7 @@ const normalizedDocuments = computed(() => {
           idExamDocument: index + 1,
           displayName: `Hồ sơ #${index + 1}`,
           links: splitDocumentLinks(document),
+          isRequired: false,
         };
       }
 
@@ -516,9 +529,9 @@ const normalizedDocuments = computed(() => {
         idExamDocument,
         displayName: document?.documentName || `Hồ sơ #${idExamDocument}`,
         links: splitDocumentLinks(document?.url || document?.fileUrl || document?.link || document?.path),
+        isRequired: !!document?.isRequired,
       };
-    })
-    .filter(document => document.links.length);
+    });
 });
 
 const showSubmitAction = computed(() => isDraftApplicationStatus(detailData.value));
@@ -633,6 +646,40 @@ const flushPendingDeletedFiles = async () => {
 
   if (failedFileNames.length) {
     message.warning(`Có ${failedFileNames.length} file chưa xóa được khỏi hệ thống`);
+  }
+};
+
+const focusFirstInvalidField = async () => {
+  await nextTick();
+
+  const formElement = detailFormRef.value?.$el || detailFormRef.value?.nativeElement;
+  if (!formElement) return;
+
+  const firstErrorItem = formElement.querySelector(".ant-form-item-has-error");
+  if (!firstErrorItem) return;
+
+  firstErrorItem.scrollIntoView({
+    behavior: "smooth",
+    block: "center",
+  });
+
+  const focusTarget = firstErrorItem.querySelector('label[for="edit-avatar-upload"]') || firstErrorItem.querySelector(".ant-select-selection-search-input") || firstErrorItem.querySelector(".ant-picker-input input") || firstErrorItem.querySelector("input:not([disabled])") || firstErrorItem.querySelector("textarea:not([disabled])") || firstErrorItem.querySelector("button:not([disabled])");
+
+  if (focusTarget && typeof focusTarget.focus === "function") {
+    focusTarget.focus({
+      preventScroll: true,
+    });
+  }
+};
+
+const validateFormAndFocusError = async () => {
+  try {
+    await detailFormRef.value?.validate();
+    return true;
+  } catch {
+    await focusFirstInvalidField();
+    message.warning("Vui lòng kiểm tra lại thông tin hồ sơ");
+    return false;
   }
 };
 
@@ -788,6 +835,43 @@ const isDocumentUploading = idExamDocument => {
   return !!documentUploadingMap.value[String(idExamDocument)];
 };
 
+const focusMissingDocument = async documentIndex => {
+  await nextTick();
+
+  const target = document.getElementById(`edit-document-card-${documentIndex}`) || documentsSectionRef.value;
+  if (!target) return;
+
+  target.scrollIntoView({
+    behavior: "smooth",
+    block: "center",
+  });
+
+  const button = target.querySelector?.(`label[for="edit-document-${normalizedDocuments.value[documentIndex]?.idExamDocument}"]`) || target.querySelector?.("label[for^='edit-document-']");
+
+  if (button && typeof button.focus === "function") {
+    button.focus({
+      preventScroll: true,
+    });
+    return;
+  }
+
+  if (typeof target.focus === "function") {
+    target.focus({
+      preventScroll: true,
+    });
+  }
+};
+
+const ensureRequiredDocumentsUploaded = async () => {
+  const missingDocumentIndex = normalizedDocuments.value.findIndex(item => item.isRequired && item.links.length === 0);
+
+  if (missingDocumentIndex !== -1) {
+    const missingDocument = normalizedDocuments.value[missingDocumentIndex];
+    await focusMissingDocument(missingDocumentIndex);
+    throw new Error(`Vui lòng tải lên hồ sơ bắt buộc: ${missingDocument.displayName}`);
+  }
+};
+
 const removeEditDocumentFile = (idExamDocument, fileIndex) => {
   if (!canEditCurrentApplication()) {
     message.warning("Hồ sơ này không thể chỉnh sửa");
@@ -931,10 +1015,8 @@ const saveApplication = async () => {
     return;
   }
 
-  try {
-    await detailFormRef.value?.validate();
-  } catch {
-    message.warning("Vui lòng kiểm tra lại thông tin hồ sơ");
+  const isValid = await validateFormAndFocusError();
+  if (!isValid) {
     return;
   }
 
@@ -970,10 +1052,8 @@ const submitApplication = async () => {
     return;
   }
 
-  try {
-    await detailFormRef.value?.validate();
-  } catch {
-    message.warning("Vui lòng kiểm tra lại thông tin hồ sơ");
+  const isValid = await validateFormAndFocusError();
+  if (!isValid) {
     return;
   }
 
@@ -986,6 +1066,8 @@ const submitApplication = async () => {
   submitLoading.value = true;
 
   try {
+    await ensureRequiredDocumentsUploaded();
+
     const { data, error } = await applicationUser.putByRest("submit", {
       body: payload,
     });
