@@ -92,10 +92,6 @@
             <a-input v-model:value="formState.accountName" placeholder="Nhập tên chủ tài khoản" :disabled="isGeneralFieldsReadOnly" />
           </a-form-item>
 
-          <div class="md:col-span-2">
-            <AdminSelectSubject v-model="formState.subjectIds" :rules="rules.subjectIds" multiple label="Danh sách môn thi" name="subjectIds" placeholder="Chọn các môn thi" :disabled="isGeneralFieldsReadOnly" />
-          </div>
-
           <div class="mt-2 md:col-span-2">
             <div class="mb-2 flex items-center justify-between">
               <span class="font-medium text-gray-700">Hồ sơ yêu cầu</span>
@@ -179,7 +175,6 @@ const createInitialFormState = () => ({
   idBank: undefined,
   accountNumber: "",
   accountName: "",
-  subjectIds: [],
   documents: [],
 });
 
@@ -241,7 +236,6 @@ const rules = {
   ],
   fee: [{ required: true, message: "Vui lòng nhập lệ phí thi", trigger: "blur" }, validateRequiredNumber("lệ phí thi")],
   quantity: [{ required: true, message: "Vui lòng nhập chỉ tiêu", trigger: "blur" }, validateRequiredNumber("chỉ tiêu")],
-  subjectIds: [{ required: true, type: "array", min: 1, message: "Vui lòng chọn ít nhất 1 môn thi", trigger: "change" }],
   reviewFee: [{ required: true, message: "Vui lòng nhập lệ phí phúc khảo", trigger: "blur" }, validateRequiredNumber("lệ phí phúc khảo")],
   accountNumber: [{ required: true, message: "Vui lòng nhập số tài khoản", trigger: "blur" }],
   accountName: [{ required: true, message: "Vui lòng nhập chủ tài khoản", trigger: "blur" }],
@@ -324,7 +318,6 @@ const editItem = async id => {
         idBank: detail.idBank ?? undefined,
         accountNumber: detail.accountNumber || "",
         accountName: detail.accountName || "",
-        subjectIds: detail.subjectIds ? [...detail.subjectIds] : [],
         documents: detail.documents ? JSON.parse(JSON.stringify(detail.documents)) : [],
       });
       visible.value = true;
@@ -358,7 +351,6 @@ const handleOk = async () => {
       idBank: formState.idBank ?? 0,
       accountNumber: formState.accountNumber.trim(),
       accountName: formState.accountName.trim(),
-      subjectIds: Array.isArray(formState.subjectIds) ? formState.subjectIds.map(id => Number(id)).filter(id => !Number.isNaN(id)) : [],
       documents: Array.isArray(formState.documents)
         ? formState.documents
             .map(doc => ({

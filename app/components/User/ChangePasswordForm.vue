@@ -9,7 +9,7 @@
       name="newPassword"
       :rules="[
         { required: true, message: 'Vui lòng nhập mật khẩu mới!' },
-        { min: 6, message: 'Mật khẩu mới cần tối thiểu 6 ký tự!' },
+        { min: 8, message: 'Mật khẩu mới cần tối thiểu 8 ký tự!' },
       ]">
       <a-input-password v-model:value="form.newPassword" placeholder="Nhập mật khẩu mới" />
     </a-form-item>
@@ -59,9 +59,11 @@ const handleSubmit = async () => {
 
   try {
     const { data, error } = await authUser.postByRest("changePassword", {
-      oldPassword: form.oldPassword,
-      newPassword: form.newPassword,
-      confirmPassword: form.confirmPassword,
+      body: {
+        oldPassword: form.oldPassword,
+        newPassword: form.newPassword,
+        confirmPassword: form.confirmPassword,
+      },
     });
     if (error.value || data.value?.status === "error" || data.value?.success === false) {
       throw new Error(error.value?.data?.message || data.value?.message || "Đổi mật khẩu thất bại");
