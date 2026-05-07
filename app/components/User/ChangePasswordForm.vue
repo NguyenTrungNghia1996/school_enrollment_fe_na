@@ -59,9 +59,11 @@ const handleSubmit = async () => {
 
   try {
     const { data, error } = await authUser.postByRest("changePassword", {
-      oldPassword: form.oldPassword,
-      newPassword: form.newPassword,
-      confirmPassword: form.confirmPassword,
+      body: {
+        oldPassword: form.oldPassword,
+        newPassword: form.newPassword,
+        confirmPassword: form.confirmPassword,
+      },
     });
     if (error.value || data.value?.status === "error" || data.value?.success === false) {
       throw new Error(error.value?.data?.message || data.value?.message || "Đổi mật khẩu thất bại");
