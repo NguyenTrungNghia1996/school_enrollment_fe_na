@@ -39,7 +39,7 @@ const fileName = computed(() => {
 });
 
 const displayName = computed(() => {
-  return fileName.value.replace(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}-/i, "");
+  return getDisplayFileName(fileName.value);
 });
 
 const openPreview = () => {
