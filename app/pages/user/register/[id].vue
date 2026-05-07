@@ -879,9 +879,10 @@ const handleAvatarUpload = async event => {
 
   try {
     await validateAvatarRatio(file);
+    const sanitizedFileName = sanitizeOriginalFileName(file.name);
 
     const result = await s3.upload(file, {
-      key: `${Date.now()}-${file.name}`,
+      key: `${Date.now()}-${sanitizedFileName}`,
       contentType: file.type || "application/octet-stream",
     });
 
@@ -905,19 +906,20 @@ const handleDocumentUpload = async (index, event) => {
   if (!document) return;
 
   document.uploading = true;
-  document.pendingLabel = files.length === 1 ? files[0].name : `${files.length} file`;
+  document.pendingLabel = files.length === 1 ? sanitizeOriginalFileName(files[0].name) : `${files.length} file`;
 
   try {
     const uploadedFiles = await Promise.all(
       files.map(async file => {
+        const sanitizedFileName = sanitizeOriginalFileName(file.name);
         const result = await s3.upload(file, {
-          key: `${Date.now()}-${file.name}`,
+          key: `${Date.now()}-${sanitizedFileName}`,
           contentType: file.type || "application/octet-stream",
         });
 
         return {
           url: result.directUrl,
-          fileName: file.name,
+          fileName: sanitizedFileName,
         };
       }),
     );

@@ -33,8 +33,10 @@ export const useS3Upload = (endpoint = "/api/upload") => {
       throw new Error("Thiếu file để upload.");
     }
 
+    const uploadKey = sanitizeUploadKey(options.key || file.name);
+
     const presigned = await getPresignedUrl({
-      key: options.key || file.name,
+      key: uploadKey,
       contentType: options.contentType || file.type || "application/octet-stream",
     });
 

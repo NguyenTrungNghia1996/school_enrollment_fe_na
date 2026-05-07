@@ -162,7 +162,7 @@ const handleUpload = async () => {
 
   try {
     uploadResult.value = await upload(selectedFile.value, {
-      key: selectedFile.value.name,
+      key: sanitizeOriginalFileName(selectedFile.value.name),
       contentType: selectedFile.value.type || "application/octet-stream",
     });
   } catch (error) {
