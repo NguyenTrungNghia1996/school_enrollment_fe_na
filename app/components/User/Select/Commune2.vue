@@ -1,13 +1,12 @@
 <template>
   <a-form-item :label="label" :name="name" :rules="rules" :label-col="labelCol" :wrapper-col="wrapperCol">
-    <a-select :value="normalizedModelValue" @update:value="handleUpdateValue" :search-value="search" :mode="multiple ? 'multiple' : undefined" show-search :placeholder="resolvedPlaceholder" :size="size" :loading="loading" :disabled="isSelectDisabled" allow-clear class="w-full" :options="options" @search="onSearch" @clear="onClear" :filter-option="false" />
+    <a-select :value="normalizedModelValue" @update:value="handleUpdateValue" :search-value="search" :mode="multiple ? 'multiple' : undefined" show-search :placeholder="resolvedPlaceholder" :size="size" :loading="loading" :disabled="isSelectDisabled" allow-clear class="w-full" :options="options" @search="onSearch" @inputKeyDown="onInputKeyDown" @clear="onClear" :filter-option="false" />
   </a-form-item>
 </template>
 
 <script setup>
-import debounce from "lodash/debounce";
-
 const { communeUser } = useApi();
+const instance = getCurrentInstance();
 
 const props = defineProps({
   modelValue: [Array, Number, String],
@@ -54,10 +53,12 @@ const normalizeOptionValue = value => {
 
 const params = ref({
   pageIndex: 1,
-  pageSize: 100,
+  pageSize: 1000,
   idProvince: undefined,
   search: "",
 });
+
+const asyncDataKey = `user-commune-select2-${instance?.uid ?? Math.random().toString(36).slice(2)}`;
 
 const {
   data: response,
@@ -65,7 +66,7 @@ const {
   pending: loading,
 } = await communeUser.get({
   params,
-  key: "user-commune-select2",
+  key: asyncDataKey,
   immediate: false,
 });
 
@@ -105,13 +106,15 @@ const resetSearch = () => {
   return hadSearch;
 };
 
-const syncSearch = debounce(val => {
-  params.value.search = (val || "").trim();
-}, 300);
-
 const onSearch = val => {
   search.value = val || "";
-  syncSearch(search.value);
+};
+
+const onInputKeyDown = event => {
+  if (event.key !== "Enter") return;
+  event.preventDefault();
+  event.stopPropagation();
+  params.value.search = search.value.trim();
 };
 
 const onClear = () => {
@@ -202,6 +205,5 @@ watch(
 
 onBeforeUnmount(() => {
   clearRetryTimer();
-  syncSearch.cancel();
 });
 </script>

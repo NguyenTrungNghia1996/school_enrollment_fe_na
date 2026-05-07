@@ -16,6 +16,7 @@
           class="flex-1"
           :options="options"
           @search="onSearch"
+          @inputKeyDown="onInputKeyDown"
           @clear="onClear"
           :filter-option="false" />
         <template v-if="hasNavigation">
@@ -47,6 +48,7 @@
           class="flex-1"
           :options="options"
           @search="onSearch"
+          @inputKeyDown="onInputKeyDown"
           @clear="onClear"
           :filter-option="false" />
         <template v-if="hasNavigation">
@@ -76,6 +78,7 @@
           class="w-full"
           :options="options"
           @search="onSearch"
+          @inputKeyDown="onInputKeyDown"
           @clear="onClear"
           :filter-option="false" />
         <template v-if="hasNavigation">
@@ -92,9 +95,8 @@
 </template>
 
 <script setup>
-import debounce from "lodash/debounce";
-
 const { examUser } = useApi();
+const instance = getCurrentInstance();
 
 const props = defineProps({
   modelValue: [Array, Number, String],
@@ -120,12 +122,14 @@ const params = ref({
   search: "",
 });
 
+const asyncDataKey = `user-enrollment-select-${instance?.uid ?? Math.random().toString(36).slice(2)}`;
+
 const {
   data: enrollmentResponse,
   pending: loading,
 } = await examUser.get({
   query: params,
-  key: "user-enrollment-select",
+  key: asyncDataKey,
 });
 
 const options = computed(() => {
@@ -163,9 +167,16 @@ watch(
   { immediate: true },
 );
 
-const onSearch = debounce(val => {
-  params.value.search = (val || "").trim();
-}, 300);
+const onSearch = val => {
+  search.value = val || "";
+};
+
+const onInputKeyDown = event => {
+  if (event.key !== "Enter") return;
+  event.preventDefault();
+  event.stopPropagation();
+  params.value.search = search.value.trim();
+};
 
 const onClear = () => {
   emit("update:modelValue", props.multiple ? [] : null);

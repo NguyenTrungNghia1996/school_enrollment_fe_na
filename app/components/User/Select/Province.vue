@@ -14,6 +14,7 @@
       class="w-full"
       :options="options"
       @search="onSearch"
+      @inputKeyDown="onInputKeyDown"
       @clear="onClear"
       :filter-option="false"
     />
@@ -21,9 +22,8 @@
 </template>
 
 <script setup>
-import debounce from "lodash/debounce";
-
 const { provinceUser } = useApi();
+const instance = getCurrentInstance();
 
 const props = defineProps({
   modelValue: [Array, Number, String],
@@ -47,13 +47,15 @@ const params = ref({
   search: "",
 });
 
+const asyncDataKey = `user-province-select-${instance?.uid ?? Math.random().toString(36).slice(2)}`;
+
 const {
   data: response,
   refresh: refreshData,
   pending: loading,
 } = await provinceUser.get({
   params: params,
-  key: "user-province-select",
+  key: asyncDataKey,
 });
 
 const options = computed(() => {
@@ -65,9 +67,16 @@ const options = computed(() => {
   }));
 });
 
-const onSearch = debounce(val => {
-  params.value.search = (val || "").trim();
-}, 300);
+const onSearch = val => {
+  search.value = val || "";
+};
+
+const onInputKeyDown = event => {
+  if (event.key !== "Enter") return;
+  event.preventDefault();
+  event.stopPropagation();
+  params.value.search = search.value.trim();
+};
 
 const onClear = () => {
   emit("update:modelValue", props.multiple ? [] : null);
