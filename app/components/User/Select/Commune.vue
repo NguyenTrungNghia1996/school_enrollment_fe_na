@@ -3,7 +3,7 @@
     <a-select
       :value="normalizedModelValue"
       @update:value="handleUpdateValue"
-      v-model:searchValue="search"
+      :search-value="search"
       :mode="multiple ? 'multiple' : undefined"
       show-search
       :placeholder="resolvedPlaceholder"
@@ -120,9 +120,14 @@ const resetSearch = () => {
   return hadSearch;
 };
 
-const onSearch = debounce(val => {
+const syncSearch = debounce(val => {
   params.value.search = (val || "").trim();
 }, 300);
+
+const onSearch = val => {
+  search.value = val || "";
+  syncSearch(search.value);
+};
 
 const onClear = () => {
   emit("update:modelValue", props.multiple ? [] : null);
@@ -211,6 +216,6 @@ watch(
 
 onBeforeUnmount(() => {
   clearRetryTimer();
-  onSearch.cancel();
+  syncSearch.cancel();
 });
 </script>
