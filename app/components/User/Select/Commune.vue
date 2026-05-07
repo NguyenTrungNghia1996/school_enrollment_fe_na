@@ -108,6 +108,9 @@ const resetSearch = () => {
 
 const onSearch = val => {
   search.value = val || "";
+  if (!search.value.trim()) {
+    params.value.search = "";
+  }
 };
 
 const onInputKeyDown = event => {
