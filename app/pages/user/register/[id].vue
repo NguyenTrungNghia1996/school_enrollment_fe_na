@@ -150,7 +150,7 @@
                   </div>
 
                   <a-form-item label="Giới tính" name="gender" :rules="[{ required: true, message: 'Vui lòng chọn giới tính' }]">
-                    <a-select v-model:value="formState.gender" :options="genderOptions" placeholder="Chọn giới tính" size="large" class="rounded-xl" />
+                    <a-select v-model:value="genderValue" :options="genderOptions" placeholder="Chọn giới tính" size="large" class="rounded-xl" />
                   </a-form-item>
 
                   <div class="grid gap-x-6 gap-y-5 md:col-span-3 md:grid-cols-3">
@@ -405,8 +405,8 @@ const loadError = ref("");
 const documentUploads = ref([]);
 
 const genderOptions = [
-  { label: "Nam", value: true },
-  { label: "Nữ", value: false },
+  { label: "Nam", value: "male" },
+  { label: "Nữ", value: "female" },
 ];
 
 const formState = reactive({
@@ -426,6 +426,27 @@ const formState = reactive({
   currentProvinceId: undefined,
   idCurrentCommune: undefined,
   currentAddress: "",
+});
+
+const genderValue = computed({
+  get() {
+    if (formState.gender === true) return "male";
+    if (formState.gender === false) return "female";
+    return undefined;
+  },
+  set(value) {
+    if (value === "male") {
+      formState.gender = true;
+      return;
+    }
+
+    if (value === "female") {
+      formState.gender = false;
+      return;
+    }
+
+    formState.gender = undefined;
+  },
 });
 
 const examId = computed(() => {
@@ -650,6 +671,7 @@ const restoreDraft = () => {
       avatar: draftFormState.avatar || "",
       dateOfBirth: getValidDayjs(draftFormState.dateOfBirth),
       identityIssueDate: getValidDayjs(draftFormState.identityIssueDate),
+      gender: draftFormState.gender === "male" ? true : draftFormState.gender === "female" ? false : draftFormState.gender,
     });
 
     documentUploads.value = createDocumentUploads(examDetail.value?.documents || [], draft?.documents || []);
