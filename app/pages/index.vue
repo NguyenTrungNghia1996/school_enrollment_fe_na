@@ -44,9 +44,7 @@
                       {{ exam.status }}
                     </span>
                   </div>
-                  <h3 class="text-xl font-bold text-slate-900 transition-colors group-hover:text-primary">
-                    {{ exam.title }}
-                  </h3>
+                  <NuxtLink :to="exam.url || '#'" target="_blank" class="text-xl font-bold text-slate-900 transition-colors group-hover:text-primary">{{ exam.title }}</NuxtLink>
                   <div class="mt-4 space-y-2 text-sm text-slate-600">
                     <div class="flex items-center gap-2">
                       <Icon name="lucide:calendar-check" class="text-slate-400" />
@@ -82,27 +80,6 @@
               <a-pagination v-model:current="pageIndex" :total="examTotal" :page-size="expandedPageSize" :show-size-changer="false" @change="handleExamPageChange" />
             </div>
           </section>
-
-          <!-- Notifications Section -->
-          <!-- <section>
-            <div class="mb-8 flex items-center justify-between border-b border-slate-200 pb-4">
-              <h2 class="flex items-center gap-3 text-2xl font-bold text-slate-800">
-                <Icon name="lucide:megaphone" class="text-primary" />
-                Thông Báo Quan Trọng
-              </h2>
-            </div>
-            <div class="space-y-4">
-              <div v-for="i in 3" :key="i" class="flex gap-4 rounded-xl border border-slate-100 bg-slate-50 p-4 transition-colors hover:bg-white hover:shadow-sm">
-                <div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-white text-primary shadow-sm">
-                  <Icon name="lucide:file-text" class="text-2xl" />
-                </div>
-                <div>
-                  <h4 class="font-bold text-slate-900">Danh sách phòng thi kỳ thi Olympic hóa học năm 2026</h4>
-                  <p class="mt-1 text-sm text-slate-500">Đăng ngày: 20/03/2026</p>
-                </div>
-              </div>
-            </div>
-          </section> -->
         </div>
 
         <!-- Right: Sidebar -->
@@ -133,25 +110,6 @@
             </div>
             <a-button block ghost class="mt-8 h-12 rounded-lg border-white/20 font-bold hover:bg-white hover:text-slate-900">GỬI YÊU CẦU HỖ TRỢ</a-button>
           </div>
-
-          <!-- Statistics -->
-          <!-- <div class="rounded-2xl border border-slate-200 bg-white p-8">
-            <h3 class="mb-6 text-lg font-bold uppercase tracking-wider text-slate-900">Thống kê cổng</h3>
-            <div class="space-y-6">
-              <div class="flex items-center justify-between">
-                <span class="font-medium text-slate-500">Hồ sơ đã tiếp nhận</span>
-                <span class="text-xl font-bold text-primary">3,492</span>
-              </div>
-              <div class="flex items-center justify-between">
-                <span class="font-medium text-slate-500">Đợt thi hiện tại</span>
-                <span class="text-xl font-bold text-primary">{{ examTotal }}</span>
-              </div>
-              <div class="flex items-center justify-between">
-                <span class="font-medium text-slate-500">Lượt truy cập</span>
-                <span class="text-xl font-bold text-primary">12K+</span>
-              </div>
-            </div>
-          </div> -->
         </aside>
       </div>
     </div>
@@ -424,6 +382,7 @@ const mapExamItem = exam => {
     title: exam.examName,
     startDate: exam.startDate,
     endDate: exam.endDate,
+    url: exam.url,
     start: $dayjs(exam.startDate).format("DD/MM/YYYY"),
     end: $dayjs(exam.endDate).format("DD/MM/YYYY"),
     status: status.label,

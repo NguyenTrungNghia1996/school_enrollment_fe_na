@@ -49,7 +49,7 @@
 
           <!-- Form Card -->
           <div class="rounded-[2rem] border border-white/80 bg-white/80 shadow-[0_8px_30px_rgb(0,0,0,0.04)] backdrop-blur-xl">
-            <a-form ref="formRef" :model="formState" layout="vertical" class="p-8" @finish="handleSubmit">
+            <a-form ref="formRef" :model="formState" layout="vertical" class="p-8">
               <!-- Thông tin thí sinh -->
               <section class="pb-10">
                 <div class="mb-8 flex items-center gap-3">
@@ -60,7 +60,11 @@
                 </div>
 
                 <div class="grid gap-x-6 gap-y-5 md:grid-cols-3">
-                  <a-form-item label="Ảnh 3x4" name="avatar" class="md:col-span-3">
+                  <a-form-item
+                    label="Ảnh 3x4"
+                    name="avatar"
+                    class="md:col-span-3"
+                    :rules="[{ required: true, message: 'Vui lòng tải lên ảnh 3x4' }]">
                     <div class="rounded-3xl border border-slate-100 bg-slate-50/50 p-6 transition-colors hover:bg-slate-50">
                       <div class="flex flex-col gap-6 md:flex-row md:items-start">
                         <!-- Avatar Preview -->
@@ -80,7 +84,7 @@
                             <!-- Hidden input -->
                             <input id="avatar-upload" type="file" class="!hidden" :disabled="avatarUploading || isProcessing" accept=".png,.jpg,.jpeg,.webp" @change="handleAvatarUpload" />
                             <!-- Styled Label acting as button -->
-                            <label for="avatar-upload" class="inline-flex cursor-pointer items-center justify-center gap-2 rounded-xl bg-white px-5 py-2.5 text-sm font-semibold text-slate-700 shadow-sm ring-1 ring-inset ring-slate-200 transition-all focus-within:ring-2 focus-within:ring-blue-500 hover:bg-slate-50 hover:text-blue-600" :class="{ 'cursor-not-allowed opacity-50': avatarUploading || isProcessing }">
+                            <label for="avatar-upload" tabindex="0" class="inline-flex cursor-pointer items-center justify-center gap-2 rounded-xl bg-white px-5 py-2.5 text-sm font-semibold text-slate-700 shadow-sm ring-1 ring-inset ring-slate-200 transition-all focus-within:ring-2 focus-within:ring-blue-500 hover:bg-slate-50 hover:text-blue-600" :class="{ 'cursor-not-allowed opacity-50': avatarUploading || isProcessing }">
                               <Icon name="lucide:upload-cloud" class="text-lg" />
                               <span>Chọn ảnh tải lên</span>
                             </label>
@@ -208,7 +212,7 @@
               <div class="my-10 h-px w-full bg-gradient-to-r from-transparent via-slate-200 to-transparent"></div>
 
               <!-- Hồ sơ yêu cầu -->
-              <section class="pb-4">
+              <section ref="documentsSectionRef" class="pb-4">
                 <div class="mb-8 flex flex-wrap items-center justify-between gap-4">
                   <div class="flex items-center gap-3">
                     <div class="flex h-10 w-10 items-center justify-center rounded-2xl bg-indigo-50 text-indigo-600">
@@ -225,7 +229,7 @@
                 </div>
 
                 <div v-if="documentUploads.length" class="space-y-5">
-                  <div v-for="(document, index) in documentUploads" :key="document.key" class="group overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm transition-all hover:border-blue-200 hover:shadow-md">
+                  <div :id="`document-upload-card-${index}`" v-for="(document, index) in documentUploads" :key="document.key" tabindex="-1" class="group overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm transition-all hover:border-blue-200 hover:shadow-md">
                     <div class="flex flex-col gap-5 p-6 lg:flex-row lg:items-start lg:justify-between">
                       <div class="flex-1">
                         <div class="flex flex-wrap items-center gap-3">
@@ -308,7 +312,7 @@
                 <a-button class="h-12 rounded-2xl px-6 font-semibold" danger type="text" :disabled="isProcessing" @click="handleCancel">Hủy</a-button>
                 <div class="flex flex-wrap gap-3">
                   <a-button class="h-12 rounded-2xl px-8 font-semibold shadow-sm hover:shadow" :loading="saveLoading" :disabled="isProcessing" @click="saveDraft">Lưu nháp</a-button>
-                  <a-button type="primary" class="h-12 rounded-2xl px-10 font-bold shadow-md shadow-blue-500/20 transition-all hover:shadow-lg hover:shadow-blue-500/30" html-type="submit" :loading="submitLoading" :disabled="status.isClosed || hasUploadingDocuments || isProcessing">Nộp hồ sơ</a-button>
+                  <a-button type="primary" class="h-12 rounded-2xl px-10 font-bold shadow-md shadow-blue-500/20 transition-all hover:shadow-lg hover:shadow-blue-500/30" :loading="submitLoading" :disabled="status.isClosed || hasUploadingDocuments || isProcessing" @click="submitApplication">Nộp hồ sơ</a-button>
                 </div>
               </div>
             </a-form>
@@ -395,6 +399,7 @@ const { $dayjs } = useNuxtApp();
 const { examUser, applicationUser, s3 } = useApi();
 
 const formRef = ref();
+const documentsSectionRef = ref();
 const examDetail = ref(null);
 const loading = ref(true);
 const saveLoading = ref(false);
@@ -687,6 +692,79 @@ const clearDraftStorage = () => {
   localStorage.removeItem(draftStorageKey.value);
 };
 
+const scrollToElement = element => {
+  if (!element || typeof element.scrollIntoView !== "function") return;
+
+  element.scrollIntoView({
+    behavior: "smooth",
+    block: "center",
+  });
+};
+
+const focusFirstInvalidField = async () => {
+  await nextTick();
+
+  const formElement = formRef.value?.$el;
+  if (!formElement) return;
+
+  const firstErrorItem = formElement.querySelector(".ant-form-item-has-error");
+  if (!firstErrorItem) return;
+
+  scrollToElement(firstErrorItem);
+
+  const focusTarget =
+    firstErrorItem.querySelector('label[for="avatar-upload"]') ||
+    firstErrorItem.querySelector(".ant-select-selection-search-input") ||
+    firstErrorItem.querySelector(".ant-picker-input input") ||
+    firstErrorItem.querySelector("input:not([disabled])") ||
+    firstErrorItem.querySelector("textarea:not([disabled])") ||
+    firstErrorItem.querySelector("button:not([disabled])");
+
+  if (focusTarget && typeof focusTarget.focus === "function") {
+    focusTarget.focus({
+      preventScroll: true,
+    });
+  }
+};
+
+const validateFormAndFocusError = async () => {
+  try {
+    await formRef.value?.validate();
+    return true;
+  } catch {
+    await focusFirstInvalidField();
+    message.warning("Vui lòng kiểm tra lại thông tin hồ sơ");
+    return false;
+  }
+};
+
+const focusMissingDocument = async documentIndex => {
+  await nextTick();
+
+  const target =
+    document.getElementById(`document-upload-card-${documentIndex}`) ||
+    documentsSectionRef.value;
+
+  scrollToElement(target);
+
+  const button =
+    target?.querySelector?.(`label[for="document-upload-${documentIndex}"]`) ||
+    target?.querySelector?.("label[for^='document-upload-']");
+
+  if (button && typeof button.focus === "function") {
+    button.focus({
+      preventScroll: true,
+    });
+    return;
+  }
+
+  if (target && typeof target.focus === "function") {
+    target.focus({
+      preventScroll: true,
+    });
+  }
+};
+
 const saveDraft = async () => {
   if (avatarUploading.value) {
     message.warning("Vui lòng chờ upload ảnh 3x4 hoàn tất");
@@ -699,6 +777,12 @@ const saveDraft = async () => {
   }
 
   saveDraftSnapshot();
+
+  const isValid = await validateFormAndFocusError();
+  if (!isValid) {
+    return;
+  }
+
   saveLoading.value = true;
 
   try {
@@ -726,9 +810,11 @@ const clearDocument = index => {
 };
 
 const ensureRequiredDocumentsUploaded = () => {
-  const missingDocument = documentUploads.value.find(item => item.isRequired && item.files.length === 0);
+  const missingDocumentIndex = documentUploads.value.findIndex(item => item.isRequired && item.files.length === 0);
 
-  if (missingDocument) {
+  if (missingDocumentIndex !== -1) {
+    const missingDocument = documentUploads.value[missingDocumentIndex];
+    focusMissingDocument(missingDocumentIndex);
     throw new Error(`Vui lòng tải lên hồ sơ bắt buộc: ${missingDocument.documentName}`);
   }
 };
@@ -875,7 +961,7 @@ const buildPayload = () => {
   };
 };
 
-const handleSubmit = async () => {
+const submitApplication = async () => {
   if (status.value.isClosed) {
     message.warning("Kỳ khảo thí này hiện chưa mở hoặc đã kết thúc");
     return;
@@ -888,6 +974,11 @@ const handleSubmit = async () => {
 
   if (hasUploadingDocuments.value) {
     message.warning("Vui lòng chờ upload hồ sơ hoàn tất");
+    return;
+  }
+
+  const isValid = await validateFormAndFocusError();
+  if (!isValid) {
     return;
   }
 

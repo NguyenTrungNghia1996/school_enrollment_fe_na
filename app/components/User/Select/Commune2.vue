@@ -1,6 +1,6 @@
 <template>
   <a-form-item :label="label" :name="name" :rules="rules" :label-col="labelCol" :wrapper-col="wrapperCol">
-    <a-select :value="normalizedModelValue" @update:value="handleUpdateValue" v-model:searchValue="search" :mode="multiple ? 'multiple' : undefined" show-search :placeholder="resolvedPlaceholder" :size="size" :loading="loading" :disabled="isSelectDisabled" allow-clear class="w-full" :options="options" @search="onSearch" @clear="onClear" :filter-option="false" />
+    <a-select :value="normalizedModelValue" @update:value="handleUpdateValue" :search-value="search" :mode="multiple ? 'multiple' : undefined" show-search :placeholder="resolvedPlaceholder" :size="size" :loading="loading" :disabled="isSelectDisabled" allow-clear class="w-full" :options="options" @search="onSearch" @clear="onClear" :filter-option="false" />
   </a-form-item>
 </template>
 
@@ -105,9 +105,14 @@ const resetSearch = () => {
   return hadSearch;
 };
 
-const onSearch = debounce(val => {
+const syncSearch = debounce(val => {
   params.value.search = (val || "").trim();
 }, 300);
+
+const onSearch = val => {
+  search.value = val || "";
+  syncSearch(search.value);
+};
 
 const onClear = () => {
   emit("update:modelValue", props.multiple ? [] : null);
@@ -197,6 +202,6 @@ watch(
 
 onBeforeUnmount(() => {
   clearRetryTimer();
-  onSearch.cancel();
+  syncSearch.cancel();
 });
 </script>

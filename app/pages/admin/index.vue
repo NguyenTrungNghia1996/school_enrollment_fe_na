@@ -31,13 +31,6 @@
 definePageMeta({
   layout: "admin",
 });
-
-const selectedRole = ref(null);
-const selectedRoles = ref([]);
-
-const handleRoleChange = (val, option) => {
-  console.log("✅ Role changed:", val, option);
-};
 </script>
 
 <style scoped>
