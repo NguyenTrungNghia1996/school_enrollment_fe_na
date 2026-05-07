@@ -14,6 +14,7 @@
       class="w-full"
       :options="options"
       @search="onSearch"
+      @inputKeyDown="onInputKeyDown"
       @clear="onClear"
       :filter-option="false"
     />
@@ -21,8 +22,6 @@
 </template>
 
 <script setup>
-import debounce from "lodash/debounce";
-
 const { provinceUser } = useApi();
 const instance = getCurrentInstance();
 
@@ -68,9 +67,16 @@ const options = computed(() => {
   }));
 });
 
-const onSearch = debounce(val => {
-  params.value.search = (val || "").trim();
-}, 300);
+const onSearch = val => {
+  search.value = val || "";
+};
+
+const onInputKeyDown = event => {
+  if (event.key !== "Enter") return;
+  event.preventDefault();
+  event.stopPropagation();
+  params.value.search = search.value.trim();
+};
 
 const onClear = () => {
   emit("update:modelValue", props.multiple ? [] : null);
