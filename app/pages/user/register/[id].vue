@@ -404,6 +404,7 @@ const avatarUploading = ref(false);
 const isAvatarPreviewOpen = ref(false);
 const loadError = ref("");
 const documentUploads = ref([]);
+const pendingDeletedFileNames = ref([]);
 
 const genderOptions = [
   { label: "Nam", value: "male" },
@@ -569,6 +570,41 @@ const getFileName = link => {
   }
 };
 
+const deleteUploadedFile = async fileName => {
+  const normalizedFileName = String(fileName || "").trim();
+  if (!normalizedFileName) return;
+
+  const { data, error } = await applicationUser.deleteByRest("file", {
+    params: {
+      fileName: normalizedFileName,
+    },
+  });
+
+  if (error.value || data.value?.success === false) {
+    throw new Error(error.value?.data?.message || data.value?.message || "Xóa file thất bại");
+  }
+};
+
+const queueFileDeletion = fileName => {
+  const normalizedFileName = String(fileName || "").trim();
+  if (!normalizedFileName || pendingDeletedFileNames.value.includes(normalizedFileName)) return;
+  pendingDeletedFileNames.value.push(normalizedFileName);
+};
+
+const flushPendingDeletedFiles = async () => {
+  if (!pendingDeletedFileNames.value.length) return;
+
+  const queuedFileNames = [...pendingDeletedFileNames.value];
+  const deleteResults = await Promise.allSettled(queuedFileNames.map(deleteUploadedFile));
+  const failedFileNames = queuedFileNames.filter((_, index) => deleteResults[index]?.status === "rejected");
+
+  pendingDeletedFileNames.value = failedFileNames;
+
+  if (failedFileNames.length) {
+    message.warning(`Có ${failedFileNames.length} file chưa xóa được khỏi hệ thống`);
+  }
+};
+
 const getDisplayName = link => {
   return getDisplayFileName(getFileName(link));
 };
@@ -628,6 +664,7 @@ const resetFormState = () => {
     idCurrentCommune: undefined,
     currentAddress: "",
   });
+  pendingDeletedFileNames.value = [];
 };
 
 const saveDraftSnapshot = () => {
@@ -792,7 +829,9 @@ const clearDocument = index => {
   const document = documentUploads.value[index];
   if (!document) return;
 
+  document.files.forEach(file => queueFileDeletion(getFileName(file.url)));
   document.files = [];
+  message.info(`Các file của ${document.documentName} sẽ được xóa khi lưu hoặc nộp`);
 };
 
 const ensureRequiredDocumentsUploaded = () => {
@@ -809,7 +848,12 @@ const removeDocumentFile = (documentIndex, fileIndex) => {
   const document = documentUploads.value[documentIndex];
   if (!document) return;
 
+  const targetFile = document.files[fileIndex];
+  if (!targetFile) return;
+
+  queueFileDeletion(getFileName(targetFile.url));
   document.files.splice(fileIndex, 1);
+  message.info("File sẽ được xóa khi lưu hoặc nộp");
 };
 
 const loadImageMeta = file =>
@@ -844,8 +888,13 @@ const validateAvatarRatio = async file => {
 };
 
 const removeAvatar = () => {
+  const currentAvatar = formState.avatar;
+  if (!currentAvatar) return;
+
+  queueFileDeletion(getFileName(currentAvatar));
   formState.avatar = "";
   isAvatarPreviewOpen.value = false;
+  message.info("Ảnh 3x4 sẽ được xóa khi lưu hoặc nộp");
 };
 
 const openAvatarPreview = () => {
@@ -866,6 +915,7 @@ const handleAvatarUpload = async event => {
   try {
     await validateAvatarRatio(file);
     const sanitizedFileName = sanitizeOriginalFileName(file.name);
+    const previousAvatar = formState.avatar;
 
     const result = await s3.upload(file, {
       key: `${Date.now()}-${sanitizedFileName}`,
@@ -873,6 +923,11 @@ const handleAvatarUpload = async event => {
     });
 
     formState.avatar = result.directUrl;
+
+    if (previousAvatar && previousAvatar !== result.directUrl) {
+      queueFileDeletion(getFileName(previousAvatar));
+    }
+
     message.success("Đã tải lên ảnh 3x4");
   } catch (error) {
     message.error(error?.message || "Upload ảnh 3x4 thất bại");
