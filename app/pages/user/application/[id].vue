@@ -271,7 +271,7 @@
                 </div>
 
                 <div v-else-if="document.links.length" class="border-t border-slate-100 bg-slate-50/50 p-6">
-                  <div class="grid gap-3 sm:grid-cols-2">
+                  <div class="grid gap-3 sm:grid-cols-1">
                     <div v-for="(link, index) in document.links" :key="`${document.key}-${index}`" class="group/file relative flex items-center gap-3 rounded-2xl border border-slate-200 bg-white p-3 shadow-sm transition-all hover:border-blue-300">
                       <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-slate-100 text-slate-500 transition-colors group-hover/file:bg-blue-50 group-hover/file:text-blue-600">
                         <Icon v-if="getFileType(link) === 'image'" name="lucide:image" class="text-xl" />

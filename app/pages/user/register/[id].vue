@@ -60,11 +60,7 @@
                 </div>
 
                 <div class="grid gap-x-6 gap-y-5 md:grid-cols-3">
-                  <a-form-item
-                    label="Ảnh 3x4"
-                    name="avatar"
-                    class="md:col-span-3"
-                    :rules="[{ required: true, message: 'Vui lòng tải lên ảnh 3x4' }]">
+                  <a-form-item label="Ảnh 3x4" name="avatar" class="md:col-span-3" :rules="[{ required: true, message: 'Vui lòng tải lên ảnh 3x4' }]">
                     <div class="rounded-3xl border border-slate-100 bg-slate-50/50 p-6 transition-colors hover:bg-slate-50">
                       <div class="flex flex-col gap-6 md:flex-row md:items-start">
                         <!-- Avatar Preview -->
@@ -264,7 +260,7 @@
 
                     <!-- Files list -->
                     <div v-else-if="document.files.length" class="border-t border-slate-100 bg-slate-50/50 p-6">
-                      <div class="grid gap-3 sm:grid-cols-2">
+                      <div class="grid gap-3 sm:grid-cols-1">
                         <div v-for="(link, fileIndex) in document.files" :key="link.url" class="group/file relative flex items-center gap-3 rounded-2xl border border-slate-200 bg-white p-3 shadow-sm transition-all hover:border-blue-300">
                           <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-slate-100 text-slate-500 transition-colors group-hover/file:bg-blue-50 group-hover/file:text-blue-600">
                             <Icon v-if="getFileType(link.url) === 'image'" name="lucide:image" class="text-xl" />
@@ -712,13 +708,7 @@ const focusFirstInvalidField = async () => {
 
   scrollToElement(firstErrorItem);
 
-  const focusTarget =
-    firstErrorItem.querySelector('label[for="avatar-upload"]') ||
-    firstErrorItem.querySelector(".ant-select-selection-search-input") ||
-    firstErrorItem.querySelector(".ant-picker-input input") ||
-    firstErrorItem.querySelector("input:not([disabled])") ||
-    firstErrorItem.querySelector("textarea:not([disabled])") ||
-    firstErrorItem.querySelector("button:not([disabled])");
+  const focusTarget = firstErrorItem.querySelector('label[for="avatar-upload"]') || firstErrorItem.querySelector(".ant-select-selection-search-input") || firstErrorItem.querySelector(".ant-picker-input input") || firstErrorItem.querySelector("input:not([disabled])") || firstErrorItem.querySelector("textarea:not([disabled])") || firstErrorItem.querySelector("button:not([disabled])");
 
   if (focusTarget && typeof focusTarget.focus === "function") {
     focusTarget.focus({
@@ -741,15 +731,11 @@ const validateFormAndFocusError = async () => {
 const focusMissingDocument = async documentIndex => {
   await nextTick();
 
-  const target =
-    document.getElementById(`document-upload-card-${documentIndex}`) ||
-    documentsSectionRef.value;
+  const target = document.getElementById(`document-upload-card-${documentIndex}`) || documentsSectionRef.value;
 
   scrollToElement(target);
 
-  const button =
-    target?.querySelector?.(`label[for="document-upload-${documentIndex}"]`) ||
-    target?.querySelector?.("label[for^='document-upload-']");
+  const button = target?.querySelector?.(`label[for="document-upload-${documentIndex}"]`) || target?.querySelector?.("label[for^='document-upload-']");
 
   if (button && typeof button.focus === "function") {
     button.focus({
