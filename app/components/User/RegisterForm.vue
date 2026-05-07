@@ -15,7 +15,7 @@
       name="password"
       :rules="[
         { required: true, message: 'Vui lòng nhập mật khẩu!' },
-        { min: 6, message: 'Mật khẩu cần tối thiểu 6 ký tự!' },
+        { min: 8, message: 'Mật khẩu cần tối thiểu 8 ký tự!' },
       ]">
       <a-input-password v-model:value="form.password" placeholder="Nhập mật khẩu" />
     </a-form-item>

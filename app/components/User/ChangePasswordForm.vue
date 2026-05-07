@@ -9,7 +9,7 @@
       name="newPassword"
       :rules="[
         { required: true, message: 'Vui lòng nhập mật khẩu mới!' },
-        { min: 6, message: 'Mật khẩu mới cần tối thiểu 6 ký tự!' },
+        { min: 8, message: 'Mật khẩu mới cần tối thiểu 8 ký tự!' },
       ]">
       <a-input-password v-model:value="form.newPassword" placeholder="Nhập mật khẩu mới" />
     </a-form-item>

@@ -35,15 +35,7 @@
       </a-table>
     </ClientOnly>
 
-    <a-modal
-      v-model:open="visible"
-      :title="isEdit ? 'Cập nhật trạng thái' : 'Thêm mới người dùng'"
-      @cancel="handleCancel"
-      :width="400"
-      :confirm-loading="confirmLoading"
-      :ok-button-props="{ disabled: isEdit && !adminStore.canEditCurrentPage }"
-      @ok="handleOk"
-    >
+    <a-modal v-model:open="visible" :title="isEdit ? 'Cập nhật trạng thái' : 'Thêm mới người dùng'" @cancel="handleCancel" :width="400" :confirm-loading="confirmLoading" :ok-button-props="{ disabled: isEdit && !adminStore.canEditCurrentPage }" @ok="handleOk">
       <a-form ref="formRef" :model="formState" :rules="rules" :disabled="isEditReadOnly" layout="vertical" class="mt-4">
         <template v-if="!isEdit">
           <a-form-item label="Tên đăng nhập" name="username">
@@ -126,7 +118,7 @@ const rules = {
   ],
   password: [
     { required: true, message: "Vui lòng nhập mật khẩu", trigger: "blur" },
-    { min: 6, message: "Mật khẩu tối thiểu 6 ký tự", trigger: "blur" },
+    { min: 8, message: "Mật khẩu tối thiểu 8 ký tự", trigger: "blur" },
   ],
 };
 
@@ -210,12 +202,11 @@ const handleOk = async () => {
     message.warning("Bạn không có quyền cập nhật thông tin");
     return;
   }
+  if (!isEdit.value) {
+    await formRef.value.validate();
+  }
   try {
-    if (!isEdit.value) {
-      await formRef.value.validate();
-    }
     confirmLoading.value = true;
-
     let res;
     if (isEdit.value) {
       const payload = {
