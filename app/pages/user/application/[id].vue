@@ -254,7 +254,7 @@
                       </span>
                     </div>
                     <p class="mt-2 text-sm text-slate-500">
-                      {{ document.links.length ? `${document.links.length} file đính kèm.` : (document.isRequired ? "Bạn cần phải tải lên ít nhất 1 file cho hồ sơ bắt buộc này." : "Bạn có thể bỏ qua nếu không có hồ sơ này.") }}
+                      {{ document.links.length ? `${document.links.length} file đính kèm.` : document.isRequired ? "Bạn cần phải tải lên ít nhất 1 file cho hồ sơ bắt buộc này." : "Bạn có thể bỏ qua nếu không có hồ sơ này." }}
                     </p>
                   </div>
 
@@ -510,28 +510,27 @@ const {
 const normalizedDocuments = computed(() => {
   const documents = Array.isArray(detailData.value?.documents) ? detailData.value.documents : [];
 
-  return documents
-    .map((document, index) => {
-      if (typeof document === "string") {
-        return {
-          key: `document-${index}`,
-          idExamDocument: index + 1,
-          displayName: `Hồ sơ #${index + 1}`,
-          links: splitDocumentLinks(document),
-          isRequired: false,
-        };
-      }
-
-      const idExamDocument = document?.idExamDocument || document?.id || index + 1;
-
+  return documents.map((document, index) => {
+    if (typeof document === "string") {
       return {
-        key: `${idExamDocument || "document"}-${index}`,
-        idExamDocument,
-        displayName: document?.documentName || `Hồ sơ #${idExamDocument}`,
-        links: splitDocumentLinks(document?.url || document?.fileUrl || document?.link || document?.path),
-        isRequired: !!document?.isRequired,
+        key: `document-${index}`,
+        idExamDocument: index + 1,
+        displayName: `Hồ sơ #${index + 1}`,
+        links: splitDocumentLinks(document),
+        isRequired: false,
       };
-    });
+    }
+
+    const idExamDocument = document?.idExamDocument || document?.id || index + 1;
+
+    return {
+      key: `${idExamDocument || "document"}-${index}`,
+      idExamDocument,
+      displayName: document?.documentName || `Hồ sơ #${idExamDocument}`,
+      links: splitDocumentLinks(document?.url || document?.fileUrl || document?.link || document?.path),
+      isRequired: !!document?.isRequired,
+    };
+  });
 });
 
 const showSubmitAction = computed(() => isDraftApplicationStatus(detailData.value));
@@ -756,7 +755,7 @@ const removeAvatar = () => {
 
   detailData.value.avatar = "";
   isAvatarPreviewOpen.value = false;
-  message.info("Ảnh 3x4 sẽ được xóa khi lưu hoặc nộp");
+  // message.info("Ảnh 3x4 sẽ được xóa khi lưu hoặc nộp");
 };
 
 const handleAvatarUpload = async event => {
