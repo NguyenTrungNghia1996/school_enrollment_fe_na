@@ -686,9 +686,10 @@ const handleAvatarUpload = async event => {
 
   try {
     await validateAvatarRatio(file);
+    const sanitizedFileName = sanitizeOriginalFileName(file.name);
 
     const result = await s3.upload(file, {
-      key: `${Date.now()}-${file.name}`,
+      key: `${Date.now()}-${sanitizedFileName}`,
       contentType: file.type || "application/octet-stream",
     });
 
@@ -774,8 +775,9 @@ const handleEditDocumentUpload = async (idExamDocument, event) => {
   try {
     const uploadedFiles = await Promise.all(
       files.map(async file => {
+        const sanitizedFileName = sanitizeOriginalFileName(file.name);
         const result = await s3.upload(file, {
-          key: `${Date.now()}-${file.name}`,
+          key: `${Date.now()}-${sanitizedFileName}`,
           contentType: file.type || "application/octet-stream",
         });
 
