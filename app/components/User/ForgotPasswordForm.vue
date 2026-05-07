@@ -44,7 +44,7 @@ const handleSubmit = async () => {
 
   try {
     const { data, error } = await authUser.postByRest("forgotPassword", {
-      body: {
+      params: {
         email: form.email,
       },
     });
