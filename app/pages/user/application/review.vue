@@ -570,7 +570,7 @@ const confirmPayment = async () => {
 
   try {
     const { data, error } = await applicationReviewUser.putByRest("confirmPayment", {
-      params: { idApplication: Number(detailData.value.idApplication) },
+      params: { idApplicationReview: Number(detailData.value.idApplication) },
     });
 
     if (error.value || data.value?.success === false) {
