@@ -341,6 +341,12 @@ const handleOk = async () => {
     formState.reviewStartDate = formState.reviewDateRange?.[0] || null;
     formState.reviewEndDate = formState.reviewDateRange?.[1] || null;
 
+    const serializeLocalDateTime = value => {
+      if (!value) return null;
+      const parsed = dayjs(value);
+      return parsed.isValid() ? parsed.format("YYYY-MM-DDTHH:mm:ss") : null;
+    };
+
     const payload = {
       ...(isEdit.value ? { id: formState.id } : {}),
       examName: formState.examName.trim(),
@@ -359,10 +365,10 @@ const handleOk = async () => {
             }))
             .filter(doc => doc.documentName)
         : [],
-      startDate: formState.startDate ? formState.startDate.toISOString() : null,
-      endDate: formState.endDate ? formState.endDate.toISOString() : null,
-      reviewStartDate: formState.reviewStartDate ? formState.reviewStartDate.toISOString() : null,
-      reviewEndDate: formState.reviewEndDate ? formState.reviewEndDate.toISOString() : null,
+      startDate: serializeLocalDateTime(formState.startDate),
+      endDate: serializeLocalDateTime(formState.endDate),
+      reviewStartDate: serializeLocalDateTime(formState.reviewStartDate),
+      reviewEndDate: serializeLocalDateTime(formState.reviewEndDate),
     };
 
     let res;

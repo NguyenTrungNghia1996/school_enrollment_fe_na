@@ -945,15 +945,16 @@ const buildApplicationPayload = ({ includeAvatar = true } = {}) => {
 
   const dateOfBirth = detailData.value.dateOfBirth ? dayjs(detailData.value.dateOfBirth) : null;
   const identityIssueDate = detailData.value.identityIssueDate ? dayjs(detailData.value.identityIssueDate) : null;
+  const serializeLocalDate = value => (value?.isValid() ? value.format("YYYY-MM-DD") : null);
 
   const payload = {
     id: detailData.value.id ?? null,
     idExam: Number(detailData.value.idExam),
     fullName: (detailData.value.fullName || detailData.value.fullname || "").trim(),
-    dateOfBirth: dateOfBirth?.isValid() ? dateOfBirth.toISOString() : null,
+    dateOfBirth: serializeLocalDate(dateOfBirth),
     idProvince: Number(detailData.value.idProvince),
     identityNumber: (detailData.value.identityNumber || "").trim(),
-    identityIssueDate: identityIssueDate?.isValid() ? identityIssueDate.toISOString() : null,
+    identityIssueDate: serializeLocalDate(identityIssueDate),
     identityIssuePlace: (detailData.value.identityIssuePlace || "").trim(),
     idEthnicity: Number(detailData.value.idEthnicity),
     gender: detailData.value.gender,

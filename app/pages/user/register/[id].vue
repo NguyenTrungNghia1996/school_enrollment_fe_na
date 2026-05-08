@@ -539,7 +539,7 @@ const getValidDayjs = value => {
 
 const toIsoStringOrNull = value => {
   const parsed = getValidDayjs(value);
-  return parsed ? parsed.toISOString() : null;
+  return parsed ? parsed.format("YYYY-MM-DD") : null;
 };
 
 const formatDateTime = value => {
