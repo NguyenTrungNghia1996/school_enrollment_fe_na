@@ -1,11 +1,16 @@
 <template>
-  <div class="min-h-screen bg-slate-50 px-2">
+  <div class="min-h-screen bg-slate-50 px-2 py-2">
     <div class="mx-auto max-w-7xl">
       <section class="rounded-3xl bg-white p-6 shadow-sm">
         <div class="grid gap-4 lg:grid-cols-[minmax(0,1fr)_260px_auto] lg:items-center">
           <a-input-search v-model:value="searchText" placeholder="Tìm theo mã phúc khảo, họ tên, môn học..." allow-clear enter-button @search="handleSearch" />
 
-          <UserSelectEnrollment v-model="selectedExamId" no-form-item :inlineLabel="false" placeholder="Lọc theo kỳ tuyển sinh" label="" @change="handleExamChange" />
+          <ClientOnly>
+            <UserSelectEnrollment v-model="selectedExamId" no-form-item :inlineLabel="false" placeholder="Lọc theo kỳ tuyển sinh" label="" @change="handleExamChange" />
+            <template #fallback>
+              <div class="h-8 w-full rounded-md border border-slate-200 bg-slate-50"></div>
+            </template>
+          </ClientOnly>
 
           <div class="flex gap-2">
             <a-button class="flex-1 lg:flex-none" @click="resetFilters">Đặt lại</a-button>
