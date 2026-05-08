@@ -1,7 +1,7 @@
 <template>
   <footer class="bg-[#071f41] text-gray-300">
     <!-- Main Footer -->
-    <div class="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
+    <div class="container mx-auto px-4 py-16 sm:px-6 lg:px-8">
       <div class="grid grid-cols-1 gap-12 lg:grid-cols-4">
         <!-- Brand Section -->
         <div class="space-y-6 lg:col-span-2">
@@ -46,7 +46,7 @@
     </div>
 
     <!-- Bottom Bar -->
-    <div class="border-t border-white/5 bg-black/20 py-8">
+    <div class="container mx-auto border-t border-white/5 bg-black/20 py-8">
       <div class="mx-auto flex max-w-7xl flex-col items-center justify-between px-4 text-xs font-medium sm:flex-row sm:px-6 lg:px-8">
         <p>Bản quyền &copy; {{ currentYear }} {{ unitStore.name }}. Bảo lưu mọi quyền.</p>
         <div class="mt-4 flex gap-6 sm:mt-0">

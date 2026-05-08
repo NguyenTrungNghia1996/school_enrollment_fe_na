@@ -7,7 +7,7 @@
         <div class="absolute -bottom-20 -right-20 h-96 w-96 rounded-full bg-primary blur-[120px]"></div>
       </div>
 
-      <div class="relative z-10 mx-auto max-w-7xl px-4 text-center sm:px-6 lg:px-8">
+      <div class="container relative z-10 mx-auto px-4 text-center sm:px-6 lg:px-8">
         <h1 class="text-4xl font-extrabold tracking-tight sm:text-5xl lg:text-6xl">Cổng Thông Tin Tuyển Sinh Trực Tuyến</h1>
         <p class="mx-auto mt-6 max-w-2xl text-xl text-blue-100">Hệ thống quản lý hồ sơ đăng ký và theo dõi thông tin thi dành cho thí sinh và phụ huynh của {{ unitStore.name }}.</p>
         <div class="mt-10 flex justify-center gap-4">
@@ -18,7 +18,7 @@
     </section>
 
     <!-- Main Content Area -->
-    <div class="mx-auto mt-12 max-w-7xl px-4 sm:px-6 lg:px-8">
+    <div class="container mx-auto mt-12 px-4 sm:px-6 lg:px-8">
       <div class="grid grid-cols-1 gap-12 lg:grid-cols-[1fr_320px]">
         <!-- Left: Exams and News -->
         <div class="space-y-16">

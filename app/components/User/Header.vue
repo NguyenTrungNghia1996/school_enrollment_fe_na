@@ -1,8 +1,8 @@
 <template>
   <header class="fixed inset-x-0 top-0 z-50 bg-white/70 shadow-[0_4px_30px_rgba(23,59,132,0.08)] backdrop-blur-md">
-    <div class="flex min-h-[100px] w-full items-center justify-between gap-6 px-4 py-4 sm:px-6 lg:px-8 2xl:px-12">
+    <div class="container mx-auto flex min-h-[100px] w-full items-center justify-between gap-6 px-4 py-4 sm:px-6 lg:px-8 2xl:px-12">
       <NuxtLink to="/" class="flex flex-col items-center md:flex-row md:items-end">
-        <img :src="unitStore.logoFull || unitStore.logo" :alt="unitStore.name" class="h-[80px] w-auto max-w-full transition-opacity hover:opacity-100" />
+        <img :src="unitStore.logoFull || unitStore.logo" :alt="unitStore.name" class="h-[60px] w-auto max-w-full transition-opacity hover:opacity-100" />
       </NuxtLink>
 
       <div class="flex items-center gap-4">
@@ -31,6 +31,10 @@
                 <a-menu-item key="profile" class="rounded-lg py-3" @click="navigateTo('/user/application')">
                   <template #icon><Icon name="lucide:user" class="text-lg" /></template>
                   Hồ sơ của tôi
+                </a-menu-item>
+                <a-menu-item key="review" class="rounded-lg py-3" @click="navigateTo('/user/application/review')">
+                  <template #icon><Icon name="lucide:search" class="text-lg" /></template>
+                  Phúc khảo
                 </a-menu-item>
                 <a-menu-item key="change-password" class="rounded-lg py-3" @click="userStore.openChangePassword()">
                   <template #icon><Icon name="lucide:key-round" class="text-lg" /></template>
