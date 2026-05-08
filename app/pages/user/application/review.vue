@@ -473,24 +473,21 @@ const closeReviewDetail = () => {
   detailFormRef.value?.clearValidate?.();
 };
 
-const submitReviewUpdate = async () => {
+const persistReviewUpdate = async ({ showSuccessMessage = true } = {}) => {
   if (!detailData.value?.id) {
     message.error("Không xác định được yêu cầu phúc khảo");
-    return;
+    return false;
   }
 
   if (!isDraftReview(detailData.value)) {
-    message.warning("Chỉ yêu cầu ở trạng thái nháp mới có thể cập nhật");
-    return;
+    return true;
   }
 
   try {
     await detailFormRef.value?.validate();
   } catch {
-    return;
+    return false;
   }
-
-  saveLoading.value = true;
 
   try {
     const { data, error } = await applicationReviewUser.put({
@@ -505,10 +502,23 @@ const submitReviewUpdate = async () => {
       throw new Error(error.value?.data?.message || data.value?.message || "Cập nhật phúc khảo thất bại");
     }
 
-    message.success(data.value?.message || "Cập nhật phúc khảo thành công");
+    if (showSuccessMessage) {
+      message.success(data.value?.message || "Cập nhật phúc khảo thành công");
+    }
+
     await Promise.all([fetchReviewDetail(), refreshReviews()]);
+    return true;
   } catch (error) {
     message.error(error?.message || "Cập nhật phúc khảo thất bại");
+    return false;
+  }
+};
+
+const submitReviewUpdate = async () => {
+  saveLoading.value = true;
+
+  try {
+    await persistReviewUpdate();
   } finally {
     saveLoading.value = false;
   }
@@ -569,8 +579,13 @@ const confirmPayment = async () => {
   confirmPaymentLoading.value = true;
 
   try {
+    const isUpdated = await persistReviewUpdate({ showSuccessMessage: false });
+    if (!isUpdated) {
+      return;
+    }
+
     const { data, error } = await applicationReviewUser.putByRest("confirmPayment", {
-      params: { idApplicationReview: Number(detailData.value.idApplication) },
+      params: { idApplicationReview: Number(detailData.value.id) },
     });
 
     if (error.value || data.value?.success === false) {
