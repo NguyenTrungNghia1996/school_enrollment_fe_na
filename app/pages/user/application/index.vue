@@ -1,5 +1,5 @@
 <template>
-  <div class="min-h-screen bg-slate-50 px-2 py-8 sm:px-6 lg:px-8">
+  <div class="min-h-screen bg-slate-50 px-2">
     <div class="mx-auto max-w-7xl">
       <section class="mt-6 rounded-3xl bg-white p-6 shadow-sm">
         <div class="grid gap-4 lg:grid-cols-[minmax(0,1fr)_260px_auto] lg:items-center">

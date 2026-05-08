@@ -10,6 +10,8 @@ export const useApi = () => {
     communeUser: useCrudApiUser("/api/commune"),
     examUser: useCrudApiUser("/api/exam"),
     applicationUser: useCrudApiUser("/api/application"),
+    applicationReviewUser: useCrudApiUser("/api/application/review"),
+    //admin
     authAdmin: useCrudApiAdmin("/api/admin"),
     adminMenus: useCrudApiAdmin("/api/admin/menus"),
     adminRoles: useCrudApiAdmin("/api/admin/roles"),
