@@ -1,11 +1,16 @@
 <template>
-  <div class="min-h-screen bg-slate-50 px-2">
+  <div class="min-h-screen bg-slate-50 px-2 py-2">
     <div class="mx-auto max-w-7xl">
       <section class="rounded-3xl bg-white p-6 shadow-sm">
         <div class="grid gap-4 lg:grid-cols-[minmax(0,1fr)_260px_auto] lg:items-center">
           <a-input-search v-model:value="searchText" placeholder="Tìm theo mã phúc khảo, họ tên, môn học..." allow-clear enter-button @search="handleSearch" />
 
-          <UserSelectEnrollment v-model="selectedExamId" no-form-item :inlineLabel="false" placeholder="Lọc theo kỳ tuyển sinh" label="" @change="handleExamChange" />
+          <ClientOnly>
+            <UserSelectEnrollment v-model="selectedExamId" no-form-item :inlineLabel="false" placeholder="Lọc theo kỳ tuyển sinh" label="" @change="handleExamChange" />
+            <template #fallback>
+              <div class="h-8 w-full rounded-md border border-slate-200 bg-slate-50"></div>
+            </template>
+          </ClientOnly>
 
           <div class="flex gap-2">
             <a-button class="flex-1 lg:flex-none" @click="resetFilters">Đặt lại</a-button>
@@ -36,7 +41,7 @@
         <template v-else>
           <div class="hidden overflow-x-auto lg:block">
             <ClientOnly>
-              <a-table :columns="columns" :data-source="dataSource" :pagination="false" :row-key="record => record.id" :scroll="{ x: 1200 }" bordered size="middle">
+              <a-table :columns="columns" :data-source="dataSource" :pagination="false" :row-key="record => record.id" :scroll="{ x: 1280 }" bordered size="middle">
                 <template #bodyCell="{ column, record, index }">
                   <template v-if="column.key === 'stt'">
                     {{ (pagination.current - 1) * pagination.pageSize + index + 1 }}
@@ -53,7 +58,8 @@
                   </template>
 
                   <template v-else-if="column.key === 'action'">
-                    <div class="flex justify-center">
+                    <div class="flex justify-center gap-3">
+                      <a-button type="link" class="px-0" @click="openReviewDetail(record)">Chi tiết</a-button>
                       <a-button type="link" class="px-0" @click="openApplicationDetail(record)">Xem hồ sơ</a-button>
                     </div>
                   </template>
@@ -91,7 +97,8 @@
                 </div>
               </dl>
 
-              <div class="mt-4 flex justify-end">
+              <div class="mt-4 flex flex-wrap justify-end gap-2">
+                <a-button class="rounded-xl" @click="openReviewDetail(record)">Chi tiết</a-button>
                 <a-button type="primary" class="rounded-xl" @click="openApplicationDetail(record)">Xem hồ sơ</a-button>
               </div>
             </article>
@@ -104,17 +111,158 @@
       </section>
     </div>
   </div>
+
+  <a-modal v-model:open="detailVisible" title="Chi tiết phúc khảo" :width="820" :footer="null" @cancel="closeReviewDetail">
+    <div v-if="detailLoading" class="py-12 text-center">
+      <a-spin size="large" />
+    </div>
+
+    <div v-else-if="detailError" class="rounded-2xl border border-rose-200 bg-rose-50 px-5 py-6 text-center">
+      <div class="text-base font-semibold text-rose-700">Không tải được chi tiết phúc khảo</div>
+      <p class="mt-2 text-sm text-rose-600">{{ detailError }}</p>
+      <a-button type="primary" danger class="mt-4" @click="fetchReviewDetail">Thử lại</a-button>
+    </div>
+
+    <div v-else-if="detailData" class="space-y-6">
+      <div class="grid gap-4 md:grid-cols-4">
+        <div class="rounded-xl border border-slate-200 bg-slate-50 px-4 py-3">
+          <div class="text-xs uppercase tracking-[0.2em] text-slate-400">Mã phúc khảo</div>
+          <div class="mt-2 font-bold text-slate-900">{{ detailData.reviewCode || `#${detailData.id}` }}</div>
+        </div>
+        <div class="rounded-xl border border-slate-200 bg-slate-50 px-4 py-3">
+          <div class="text-xs uppercase tracking-[0.2em] text-slate-400">Mã hồ sơ</div>
+          <div class="mt-2 font-bold text-slate-900">{{ detailData.applicationCode || `#${detailData.idApplication}` }}</div>
+        </div>
+        <div class="rounded-xl border border-slate-200 bg-slate-50 px-4 py-3">
+          <div class="text-xs uppercase tracking-[0.2em] text-slate-400">Trạng thái</div>
+          <div class="mt-2">
+            <a-tag :color="getReviewStatusColor(detailData)">{{ getReviewStatusLabel(detailData) }}</a-tag>
+          </div>
+        </div>
+        <div class="rounded-xl border border-slate-200 bg-slate-50 px-4 py-3">
+          <div class="text-xs uppercase tracking-[0.2em] text-slate-400">Kỳ tuyển sinh</div>
+          <div class="mt-2 font-bold text-slate-900">{{ selectedReviewRecord?.examName || `#${detailData.idExam || "-"}` }}</div>
+        </div>
+      </div>
+
+      <a-form v-if="isDraftReview(detailData)" ref="detailFormRef" :model="detailFormState" layout="vertical">
+        <UserSelectSubject v-model="detailFormState.idSubject" label="Môn phúc khảo" name="idSubject" placeholder="Chọn môn phúc khảo" :rules="detailFormRules.idSubject" />
+
+        <a-form-item label="Lý do phúc khảo" name="reason" :rules="detailFormRules.reason">
+          <a-textarea v-model:value="detailFormState.reason" :rows="4" :maxlength="1000" placeholder="Nhập lý do phúc khảo" show-count />
+        </a-form-item>
+      </a-form>
+
+      <div v-else class="grid gap-4 md:grid-cols-2">
+        <div class="rounded-xl border border-slate-100 bg-white p-4 shadow-sm">
+          <div class="text-[11px] font-bold uppercase tracking-widest text-slate-400">Họ tên</div>
+          <div class="mt-1.5 font-medium text-slate-900">{{ detailData.fullName || "-" }}</div>
+        </div>
+        <div class="rounded-xl border border-slate-100 bg-white p-4 shadow-sm">
+          <div class="text-[11px] font-bold uppercase tracking-widest text-slate-400">Môn phúc khảo</div>
+          <div class="mt-1.5 font-medium text-slate-900">{{ detailData.subjectName || "-" }}</div>
+        </div>
+        <div class="rounded-xl border border-slate-100 bg-white p-4 shadow-sm md:col-span-2">
+          <div class="text-[11px] font-bold uppercase tracking-widest text-slate-400">Lý do phúc khảo</div>
+          <div class="mt-1.5 whitespace-pre-line font-medium text-slate-900">{{ detailData.reason || "-" }}</div>
+        </div>
+      </div>
+
+      <div class="flex flex-wrap justify-end gap-2 border-t border-slate-100 pt-4">
+        <a-button @click="openApplicationDetail(detailData)">Xem hồ sơ</a-button>
+        <a-button v-if="showPayAction(detailData)" type="primary" :loading="qrLoading" @click="openPaymentModal">Thanh toán ngay</a-button>
+        <a-button v-if="isDraftReview(detailData)" type="primary" :loading="saveLoading" @click="submitReviewUpdate">Cập nhật</a-button>
+      </div>
+    </div>
+  </a-modal>
+
+  <a-modal v-model:open="paymentVisible" title="Thanh toán phúc khảo" :width="960" :footer="null" @cancel="closePaymentModal">
+    <div v-if="qrLoading" class="py-12 text-center">
+      <a-spin size="large" />
+    </div>
+
+    <div v-else-if="qrData" class="grid gap-6 lg:grid-cols-[380px_minmax(0,1fr)]">
+      <div class="rounded-3xl border border-slate-200 bg-slate-50 p-6">
+        <div class="rounded-2xl bg-white p-4 shadow-sm">
+          <img :src="qrData.url" :alt="`QR thanh toán ${qrData.applicationCode}`" class="mx-auto h-auto w-full max-w-[280px]" />
+        </div>
+        <div class="mt-4 rounded-2xl bg-amber-50 px-4 py-3 text-center">
+          <div class="text-xs uppercase tracking-[0.2em] text-amber-500">Nội dung chuyển khoản</div>
+          <div class="mt-2 text-center text-xl font-bold tracking-[0.35em] text-amber-700">{{ qrData.code || "-" }}</div>
+        </div>
+      </div>
+
+      <div class="space-y-4">
+        <div class="grid gap-4 sm:grid-cols-3">
+          <div class="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3">
+            <div class="text-xs uppercase tracking-[0.15em] text-slate-400">Ngân hàng</div>
+            <div class="mt-2 font-semibold text-slate-800">{{ qrData.bank || "-" }}</div>
+          </div>
+          <div class="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3">
+            <div class="text-xs uppercase tracking-[0.15em] text-slate-400">Số tài khoản</div>
+            <div class="mt-2 font-semibold text-slate-800">{{ qrData.accountNo || "-" }}</div>
+          </div>
+          <div class="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3">
+            <div class="text-xs uppercase tracking-[0.15em] text-slate-400">Chủ tài khoản</div>
+            <div class="mt-2 font-semibold uppercase text-slate-800">{{ qrData.accountName || "-" }}</div>
+          </div>
+        </div>
+
+        <div class="overflow-hidden rounded-2xl border border-slate-200">
+          <div class="grid grid-cols-[180px_minmax(0,1fr)] border-b border-slate-200 bg-slate-50">
+            <div class="px-4 py-3 text-xs font-semibold uppercase tracking-[0.15em] text-slate-400">Kỳ tuyển sinh</div>
+            <div class="px-4 py-3 text-sm font-semibold text-slate-900">{{ qrData.examName || "-" }}</div>
+          </div>
+          <div class="grid grid-cols-[180px_minmax(0,1fr)] border-b border-slate-200">
+            <div class="px-4 py-3 text-xs font-semibold uppercase tracking-[0.15em] text-slate-400">Mã hồ sơ</div>
+            <div class="px-4 py-3 text-sm font-semibold text-slate-900">{{ qrData.applicationCode || "-" }}</div>
+          </div>
+          <div class="grid grid-cols-[180px_minmax(0,1fr)] border-b border-slate-200 bg-slate-50">
+            <div class="px-4 py-3 text-xs font-semibold uppercase tracking-[0.15em] text-slate-400">Họ tên</div>
+            <div class="px-4 py-3 text-sm font-semibold text-slate-900">{{ qrData.fullName || "-" }}</div>
+          </div>
+          <div class="grid grid-cols-[180px_minmax(0,1fr)] border-b border-slate-200">
+            <div class="px-4 py-3 text-xs font-semibold uppercase tracking-[0.15em] text-slate-400">Lệ phí</div>
+            <div class="px-4 py-3 text-sm font-semibold text-slate-900">{{ formatCurrency(qrData.fee) }}</div>
+          </div>
+          <div class="grid grid-cols-[180px_minmax(0,1fr)] bg-emerald-50">
+            <div class="px-4 py-3 text-xs font-semibold uppercase tracking-[0.15em] text-emerald-600">Cần thanh toán</div>
+            <div class="px-4 py-3 text-base font-bold text-emerald-700">{{ formatCurrency(qrData.fee) }}</div>
+          </div>
+        </div>
+
+        <div class="flex justify-end gap-2">
+          <a-button @click="closePaymentModal">Đóng</a-button>
+          <a-button type="primary" class="min-w-40" :loading="confirmPaymentLoading" @click="confirmPayment">Xác nhận thanh toán</a-button>
+        </div>
+      </div>
+    </div>
+  </a-modal>
 </template>
 
 <script setup>
+import { canPayApplicationReview, getApplicationReviewStatusColor, getApplicationReviewStatusLabel, isDraftApplicationReviewStatus } from "~/composables/useApplicationReviewStatus";
+
 definePageMeta({
   layout: "default",
 });
 
 const userStore = useUserStore();
 const route = useRoute();
+const message = useSafeMessage();
 const searchText = ref("");
 const loadError = ref("");
+const detailVisible = ref(false);
+const detailLoading = ref(false);
+const detailError = ref("");
+const detailData = ref(null);
+const selectedReviewRecord = ref(null);
+const detailFormRef = ref();
+const saveLoading = ref(false);
+const paymentVisible = ref(false);
+const qrData = ref(null);
+const qrLoading = ref(false);
+const confirmPaymentLoading = ref(false);
 
 if (!userStore.token) {
   userStore.openLogin();
@@ -143,6 +291,16 @@ const params = ref({
   idExam: initialExamId,
 });
 
+const detailFormState = reactive({
+  idSubject: undefined,
+  reason: "",
+});
+
+const detailFormRules = {
+  idSubject: [{ required: true, message: "Vui lòng chọn môn phúc khảo", trigger: "change" }],
+  reason: [{ required: true, message: "Vui lòng nhập lý do phúc khảo", trigger: "blur" }],
+};
+
 const columns = [
   { title: "STT", key: "stt", width: 70, align: "center" },
   { title: "Mã phúc khảo", dataIndex: "reviewCode", key: "reviewCode", width: 150 },
@@ -151,7 +309,7 @@ const columns = [
   { title: "Lý do", dataIndex: "reason", key: "reason", ellipsis: true },
   { title: "Lệ phí", dataIndex: "reviewFee", key: "reviewFee", width: 150, align: "right" },
   { title: "Trạng thái", dataIndex: "statusName", key: "statusName", width: 180, align: "center" },
-  { title: "Thao tác", key: "action", width: 130, align: "center" },
+  { title: "Thao tác", key: "action", width: 180, align: "center" },
 ];
 
 const {
@@ -241,24 +399,10 @@ const handlePageChange = (page, pageSize) => {
   params.value.pageSize = pageSize;
 };
 
-const getReviewStatusLabel = record => record?.statusName || "Không xác định";
-
-const getReviewStatusColor = record => {
-  const status = Number(record?.idApplicationReviewStatus);
-
-  if (status === 1) return "default";
-  if (status === 2) return "processing";
-  if (status === 3) return "warning";
-  if (status === 4) return "success";
-
-  const normalizedStatusName = String(record?.statusName || "").toLowerCase();
-
-  if (normalizedStatusName.includes("hoàn thành")) return "success";
-  if (normalizedStatusName.includes("chờ") || normalizedStatusName.includes("xử lý")) return "processing";
-  if (normalizedStatusName.includes("từ chối")) return "error";
-
-  return "default";
-};
+const getReviewStatusLabel = value => getApplicationReviewStatusLabel(value);
+const getReviewStatusColor = value => getApplicationReviewStatusColor(value);
+const isDraftReview = value => isDraftApplicationReviewStatus(value);
+const showPayAction = value => canPayApplicationReview(value);
 
 const formatCurrency = value => {
   if (value === undefined || value === null || value === "") {
@@ -274,6 +418,188 @@ const formatCurrency = value => {
 const openApplicationDetail = record => {
   if (!record?.idApplication) return;
   navigateTo(`/user/application/${record.idApplication}`);
+};
+
+const syncDetailForm = detail => {
+  detailFormState.idSubject = toPositiveNumber(detail?.idSubject);
+  detailFormState.reason = detail?.reason || "";
+};
+
+const fetchReviewDetail = async () => {
+  if (!selectedReviewRecord.value?.id) {
+    detailError.value = "Không xác định được yêu cầu phúc khảo";
+    return;
+  }
+
+  detailLoading.value = true;
+  detailError.value = "";
+
+  try {
+    const { data, error } = await applicationReviewUser.getByRest("detail", {
+      params: { id: Number(selectedReviewRecord.value.id) },
+      key: `user-application-review-detail-${selectedReviewRecord.value.id}-${Date.now()}`,
+    });
+
+    if (error.value || data.value?.success === false || !data.value?.data) {
+      throw new Error(error.value?.data?.message || data.value?.message || "Không tải được chi tiết phúc khảo");
+    }
+
+    detailData.value = data.value.data;
+    syncDetailForm(detailData.value);
+  } catch (error) {
+    detailData.value = null;
+    detailError.value = error?.message || "Không tải được chi tiết phúc khảo";
+  } finally {
+    detailLoading.value = false;
+  }
+};
+
+const openReviewDetail = async record => {
+  if (!record?.id) return;
+
+  selectedReviewRecord.value = record;
+  detailVisible.value = true;
+  detailData.value = null;
+  qrData.value = null;
+  await fetchReviewDetail();
+};
+
+const closeReviewDetail = () => {
+  detailVisible.value = false;
+  detailLoading.value = false;
+  detailError.value = "";
+  detailData.value = null;
+  selectedReviewRecord.value = null;
+  detailFormRef.value?.clearValidate?.();
+};
+
+const persistReviewUpdate = async ({ showSuccessMessage = true } = {}) => {
+  if (!detailData.value?.id) {
+    message.error("Không xác định được yêu cầu phúc khảo");
+    return false;
+  }
+
+  if (!isDraftReview(detailData.value)) {
+    return true;
+  }
+
+  try {
+    await detailFormRef.value?.validate();
+  } catch {
+    return false;
+  }
+
+  try {
+    const { data, error } = await applicationReviewUser.put({
+      body: {
+        id: Number(detailData.value.id),
+        idSubject: Number(detailFormState.idSubject),
+        reason: detailFormState.reason.trim(),
+      },
+    });
+
+    if (error.value || data.value?.success === false) {
+      throw new Error(error.value?.data?.message || data.value?.message || "Cập nhật phúc khảo thất bại");
+    }
+
+    if (showSuccessMessage) {
+      message.success(data.value?.message || "Cập nhật phúc khảo thành công");
+    }
+
+    await Promise.all([fetchReviewDetail(), refreshReviews()]);
+    return true;
+  } catch (error) {
+    message.error(error?.message || "Cập nhật phúc khảo thất bại");
+    return false;
+  }
+};
+
+const submitReviewUpdate = async () => {
+  saveLoading.value = true;
+
+  try {
+    await persistReviewUpdate();
+  } finally {
+    saveLoading.value = false;
+  }
+};
+
+const openPaymentModal = async () => {
+  if (!detailData.value?.id) {
+    message.error("Không xác định được yêu cầu phúc khảo");
+    return;
+  }
+
+  qrData.value = null;
+  paymentVisible.value = true;
+  qrLoading.value = true;
+
+  try {
+    const { data, error } = await applicationReviewUser.getByRest("qr", {
+      params: { id: Number(detailData.value.id) },
+      key: `user-application-review-qr-${detailData.value.id}-${Date.now()}`,
+    });
+
+    if (error.value || data.value?.success === false || !data.value?.data) {
+      throw new Error(error.value?.data?.message || data.value?.message || "Không tải được thông tin thanh toán");
+    }
+
+    qrData.value = data.value.data;
+  } catch (error) {
+    paymentVisible.value = false;
+    message.error(error?.message || "Không tải được thông tin thanh toán");
+  } finally {
+    qrLoading.value = false;
+  }
+};
+
+const closePaymentModal = () => {
+  paymentVisible.value = false;
+  qrData.value = null;
+  qrLoading.value = false;
+  confirmPaymentLoading.value = false;
+};
+
+const confirmPayment = async () => {
+  if (!detailData.value?.idApplication) {
+    message.error("Không xác định được hồ sơ thanh toán");
+    return;
+  }
+
+  if (!qrData.value) {
+    message.error("Không có thông tin thanh toán để xác nhận");
+    return;
+  }
+
+  if (!qrData.value.code) {
+    message.error("Không có nội dung chuyển khoản để xác nhận");
+    return;
+  }
+
+  confirmPaymentLoading.value = true;
+
+  try {
+    const isUpdated = await persistReviewUpdate({ showSuccessMessage: false });
+    if (!isUpdated) {
+      return;
+    }
+
+    const { data, error } = await applicationReviewUser.putByRest("confirmPayment", {
+      params: { idApplicationReview: Number(detailData.value.id) },
+    });
+
+    if (error.value || data.value?.success === false) {
+      throw new Error(error.value?.data?.message || data.value?.message || "Xác nhận thanh toán thất bại");
+    }
+
+    message.success(data.value?.message || "Xác nhận thanh toán thành công");
+    closePaymentModal();
+    await Promise.all([fetchReviewDetail(), refreshReviews()]);
+  } catch (error) {
+    message.error(error?.message || "Xác nhận thanh toán thất bại");
+  } finally {
+    confirmPaymentLoading.value = false;
+  }
 };
 
 useHead({

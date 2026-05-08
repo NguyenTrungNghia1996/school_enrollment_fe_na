@@ -1,5 +1,5 @@
 <template>
-  <div class="min-h-screen bg-slate-50 px-2 py-8 sm:px-6 lg:px-8">
+  <div class="min-h-screen bg-slate-50 px-2 py-2">
     <div class="mx-auto max-w-7xl">
       <div class="mb-6 flex items-center justify-between gap-3">
         <a-button class="rounded-xl" @click="goBack">

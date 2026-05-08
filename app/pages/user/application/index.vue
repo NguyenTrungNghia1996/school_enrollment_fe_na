@@ -1,11 +1,16 @@
 <template>
-  <div class="min-h-screen bg-slate-50 px-2">
+  <div class="min-h-screen bg-slate-50 px-2 py-2">
     <div class="mx-auto max-w-7xl">
       <section class="mt-6 rounded-3xl bg-white p-6 shadow-sm">
         <div class="grid gap-4 lg:grid-cols-[minmax(0,1fr)_260px_auto] lg:items-center">
           <a-input-search v-model:value="searchText" placeholder="Tìm theo mã hồ sơ, họ tên, kỳ tuyển sinh..." allow-clear enter-button @search="handleSearch" />
 
-          <UserSelectEnrollment v-model="selectedExamId" no-form-item :inlineLabel="false" placeholder="Lọc theo kỳ tuyển sinh" label="" @change="handleExamChange" />
+          <ClientOnly>
+            <UserSelectEnrollment v-model="selectedExamId" no-form-item :inlineLabel="false" placeholder="Lọc theo kỳ tuyển sinh" label="" @change="handleExamChange" />
+            <template #fallback>
+              <div class="h-8 w-full rounded-md border border-slate-200 bg-slate-50"></div>
+            </template>
+          </ClientOnly>
 
           <div class="flex gap-2">
             <a-button class="flex-1 lg:flex-none" @click="resetFilters">Đặt lại</a-button>
@@ -42,8 +47,9 @@
                   </template>
 
                   <template v-else-if="column.key === 'action'">
-                    <div class="flex justify-center">
+                    <div class="flex justify-center gap-3">
                       <a-button type="link" class="px-0" @click="openDetail(record)">Xem chi tiết</a-button>
+                      <a-button v-if="record.hasScores" type="link" class="px-0" @click="openReviewModal(record)">Phúc khảo</a-button>
                     </div>
                   </template>
                 </template>
@@ -74,7 +80,8 @@
                 </div>
               </dl>
 
-              <div class="mt-4 flex justify-end">
+              <div class="mt-4 flex flex-wrap justify-end gap-2">
+                <a-button v-if="record.hasScores" class="rounded-xl" @click="openReviewModal(record)">Phúc khảo</a-button>
                 <a-button type="primary" class="rounded-xl" @click="openDetail(record)">Xem chi tiết</a-button>
               </div>
             </article>
@@ -87,6 +94,22 @@
       </section>
     </div>
   </div>
+
+  <a-modal v-model:open="reviewModalVisible" title="Tạo yêu cầu phúc khảo" :confirm-loading="reviewSubmitting" ok-text="Gửi yêu cầu" cancel-text="Hủy" @ok="submitReview" @cancel="closeReviewModal">
+    <div class="mb-4 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3">
+      <div class="text-xs uppercase tracking-[0.18em] text-slate-400">Hồ sơ</div>
+      <div class="mt-2 text-sm font-semibold text-slate-900">{{ selectedReviewRecord?.applicationCode || `#${selectedReviewRecord?.id || ""}` }} - {{ selectedReviewRecord?.fullname || "-" }}</div>
+      <div class="mt-1 text-sm text-slate-500">{{ selectedReviewRecord?.examName || "-" }}</div>
+    </div>
+
+    <a-form ref="reviewFormRef" :model="reviewFormState" layout="vertical">
+      <UserSelectSubject v-model="reviewFormState.idSubject" label="Môn phúc khảo" name="idSubject" placeholder="Chọn môn phúc khảo" :rules="[{ required: true, message: 'Vui lòng chọn môn phúc khảo', trigger: 'change' }]" />
+
+      <a-form-item label="Lý do phúc khảo" name="reason" :rules="[{ required: true, message: 'Vui lòng nhập lý do phúc khảo', trigger: 'blur' }]">
+        <a-textarea v-model:value="reviewFormState.reason" :rows="4" :maxlength="1000" placeholder="Nhập lý do phúc khảo" show-count />
+      </a-form-item>
+    </a-form>
+  </a-modal>
 </template>
 
 <script setup>
@@ -100,6 +123,11 @@ const userStore = useUserStore();
 const route = useRoute();
 const searchText = ref("");
 const loadError = ref("");
+const message = useSafeMessage();
+const reviewFormRef = ref();
+const reviewModalVisible = ref(false);
+const reviewSubmitting = ref(false);
+const selectedReviewRecord = ref(null);
 
 if (!userStore.token) {
   userStore.openLogin();
@@ -113,7 +141,12 @@ const toPositiveNumber = value => {
 
 const initialExamId = toPositiveNumber(route.query.idExam);
 const selectedExamId = ref(initialExamId);
-const { applicationUser } = useApi();
+const { applicationUser, applicationReviewUser } = useApi();
+
+const reviewFormState = reactive({
+  idSubject: undefined,
+  reason: "",
+});
 
 const pagination = reactive({
   current: 1,
@@ -134,7 +167,7 @@ const columns = [
   { title: "Kỳ tuyển sinh", dataIndex: "examName", key: "examName", ellipsis: true },
   { title: "Họ tên", dataIndex: "fullname", key: "fullname", ellipsis: true },
   { title: "Trạng thái", dataIndex: "statusName", key: "statusName", width: 200, align: "center" },
-  { title: "Thao tác", key: "action", width: 140, align: "center" },
+  { title: "Thao tác", key: "action", width: 220, align: "center" },
 ];
 
 const {
@@ -231,6 +264,62 @@ const getStatusLabel = value => getApplicationStatusLabel(value);
 const openDetail = record => {
   if (!record?.id) return;
   navigateTo(`/user/application/${record.id}`);
+};
+
+const resetReviewForm = () => {
+  reviewFormState.idSubject = undefined;
+  reviewFormState.reason = "";
+};
+
+const openReviewModal = record => {
+  if (!record?.id || !record?.hasScores) return;
+
+  selectedReviewRecord.value = record;
+  resetReviewForm();
+  reviewModalVisible.value = true;
+};
+
+const closeReviewModal = () => {
+  reviewModalVisible.value = false;
+  selectedReviewRecord.value = null;
+  resetReviewForm();
+  reviewFormRef.value?.clearValidate?.();
+};
+
+const submitReview = async () => {
+  if (!selectedReviewRecord.value?.id) {
+    message.error("Không xác định được hồ sơ phúc khảo");
+    return;
+  }
+
+  try {
+    await reviewFormRef.value?.validate();
+  } catch {
+    return;
+  }
+
+  reviewSubmitting.value = true;
+
+  try {
+    const { data, error } = await applicationReviewUser.post({
+      body: {
+        idApplication: Number(selectedReviewRecord.value.id),
+        idSubject: Number(reviewFormState.idSubject),
+        reason: reviewFormState.reason.trim(),
+      },
+    });
+
+    if (error.value || data.value?.success === false) {
+      throw new Error(error.value?.data?.message || data.value?.message || "Gửi yêu cầu phúc khảo thất bại");
+    }
+
+    message.success(data.value?.message || "Gửi yêu cầu phúc khảo thành công");
+    closeReviewModal();
+  } catch (error) {
+    message.error(error?.message || "Gửi yêu cầu phúc khảo thất bại");
+  } finally {
+    reviewSubmitting.value = false;
+  }
 };
 
 useHead({

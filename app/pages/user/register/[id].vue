@@ -1,5 +1,5 @@
 <template>
-  <div class="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50/50 px-4 py-12 sm:px-6 lg:px-8">
+  <div class="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50/50 px-4 py-2">
     <div class="mx-auto max-w-7xl">
       <!-- Loading State -->
       <div v-if="loading" class="flex flex-col items-center justify-center rounded-[2rem] border border-white/80 bg-white/60 p-20 shadow-[0_8px_30px_rgb(0,0,0,0.04)] backdrop-blur-xl">
@@ -583,7 +583,6 @@ const deleteUploadedFile = async fileName => {
     throw new Error(error.value?.data?.message || data.value?.message || "Xóa file thất bại");
   }
 };
-
 
 const getDisplayName = link => {
   return getDisplayFileName(getFileName(link));

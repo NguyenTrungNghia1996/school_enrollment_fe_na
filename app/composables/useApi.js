@@ -8,6 +8,7 @@ export const useApi = () => {
     ethnicityUser: useCrudApiUser("/api/ethnicity"),
     provinceUser: useCrudApiUser("/api/province"),
     communeUser: useCrudApiUser("/api/commune"),
+    subjectUser: useCrudApiUser("/api/subject"),
     examUser: useCrudApiUser("/api/exam"),
     applicationUser: useCrudApiUser("/api/application"),
     applicationReviewUser: useCrudApiUser("/api/application/review"),
