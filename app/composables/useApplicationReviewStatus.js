@@ -22,7 +22,7 @@ export const isCompletedApplicationReviewStatus = value => getApplicationReviewS
 
 export const canPayApplicationReview = value => {
   const status = getApplicationReviewStatus(value);
-  return status === APPLICATION_REVIEW_STATUS.DRAFT || status === APPLICATION_REVIEW_STATUS.PENDING_CONFIRMATION;
+  return status === APPLICATION_REVIEW_STATUS.DRAFT;
 };
 
 export const getApplicationReviewStatusColor = value => {
