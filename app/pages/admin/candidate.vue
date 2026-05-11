@@ -15,7 +15,7 @@
     </div>
 
     <ClientOnly>
-      <div class="hidden overflow-x-auto lg:block">
+      <div class="overflow-x-auto lg:block">
         <a-table :columns="columns" :data-source="dataSource" :pagination="pagination" :loading="loading" :scroll="{ x: 1100 }" bordered size="small" row-key="applicationCode" @change="handleTableChange">
           <template #bodyCell="{ column, record, index }">
             <template v-if="column.key === 'stt'">
@@ -37,39 +37,6 @@
             </template>
           </template>
         </a-table>
-      </div>
-
-      <div class="space-y-4 lg:hidden">
-        <article v-for="record in dataSource" :key="record.applicationCode || record.identityNumber" class="rounded-2xl border border-slate-200 bg-slate-50 p-4">
-          <div class="flex items-start justify-between gap-3">
-            <div>
-              <div class="text-xs uppercase tracking-[0.2em] text-slate-400">{{ record.applicationCode || "-" }}</div>
-              <h2 class="mt-2 text-lg font-bold text-slate-900">{{ record.fullName || "-" }}</h2>
-            </div>
-            <a-tag :color="getGenderColor(record.gender)">
-              {{ formatGender(record.gender) }}
-            </a-tag>
-          </div>
-
-          <dl class="mt-4 grid gap-3 text-sm sm:grid-cols-2">
-            <div class="rounded-xl bg-white px-4 py-3">
-              <dt class="text-xs uppercase tracking-[0.15em] text-slate-400">Ngày sinh</dt>
-              <dd class="mt-2 font-medium text-slate-700">{{ formatDate(record.dateOfBirth) }}</dd>
-            </div>
-            <div class="rounded-xl bg-white px-4 py-3">
-              <dt class="text-xs uppercase tracking-[0.15em] text-slate-400">CCCD</dt>
-              <dd class="mt-2 font-medium text-slate-700">{{ record.identityNumber || "-" }}</dd>
-            </div>
-            <div class="rounded-xl bg-white px-4 py-3">
-              <dt class="text-xs uppercase tracking-[0.15em] text-slate-400">Số báo danh</dt>
-              <dd class="mt-2 font-medium text-slate-700">{{ record.examNumber || "-" }}</dd>
-            </div>
-            <div class="rounded-xl bg-white px-4 py-3">
-              <dt class="text-xs uppercase tracking-[0.15em] text-slate-400">Phòng thi</dt>
-              <dd class="mt-2 font-medium text-slate-700">{{ formatRoom(record.room) }}</dd>
-            </div>
-          </dl>
-        </article>
       </div>
     </ClientOnly>
 

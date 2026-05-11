@@ -19,7 +19,7 @@
     </div>
 
     <ClientOnly>
-      <div class="hidden overflow-x-auto lg:block">
+      <div class="overflow-x-auto lg:block">
         <a-table :columns="columns" :data-source="dataSource" :pagination="pagination" :loading="loading" :scroll="{ x: 1200 }" bordered size="small" :row-key="record => record.id" @change="handleTableChange">
           <template #bodyCell="{ column, record, index }">
             <template v-if="column.key === 'stt'">
@@ -58,46 +58,6 @@
       </div>
 
       <div v-if="!loading && !dataSource.length" class="rounded-xl border border-dashed border-slate-300 bg-slate-50 px-4 py-10 text-center text-sm text-slate-500 lg:hidden">Chưa có yêu cầu phúc khảo nào.</div>
-
-      <div class="space-y-4 lg:hidden">
-        <article v-for="record in dataSource" :key="record.id" class="rounded-xl border border-slate-200 bg-slate-50 p-4">
-          <div class="flex items-start justify-between gap-3">
-            <div>
-              <div class="text-xs uppercase tracking-[0.2em] text-slate-400">{{ record.reviewCode || `#${record.id}` }}</div>
-              <h2 class="mt-2 text-lg font-bold text-slate-900">{{ record.fullName || "-" }}</h2>
-            </div>
-            <a-tag :color="getReviewStatusColor(record)">
-              {{ getReviewStatusLabel(record) }}
-            </a-tag>
-          </div>
-
-          <dl class="mt-4 grid gap-3 text-sm sm:grid-cols-2">
-            <div class="rounded-lg bg-white px-4 py-3">
-              <dt class="text-xs uppercase tracking-[0.15em] text-slate-400">Số báo danh</dt>
-              <dd class="mt-2 font-medium text-slate-700">{{ record.examNumber || "-" }}</dd>
-            </div>
-            <div class="rounded-lg bg-white px-4 py-3">
-              <dt class="text-xs uppercase tracking-[0.15em] text-slate-400">Môn phúc khảo</dt>
-              <dd class="mt-2 font-medium text-slate-700">{{ record.subjectName || "-" }}</dd>
-            </div>
-            <div class="rounded-lg bg-white px-4 py-3">
-              <dt class="text-xs uppercase tracking-[0.15em] text-slate-400">Điểm phúc khảo</dt>
-              <dd class="mt-2 font-medium text-slate-700">{{ formatScore(record.reviewScore) }}</dd>
-            </div>
-            <div class="rounded-lg bg-white px-4 py-3 sm:col-span-2">
-              <dt class="text-xs uppercase tracking-[0.15em] text-slate-400">Lý do</dt>
-              <dd class="mt-2 whitespace-pre-line font-medium text-slate-700">{{ record.reason || "-" }}</dd>
-            </div>
-          </dl>
-
-          <div class="mt-4 flex flex-wrap justify-end gap-2">
-            <a-button @click="openDetail(record)">Chi tiết</a-button>
-            <a-popconfirm title="Xác nhận yêu cầu này đã thanh toán?" ok-text="Xác nhận" cancel-text="Hủy" @confirm="completePayment(record)">
-              <a-button type="primary" :disabled="!canCompletePayment(record) || !adminStore.canEditCurrentPage || completePaymentLoading">Xác nhận thanh toán</a-button>
-            </a-popconfirm>
-          </div>
-        </article>
-      </div>
     </ClientOnly>
 
     <a-modal v-model:open="detailVisible" title="Chi tiết phúc khảo" :width="860" :footer="null" @cancel="closeDetail">
