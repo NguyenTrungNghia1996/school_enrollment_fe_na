@@ -63,7 +63,7 @@
                   </div>
                 </div>
                 <div class="mt-8">
-                  <a-button block type="primary" class="h-11 rounded-lg bg-primary font-bold hover:bg-primary/90" :disabled="isExamActionDisabled(exam)" @click="handleRegistration(exam)">
+                  <a-button block type="primary" class="h-11 rounded-lg bg-primary font-bold hover:bg-primary/90" :disabled="isExamActionDisabled(exam)" :loading="openingApplicationExamId === exam.id" @click="handleRegistration(exam)">
                     {{ getExamActionLabel(exam) }}
                   </a-button>
                 </div>
@@ -320,6 +320,7 @@ const examSearchText = ref("");
 const applicationDetailVisible = ref(false);
 const applicationDetailLoading = ref(false);
 const applicationDetail = ref(null);
+const openingApplicationExamId = ref(null);
 const paymentVisible = ref(false);
 const qrData = ref(null);
 const qrLoading = ref(false);
@@ -604,9 +605,7 @@ const openApplicationDetail = async examId => {
     return;
   }
 
-  applicationDetailVisible.value = true;
-  applicationDetailLoading.value = true;
-  applicationDetail.value = null;
+  openingApplicationExamId.value = normalizedExamId;
 
   try {
     const { data, error } = await applicationUser.getByRest("detail/exam", {
@@ -618,12 +617,16 @@ const openApplicationDetail = async examId => {
       throw new Error(error.value?.data?.message || data.value?.message || "Không thể tải thông tin hồ sơ");
     }
 
-    applicationDetail.value = normalizeApplicationDetail(data.value.data);
+    const applicationId = Number(data.value.data.id);
+    if (!Number.isFinite(applicationId) || applicationId <= 0) {
+      throw new Error("Không xác định được id hồ sơ");
+    }
+
+    await navigateTo(`/user/application/${applicationId}`);
   } catch (error) {
-    applicationDetailVisible.value = false;
     safeMessage.error(error?.message || "Không thể tải thông tin hồ sơ");
   } finally {
-    applicationDetailLoading.value = false;
+    openingApplicationExamId.value = null;
   }
 };
 
@@ -712,9 +715,9 @@ const confirmPayment = async () => {
   }
 };
 
-const handleRegistration = exam => {
+const handleRegistration = async exam => {
   if (userStore.token && hasExamApplication(exam)) {
-    openApplicationDetail(exam.id);
+    await openApplicationDetail(exam.id);
   } else if (isExamActionDisabled(exam)) {
     safeMessage.warning("Kỳ khảo thí này hiện chưa mở hoặc đã kết thúc");
   } else if (!userStore.token) {

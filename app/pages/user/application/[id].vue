@@ -197,6 +197,29 @@
                   </div>
 
                   <div class="grid gap-4 md:grid-cols-3">
+                    <div class="rounded-xl border border-slate-100 bg-white p-4 shadow-sm md:row-span-2">
+                      <div class="text-[11px] font-bold uppercase tracking-widest text-slate-400">Ảnh 3x4</div>
+                      <button type="button" class="group relative mx-auto mt-3 flex h-[192px] w-[144px] items-center justify-center overflow-hidden rounded-2xl border-2 border-dashed border-slate-200 bg-slate-50 transition-all hover:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2" :class="detailData.avatar ? 'cursor-pointer border-solid border-slate-200' : 'cursor-default'" :disabled="!detailData.avatar" @click="openAvatarPreview">
+                        <img v-if="detailData.avatar" :src="detailData.avatar" alt="Ảnh 3x4" class="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105" />
+                        <div v-else class="flex flex-col items-center gap-2 px-4 text-center text-slate-400">
+                          <Icon name="lucide:image" class="text-3xl opacity-50" />
+                          <span class="text-xs font-medium uppercase tracking-wider">Chưa có ảnh</span>
+                        </div>
+                        <div v-if="detailData.avatar" class="absolute inset-0 flex items-center justify-center bg-slate-900/40 opacity-0 backdrop-blur-sm transition-opacity group-hover:opacity-100">
+                          <Icon name="lucide:zoom-in" class="text-2xl text-white" />
+                        </div>
+                      </button>
+
+                      <a-image
+                        v-if="detailData.avatar"
+                        :src="detailData.avatar"
+                        class="hidden"
+                        :preview="{
+                          visible: isAvatarPreviewOpen,
+                          src: detailData.avatar,
+                          onVisibleChange: handleAvatarPreviewVisibleChange,
+                        }" />
+                    </div>
                     <div class="rounded-xl border border-slate-100 bg-white p-4 shadow-sm">
                       <div class="text-[11px] font-bold uppercase tracking-widest text-slate-400">Họ tên</div>
                       <div class="mt-1.5 font-medium text-slate-900">{{ detailData.fullName || detailData.fullname || "-" }}</div>
