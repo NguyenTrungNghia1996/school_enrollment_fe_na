@@ -722,6 +722,7 @@ const saveDraft = async () => {
     }
 
     message.success(data.value?.message || `Lưu ${APPLICATION_STATUS_LABELS[APPLICATION_STATUS.DRAFT].toLowerCase()} thành công`);
+    navigateTo("/");
   } catch (error) {
     message.error(error?.message || "Lưu hồ sơ thất bại");
   } finally {

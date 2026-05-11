@@ -40,7 +40,7 @@
                 </a-button>
               </a-tooltip>
 
-              <a-tooltip title="Duyệt hồ sơ">
+              <!-- <a-tooltip title="Duyệt hồ sơ">
                 <a-button type="link" size="small" class="text-emerald-600" :disabled="isActionDisabled(record) || !adminStore.canApproveCurrentPage" @click="approveItem(record)">
                   <template #icon><CheckOutlined /></template>
                 </a-button>
@@ -50,7 +50,7 @@
                 <a-button type="link" size="small" danger :disabled="isActionDisabled(record) || !adminStore.canApproveCurrentPage" @click="openReject(record)">
                   <template #icon><CloseOutlined /></template>
                 </a-button>
-              </a-tooltip>
+              </a-tooltip> -->
 
               <a-tooltip v-if="showPaymentInfoAction(record)" title="Thông tin thanh toán">
                 <a-button type="link" size="small" class="text-sky-600" :disabled="!adminStore.canApproveCurrentPage" @click="openPaymentDetail(record)">
