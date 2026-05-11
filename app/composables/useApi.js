@@ -26,5 +26,6 @@ export const useApi = () => {
     adminResult: useCrudApiAdmin("/api/admin/exam/result"),
     // adminPayment: useCrudApiAdmin("/api/admin/payment"),
     adminApplication: useCrudApiAdmin("/api/admin/application"),
+    adminApplicationReview: useCrudApiAdmin("/api/admin/application/review"),
   };
 };

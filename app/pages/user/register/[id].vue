@@ -155,7 +155,7 @@
 
                   <div class="grid gap-x-6 gap-y-5 md:col-span-3 md:grid-cols-3">
                     <div>
-                      <UserSelectProvince v-model="formState.permanentProvinceId" label="Tỉnh/thành phố cư trú" name="permanentProvinceId" placeholder="Chọn tỉnh thành phố" :rules="[{ required: true, message: 'Vui lòng chọn tỉnh/thành phố cư trú' }]" size="large" class="rounded-xl" />
+                      <UserSelectProvince v-model="formState.permanentProvinceId" label="Tỉnh/thành phố cư trú" name="permanentProvinceId" placeholder="Chọn tỉnh thành phố" :rules="[{ required: true, message: 'Vui lòng chọn tỉnh/thành phố cư trú' }]" size="large" disabled class="rounded-xl" />
                     </div>
 
                     <div>
@@ -192,7 +192,7 @@
                   </a-form-item>
 
                   <div>
-                    <UserSelectProvince v-model="formState.currentProvinceId" label="Tỉnh/thành phố nơi ở hiện tại" name="currentProvinceId" placeholder="Chọn tỉnh thành phố" :rules="[{ required: true, message: 'Vui lòng chọn tỉnh/thành phố hiện tại' }]" size="large" class="rounded-xl" />
+                    <UserSelectProvince v-model="formState.currentProvinceId" label="Tỉnh/thành phố nơi ở hiện tại" name="currentProvinceId" placeholder="Chọn tỉnh thành phố" :rules="[{ required: true, message: 'Vui lòng chọn tỉnh/thành phố hiện tại' }]" size="large" disabled class="rounded-xl" />
                   </div>
 
                   <div>
@@ -410,6 +410,8 @@ const genderOptions = [
   { label: "Nữ", value: "female" },
 ];
 
+const DEFAULT_PROVINCE_ID = 3;
+
 const formState = reactive({
   avatar: "",
   fullName: "",
@@ -420,11 +422,11 @@ const formState = reactive({
   identityIssuePlace: "",
   idEthnicity: undefined,
   gender: undefined,
-  permanentProvinceId: undefined,
+  permanentProvinceId: DEFAULT_PROVINCE_ID,
   idCommune: undefined,
   permanentAddress: "",
   phoneNumber: "",
-  currentProvinceId: undefined,
+  currentProvinceId: DEFAULT_PROVINCE_ID,
   idCurrentCommune: undefined,
   currentAddress: "",
 });
@@ -635,11 +637,11 @@ const resetFormState = () => {
     identityIssuePlace: "",
     idEthnicity: undefined,
     gender: undefined,
-    permanentProvinceId: undefined,
+    permanentProvinceId: DEFAULT_PROVINCE_ID,
     idCommune: undefined,
     permanentAddress: "",
     phoneNumber: "",
-    currentProvinceId: undefined,
+    currentProvinceId: DEFAULT_PROVINCE_ID,
     idCurrentCommune: undefined,
     currentAddress: "",
   });
@@ -688,6 +690,8 @@ const restoreDraft = () => {
       dateOfBirth: getValidDayjs(draftFormState.dateOfBirth),
       identityIssueDate: getValidDayjs(draftFormState.identityIssueDate),
       gender: draftFormState.gender === "male" ? true : draftFormState.gender === "female" ? false : draftFormState.gender,
+      permanentProvinceId: DEFAULT_PROVINCE_ID,
+      currentProvinceId: DEFAULT_PROVINCE_ID,
     });
 
     documentUploads.value = createDocumentUploads(examDetail.value?.documents || [], draft?.documents || []);
