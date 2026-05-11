@@ -46,7 +46,7 @@
     </div>
 
     <!-- Bottom Bar -->
-    <div class="container mx-auto border-t border-white/5 bg-black/20 py-8">
+    <div class="mx-auto border-t border-white/5 bg-black/20 py-8">
       <div class="mx-auto flex max-w-7xl flex-col items-center justify-between px-4 text-xs font-medium sm:flex-row sm:px-6 lg:px-8">
         <p>Bản quyền &copy; {{ currentYear }} {{ unitStore.name }}. Bảo lưu mọi quyền.</p>
         <div class="mt-4 flex gap-6 sm:mt-0">

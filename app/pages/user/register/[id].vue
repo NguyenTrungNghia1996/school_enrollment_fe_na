@@ -412,7 +412,7 @@ const genderOptions = [
 
 const DEFAULT_PROVINCE_ID = 3;
 
-const formState = reactive({
+const createDefaultFormState = () => ({
   avatar: "",
   fullName: "",
   dateOfBirth: null,
@@ -430,6 +430,8 @@ const formState = reactive({
   idCurrentCommune: undefined,
   currentAddress: "",
 });
+
+const formState = reactive(createDefaultFormState());
 
 const genderValue = computed({
   get() {
@@ -458,8 +460,6 @@ const examId = computed(() => {
   const normalized = Number(value);
   return Number.isFinite(normalized) ? normalized : null;
 });
-
-const draftStorageKey = computed(() => `application-draft-${examId.value || "unknown"}`);
 
 const status = computed(() => {
   const exam = examDetail.value;
@@ -607,7 +607,6 @@ const getFileType = link => {
 const createDocumentUploads = (documents = [], existingDocuments = []) => {
   return documents.map((document, index) => {
     const documentId = document.id ?? document.idExamDocument ?? index;
-    const existing = existingDocuments.find(item => Number(item.idExamDocument) === Number(documentId));
 
     return {
       key: `${documentId}-${document.documentName}`,
@@ -627,84 +626,9 @@ const createDocumentUploads = (documents = [], existingDocuments = []) => {
 };
 
 const resetFormState = () => {
-  Object.assign(formState, {
-    avatar: "",
-    fullName: "",
-    dateOfBirth: null,
-    idProvince: undefined,
-    identityNumber: "",
-    identityIssueDate: null,
-    identityIssuePlace: "",
-    idEthnicity: undefined,
-    gender: undefined,
-    permanentProvinceId: DEFAULT_PROVINCE_ID,
-    idCommune: undefined,
-    permanentAddress: "",
-    phoneNumber: "",
-    currentProvinceId: DEFAULT_PROVINCE_ID,
-    idCurrentCommune: undefined,
-    currentAddress: "",
-  });
-};
-
-const saveDraftSnapshot = () => {
-  if (!import.meta.client) return;
-
-  const snapshot = {
-    formState: {
-      ...formState,
-      dateOfBirth: toIsoStringOrNull(formState.dateOfBirth),
-      identityIssueDate: toIsoStringOrNull(formState.identityIssueDate),
-    },
-    documents: documentUploads.value
-      .map(item => ({
-        idExamDocument: item.idExamDocument,
-        files: item.files,
-      }))
-      .flatMap(item =>
-        item.files.map(file => ({
-          idExamDocument: item.idExamDocument,
-          url: file.url,
-          fileName: file.fileName,
-        })),
-      ),
-  };
-
-  localStorage.setItem(draftStorageKey.value, JSON.stringify(snapshot));
-};
-
-const restoreDraft = () => {
-  if (!import.meta.client) return false;
-
-  const raw = localStorage.getItem(draftStorageKey.value);
-  if (!raw) return false;
-
-  try {
-    const draft = JSON.parse(raw);
-    const draftFormState = draft?.formState || {};
-
-    Object.assign(formState, {
-      ...formState,
-      ...draftFormState,
-      avatar: draftFormState.avatar || "",
-      dateOfBirth: getValidDayjs(draftFormState.dateOfBirth),
-      identityIssueDate: getValidDayjs(draftFormState.identityIssueDate),
-      gender: draftFormState.gender === "male" ? true : draftFormState.gender === "female" ? false : draftFormState.gender,
-      permanentProvinceId: DEFAULT_PROVINCE_ID,
-      currentProvinceId: DEFAULT_PROVINCE_ID,
-    });
-
-    documentUploads.value = createDocumentUploads(examDetail.value?.documents || [], draft?.documents || []);
-    return true;
-  } catch {
-    localStorage.removeItem(draftStorageKey.value);
-    return false;
-  }
-};
-
-const clearDraftStorage = () => {
-  if (!import.meta.client) return;
-  localStorage.removeItem(draftStorageKey.value);
+  Object.assign(formState, createDefaultFormState());
+  formRef.value?.clearValidate?.();
+  isAvatarPreviewOpen.value = false;
 };
 
 const scrollToElement = element => {
@@ -780,8 +704,6 @@ const saveDraft = async () => {
     message.warning("Vui lòng chờ upload hồ sơ hoàn tất");
     return;
   }
-
-  saveDraftSnapshot();
 
   const isValid = await validateFormAndFocusError();
   if (!isValid) {
@@ -1045,7 +967,6 @@ const submitApplication = async () => {
       throw new Error(error.value?.data?.message || data.value?.message || "Nộp hồ sơ thất bại");
     }
 
-    clearDraftStorage();
     message.success(data.value?.message || `Nộp hồ sơ thành công, trạng thái: ${APPLICATION_STATUS_LABELS[APPLICATION_STATUS.PENDING_REVIEW]}`);
     navigateTo("/");
   } catch (error) {
@@ -1056,7 +977,6 @@ const submitApplication = async () => {
 };
 
 const handleCancel = () => {
-  clearDraftStorage();
   resetFormState();
   documentUploads.value = createDocumentUploads(examDetail.value?.documents || []);
   message.info("Đã hủy thông tin đang nhập");
@@ -1090,9 +1010,7 @@ const fetchExamDetail = async () => {
 
     examDetail.value = data.value.data;
 
-    if (!restoreDraft()) {
-      documentUploads.value = createDocumentUploads(examDetail.value.documents || []);
-    }
+    documentUploads.value = createDocumentUploads(examDetail.value.documents || []);
   } catch (error) {
     examDetail.value = null;
     loadError.value = error?.message || "Không thể tải thông tin kỳ khảo thí.";
