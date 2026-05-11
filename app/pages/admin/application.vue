@@ -1,10 +1,11 @@
 <template>
   <div class="min-h-full bg-white p-2 md:p-4">
     <div class="mb-4 flex flex-col items-start justify-between gap-2 md:flex-row md:items-center">
-      <a-input-search v-model:value="searchText" placeholder="Tìm theo mã hồ sơ, họ tên, CCCD..." enter-button @search="handleSearch" class="w-full" />
-      <div class="w-1/3 py-2 md:py-0">
+      <a-input-search v-model:value="searchText" placeholder="Tìm theo mã hồ sơ, họ tên, CCCD..." enter-button @search="handleSearch" class="w-full md:min-w-0 md:flex-1" />
+      <div class="w-full py-2 md:w-1/3 md:py-0">
         <AdminSelectEnrollment v-model="selectedExamId" no-form-item :inlineLabel="false" placeholder="Lọc theo kỳ tuyển sinh" label="" />
       </div>
+      <a-select v-model:value="selectedStatusId" class="w-full md:w-60" placeholder="Lọc theo trạng thái" :options="statusOptions" />
       <div class="flex w-full gap-2 md:w-auto">
         <a-button :disabled="!selectedExamId" type="primary" ghost :loading="exportLoading" @click="exportApplications">Xuất dữ liệu</a-button>
         <a-button @click="resetFilters" class="flex-1 md:flex-none">Đặt lại</a-button>
@@ -185,7 +186,7 @@
 
 <script setup>
 import dayjs from "dayjs";
-import { getApplicationStatusColor, isDraftApplicationStatus, isPendingReviewApplicationStatus, isPaidPendingVerificationApplicationStatus } from "~/composables/useApplicationStatus";
+import { APPLICATION_STATUS_LABELS, getApplicationStatusColor, isDraftApplicationStatus, isPendingReviewApplicationStatus, isPaidPendingVerificationApplicationStatus } from "~/composables/useApplicationStatus";
 
 definePageMeta({
   layout: "admin",
@@ -197,6 +198,7 @@ const { adminApplication } = useApi();
 
 const searchText = ref("");
 const selectedExamId = ref(null);
+const selectedStatusId = ref(0);
 const exportLoading = ref(false);
 const detailVisible = ref(false);
 const detailLoading = ref(false);
@@ -228,11 +230,22 @@ const columns = [
   { title: "Thao tác", key: "action", width: 150, align: "center", fixed: "right" },
 ];
 
+const statusOptions = computed(() => [
+  { label: "Tất cả trạng thái", value: 0 },
+  ...Object.entries(APPLICATION_STATUS_LABELS)
+    .filter(([value]) => Number(value) !== 1)
+    .map(([value, label]) => ({
+      label,
+      value: Number(value),
+    })),
+]);
+
 const params = ref({
   pageIndex: 1,
   pageSize: 10,
   search: "",
-  idExam: undefined,
+  idExam: 0,
+  idStatus: 0,
 });
 
 const {
@@ -299,7 +312,13 @@ watch(
 );
 
 watch(selectedExamId, value => {
-  params.value.idExam = value || undefined;
+  params.value.idExam = value ? Number(value) : 0;
+  params.value.pageIndex = 1;
+  pagination.current = 1;
+});
+
+watch(selectedStatusId, value => {
+  params.value.idStatus = value ? Number(value) : 0;
   params.value.pageIndex = 1;
   pagination.current = 1;
 });
@@ -320,11 +339,13 @@ const handleSearch = () => {
 const resetFilters = () => {
   searchText.value = "";
   selectedExamId.value = null;
+  selectedStatusId.value = 0;
   params.value = {
     pageIndex: 1,
     pageSize: 10,
     search: "",
-    idExam: undefined,
+    idExam: 0,
+    idStatus: 0,
   };
   pagination.current = 1;
   pagination.pageSize = 10;
