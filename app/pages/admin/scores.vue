@@ -15,7 +15,7 @@
     </div>
 
     <ClientOnly>
-      <div class="hidden overflow-x-auto lg:block">
+      <div class="overflow-x-auto lg:block">
         <a-table :columns="columns" :data-source="dataSource" :pagination="pagination" :loading="loading" :scroll="{ x: 1000 }" bordered size="small" row-key="examNumber" @change="handleTableChange">
           <template #bodyCell="{ column, record, index }">
             <template v-if="column.key === 'stt'">
@@ -27,32 +27,6 @@
             </template>
           </template>
         </a-table>
-      </div>
-
-      <div class="space-y-4 lg:hidden">
-        <article v-for="record in dataSource" :key="record.examNumber || record.fullName" class="rounded-2xl border border-slate-200 bg-slate-50 p-4">
-          <div class="flex items-start justify-between gap-3">
-            <div>
-              <div class="text-xs uppercase tracking-[0.2em] text-slate-400">SBD {{ record.examNumber || "-" }}</div>
-              <h2 class="mt-2 text-lg font-bold text-slate-900">{{ record.fullName || "-" }}</h2>
-            </div>
-          </div>
-
-          <dl class="mt-4 grid gap-3 text-sm sm:grid-cols-2">
-            <div class="rounded-xl bg-white px-4 py-3">
-              <dt class="text-xs uppercase tracking-[0.15em] text-slate-400">Toán</dt>
-              <dd class="mt-2 font-medium text-slate-700">{{ formatScore(record.mathScore) }}</dd>
-            </div>
-            <div class="rounded-xl bg-white px-4 py-3">
-              <dt class="text-xs uppercase tracking-[0.15em] text-slate-400">Ngữ văn</dt>
-              <dd class="mt-2 font-medium text-slate-700">{{ formatScore(record.literatureScore) }}</dd>
-            </div>
-            <div class="rounded-xl bg-white px-4 py-3">
-              <dt class="text-xs uppercase tracking-[0.15em] text-slate-400">Tiếng Anh</dt>
-              <dd class="mt-2 font-medium text-slate-700">{{ formatScore(record.englishScore) }}</dd>
-            </div>
-          </dl>
-        </article>
       </div>
     </ClientOnly>
 
