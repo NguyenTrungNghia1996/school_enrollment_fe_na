@@ -155,7 +155,7 @@
 
                   <div class="grid gap-x-6 gap-y-5 md:col-span-3 md:grid-cols-3">
                     <div>
-                      <UserSelectProvince v-model="formState.permanentProvinceId" label="Tỉnh/thành phố cư trú" name="permanentProvinceId" placeholder="Chọn tỉnh thành phố" :rules="[{ required: true, message: 'Vui lòng chọn tỉnh/thành phố cư trú' }]" size="large" disabled class="rounded-xl" />
+                      <UserSelectProvince v-model="formState.permanentProvinceId" label="Tỉnh/thành phố cư trú" name="permanentProvinceId" placeholder="Chọn tỉnh thành phố" :rules="[{ required: true, message: 'Vui lòng chọn tỉnh/thành phố cư trú' }]" size="large" class="rounded-xl" />
                     </div>
 
                     <div>
@@ -422,7 +422,7 @@ const createDefaultFormState = () => ({
   identityIssuePlace: "",
   idEthnicity: undefined,
   gender: undefined,
-  permanentProvinceId: DEFAULT_PROVINCE_ID,
+  permanentProvinceId: null,
   idCommune: undefined,
   permanentAddress: "",
   phoneNumber: "",
