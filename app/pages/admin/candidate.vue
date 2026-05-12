@@ -55,6 +55,13 @@
         </div> -->
 
         <div class="rounded-xl border border-slate-200 bg-white p-4">
+          <div class="font-medium text-slate-900">Kỳ tuyển sinh</div>
+          <div class="mt-3">
+            <AdminSelectEnrollment v-model="selectedImportExamId" no-form-item :inlineLabel="false" placeholder="Chọn kỳ tuyển sinh" label="" />
+          </div>
+        </div>
+
+        <div class="rounded-xl border border-slate-200 bg-white p-4">
           <div class="font-medium text-slate-900">Chọn file import</div>
           <p class="mt-1 text-sm text-slate-500">Chấp nhận file `.xlsx` hoặc `.xls`.</p>
 
@@ -85,6 +92,7 @@ const importLoading = ref(false);
 const publishLoading = ref(false);
 const selectedImportFile = ref(null);
 const selectedImportFileName = ref("");
+const selectedImportExamId = ref(null);
 const templateFileUrl = "/file/DanhSachSBDVaPhong.xlsx";
 
 const pagination = reactive({
@@ -175,11 +183,13 @@ const openImportModal = () => {
     message.warning("Bạn không có quyền import dữ liệu");
     return;
   }
+  selectedImportExamId.value = selectedExamId.value || null;
   importVisible.value = true;
 };
 
 const closeImportModal = () => {
   importVisible.value = false;
+  selectedImportExamId.value = null;
   resetImportFile();
 };
 
@@ -210,11 +220,17 @@ const submitImport = async () => {
     return;
   }
 
+  if (!selectedImportExamId.value) {
+    message.warning("Vui lòng chọn kỳ tuyển sinh");
+    return;
+  }
+
   importLoading.value = true;
 
   try {
     const formData = new FormData();
     formData.append("file", selectedImportFile.value);
+    formData.append("idExam", String(selectedImportExamId.value));
     const { data, error } = await adminCandidate.postByRest("import", {
       body: formData,
     });
