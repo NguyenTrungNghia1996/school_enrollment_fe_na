@@ -9,7 +9,7 @@
       <div class="flex w-full flex-initial gap-2 md:w-auto">
         <template v-if="showEditActions">
           <a-popconfirm title="Bạn chắc chắn muốn công bố kết quả phúc khảo cho kỳ tuyển sinh đã chọn?" ok-text="Công bố" cancel-text="Hủy" @confirm="publishReviews">
-            <a-button class="shrink-0 whitespace-nowrap" type="primary" :loading="publishLoading" :disabled="!selectedExamId || publishLoading">Công bố</a-button>
+            <a-button class="shrink-0 whitespace-nowrap" type="primary" :loading="publishLoading">Công bố</a-button>
           </a-popconfirm>
           <a-button class="shrink-0 whitespace-nowrap" type="primary" ghost :loading="exportLoading" :disabled="!selectedExamId || exportLoading" @click="exportReviews">Xuất dữ liệu</a-button>
           <a-button class="shrink-0 whitespace-nowrap" type="primary" ghost @click="openImportModal">Import</a-button>
