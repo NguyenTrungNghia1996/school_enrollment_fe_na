@@ -7,7 +7,7 @@
       </div>
       <div class="flex w-full flex-initial gap-2 md:w-auto">
         <a-popconfirm v-if="adminStore.canEditCurrentPage" title="Bạn chắc chắn muốn công bố điểm thi cho kỳ tuyển sinh đã chọn?" ok-text="Công bố" cancel-text="Hủy" @confirm="publishScores">
-          <a-button type="primary" :loading="publishLoading" :disabled="!selectedExamId || publishLoading">Công bố</a-button>
+          <a-button type="primary" :loading="publishLoading">Công bố</a-button>
         </a-popconfirm>
         <a-button v-if="adminStore.canEditCurrentPage" type="primary" ghost @click="openImportModal">Import</a-button>
         <a-button @click="resetFilters" class="flex-1 md:flex-none">Đặt lại</a-button>
@@ -44,7 +44,7 @@
           </div>
         </div> -->
 
-        <div class="rounded-xl border border-slate-200 bg-white p-4">
+        <div class="hidden rounded-xl border border-slate-200 bg-white p-4">
           <div class="font-medium text-slate-900">Kỳ tuyển sinh</div>
           <div class="mt-3">
             <AdminSelectEnrollment v-model="selectedImportExamId" no-form-item :inlineLabel="false" placeholder="Chọn kỳ tuyển sinh" label="" />
