@@ -65,7 +65,7 @@
           <div class="font-medium text-slate-900">Chọn file import</div>
           <p class="mt-1 text-sm text-slate-500">Chấp nhận file `.xlsx` hoặc `.xls`.</p>
 
-          <input ref="importInputRef" type="file" class="mt-4 block w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-600 file:mr-3 file:rounded-md file:border-0 file:bg-sky-600 file:px-3 file:py-2 file:text-sm file:font-medium file:text-white" accept=".xlsx,.xls" :disabled="importLoading" @click="resetImportFile" @change="handleImportFileChange" />
+          <input :key="importInputKey" ref="importInputRef" type="file" class="mt-4 block w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-600 file:mr-3 file:rounded-md file:border-0 file:bg-sky-600 file:px-3 file:py-2 file:text-sm file:font-medium file:text-white" accept=".xlsx,.xls" :disabled="importLoading" @click="prepareImportFileInput" @change="handleImportFileChange" />
 
           <div v-if="selectedImportFileName" class="mt-3 rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700">Đã chọn: {{ selectedImportFileName }}</div>
         </div>
@@ -93,6 +93,7 @@ const publishLoading = ref(false);
 const selectedImportFile = ref(null);
 const selectedImportFileName = ref("");
 const selectedImportExamId = ref(null);
+const importInputKey = ref(0);
 const templateFileUrl = "/file/DanhSachSBDVaPhong.xlsx";
 
 const pagination = reactive({
@@ -196,6 +197,15 @@ const closeImportModal = () => {
 const resetImportFile = () => {
   selectedImportFile.value = null;
   selectedImportFileName.value = "";
+  importInputKey.value += 1;
+  if (importInputRef.value) {
+    importInputRef.value.value = "";
+  }
+};
+
+const prepareImportFileInput = () => {
+  selectedImportFile.value = null;
+  selectedImportFileName.value = "";
   if (importInputRef.value) {
     importInputRef.value.value = "";
   }
@@ -242,9 +252,9 @@ const submitImport = async () => {
     await refreshCandidates();
     closeImportModal();
   } catch (error) {
-    message.error(error?.message || "Import danh sách thí sinh thất bại");
-    resetImportFile();
+    message.error(`${error?.message || "Import danh sách thí sinh thất bại"}. Vui lòng chọn lại file sau khi sửa.`);
   } finally {
+    resetImportFile();
     importLoading.value = false;
   }
 };
