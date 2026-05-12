@@ -68,6 +68,14 @@ export class RequestAdmin {
     });
   }
 
+  fetch(url, options = {}) {
+    return $fetch(url, {
+      baseURL: this.baseURL,
+      ...options,
+      ...this.handlers(),
+    });
+  }
+
   // =========================
   // METHODS
   // =========================

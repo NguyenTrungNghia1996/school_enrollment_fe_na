@@ -14,6 +14,24 @@ export const useCrudApiAdmin = endpoint => {
     postByRest(id, options) {
       return request.post(`${endpoint}/${id}`, options ?? {});
     },
+    async upload(id, options) {
+      const data = ref(null);
+      const error = ref(null);
+      try {
+        const res = await request.fetch(`${endpoint}/${id}`, {
+          method: "POST",
+          ...(options ?? {}),
+        });
+        data.value = res;
+      } catch (err) {
+        error.value = {
+          data: err.response?._data || err.data,
+          message: err.message,
+          ...err,
+        };
+      }
+      return { data, error };
+    },
     put(options) {
       return request.put(endpoint, options ?? {});
     },

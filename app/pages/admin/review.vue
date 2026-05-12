@@ -109,7 +109,7 @@
         <div class="font-medium text-slate-900">Chọn file import</div>
         <p class="mt-1 text-sm text-slate-500">Chấp nhận file `.xlsx` hoặc `.xls`.</p>
 
-        <input :key="importInputKey" ref="importInputRef" type="file" class="mt-4 block w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-600 file:mr-3 file:rounded-md file:border-0 file:bg-sky-600 file:px-3 file:py-2 file:text-sm file:font-medium file:text-white" accept=".xlsx,.xls" :disabled="importLoading" @click="prepareImportFileInput" @change="handleImportFileChange" />
+        <input :key="importInputKey" ref="importInputRef" type="file" class="mt-4 block w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-600 file:mr-3 file:rounded-md file:border-0 file:bg-sky-600 file:px-3 file:py-2 file:text-sm file:font-medium file:text-white" accept=".xlsx,.xls" @click="prepareImportFileInput" @change="handleImportFileChange" />
 
         <div v-if="selectedImportFileName" class="mt-3 rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700">Đã chọn: {{ selectedImportFileName }}</div>
       </div>
@@ -433,7 +433,11 @@ const resetImportFile = () => {
   }
 };
 
-const prepareImportFileInput = () => {
+const prepareImportFileInput = event => {
+  if (importLoading.value) {
+    event?.preventDefault();
+    return;
+  }
   selectedImportFile.value = null;
   selectedImportFileName.value = "";
   if (importInputRef.value) {
@@ -442,6 +446,7 @@ const prepareImportFileInput = () => {
 };
 
 const handleImportFileChange = event => {
+  if (importLoading.value) return;
   const file = event?.target?.files?.[0];
   if (!file) return;
 
@@ -466,7 +471,7 @@ const submitImport = async () => {
     const formData = new FormData();
     formData.append("file", selectedImportFile.value);
 
-    const { data, error } = await adminApplicationReview.postByRest("import", {
+    const { data, error } = await adminApplicationReview.upload("import", {
       body: formData,
     });
 
