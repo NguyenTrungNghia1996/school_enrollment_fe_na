@@ -382,8 +382,11 @@ const exportApplications = async () => {
     const downloadUrl = window.URL.createObjectURL(blob);
     const link = document.createElement("a");
     const contentDisposition = response.headers.get("content-disposition") || "";
-    const fileNameMatch = contentDisposition.match(/filename\*=UTF-8''([^;]+)|filename=\"?([^"]+)\"?/i);
-    const fileName = decodeURIComponent(fileNameMatch?.[1] || fileNameMatch?.[2] || `ho-so-ky-tuyen-sinh-${selectedExamId.value}.xlsx`);
+    const utf8Match = contentDisposition.match(/filename\*\s*=\s*UTF-8''([^;]+)/i);
+    const fileNameMatch = contentDisposition.match(/filename\s*=\s*"?([^";]+)"?/i);
+    const fileName = utf8Match?.[1]
+      ? decodeURIComponent(utf8Match[1].trim())
+      : (fileNameMatch?.[1]?.trim() || `ho-so-ky-tuyen-sinh-${selectedExamId.value}.xlsx`);
 
     link.href = downloadUrl;
     link.download = fileName;
