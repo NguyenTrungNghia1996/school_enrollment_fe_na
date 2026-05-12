@@ -9,6 +9,7 @@
         <a-popconfirm v-if="adminStore.canEditCurrentPage" title="Bạn chắc chắn muốn công bố kết quả cho kỳ tuyển sinh đã chọn?" ok-text="Công bố" cancel-text="Hủy" @confirm="publishCandidates">
           <a-button type="primary" :loading="publishLoading">Công bố</a-button>
         </a-popconfirm>
+        <a-button type="primary" ghost :loading="exportLoading" @click="exportCandidates">Export</a-button>
         <a-button v-if="adminStore.canEditCurrentPage" type="primary" ghost @click="openImportModal">Import</a-button>
         <a-button @click="resetFilters" class="flex-1 md:flex-none">Đặt lại</a-button>
       </div>
@@ -69,6 +70,7 @@ definePageMeta({
   layout: "admin",
 });
 
+const config = useRuntimeConfig();
 const { adminCandidate } = useApi();
 const adminStore = useAdminStore();
 
@@ -77,6 +79,7 @@ const selectedExamId = ref(null);
 const importVisible = ref(false);
 const importInputRef = ref(null);
 const importLoading = ref(false);
+const exportLoading = ref(false);
 const publishLoading = ref(false);
 const selectedImportFile = ref(null);
 const selectedImportFileName = ref("");
@@ -165,6 +168,69 @@ const resetFilters = () => {
   };
   pagination.current = 1;
   pagination.pageSize = 10;
+};
+
+const getFileNameFromContentDisposition = (contentDisposition, fallbackFileName) => {
+  const utf8Match = contentDisposition.match(/filename\*\s*=\s*UTF-8''([^;]+)/i);
+  if (utf8Match?.[1]) {
+    return decodeURIComponent(utf8Match[1].trim());
+  }
+
+  const fileNameMatch = contentDisposition.match(/filename\s*=\s*"?([^";]+)"?/i);
+  if (fileNameMatch?.[1]) {
+    return fileNameMatch[1].trim();
+  }
+
+  return fallbackFileName;
+};
+
+const exportCandidates = async () => {
+  if (!selectedExamId.value) {
+    message.warning("Vui lòng chọn kỳ tuyển sinh");
+    return;
+  }
+
+  if (!adminStore.token) {
+    message.error("Không tìm thấy phiên đăng nhập quản trị");
+    return;
+  }
+
+  exportLoading.value = true;
+
+  try {
+    const exportUrl = new URL("/api/admin/examList/export", config.public.baseURL);
+    exportUrl.searchParams.set("idExam", String(selectedExamId.value));
+
+    const response = await fetch(exportUrl.toString(), {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${adminStore.token}`,
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error("Xuất dữ liệu danh sách thí sinh thất bại");
+    }
+
+    const blob = await response.blob();
+    const downloadUrl = window.URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    const contentDisposition = response.headers.get("content-disposition") || "";
+    const fileName = getFileNameFromContentDisposition(contentDisposition, `danh-sach-thi-sinh-${selectedExamId.value}.xlsx`);
+
+    link.href = downloadUrl;
+    link.download = fileName;
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    window.URL.revokeObjectURL(downloadUrl);
+
+    message.success("Xuất dữ liệu danh sách thí sinh thành công");
+  } catch (error) {
+    message.error(error?.message || "Xuất dữ liệu danh sách thí sinh thất bại");
+  } finally {
+    exportLoading.value = false;
+  }
 };
 
 const openImportModal = () => {
