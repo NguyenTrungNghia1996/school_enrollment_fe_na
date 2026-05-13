@@ -117,7 +117,7 @@
 </template>
 
 <script setup>
-import { APPLICATION_REVIEW_STATUS_LABELS, getApplicationReviewStatusColor, getApplicationReviewStatusLabel, isPendingConfirmationApplicationReviewStatus } from "~/composables/useApplicationReviewStatus";
+import { APPLICATION_REVIEW_STATUS, APPLICATION_REVIEW_STATUS_LABELS, getApplicationReviewStatusColor, getApplicationReviewStatusLabel, isPendingConfirmationApplicationReviewStatus } from "~/composables/useApplicationReviewStatus";
 
 definePageMeta({
   layout: "admin",
@@ -170,10 +170,12 @@ const columns = [
 
 const statusOptions = computed(() => [
   { label: "Tất cả trạng thái", value: 0 },
-  ...Object.entries(APPLICATION_REVIEW_STATUS_LABELS).map(([value, label]) => ({
-    label,
-    value: Number(value),
-  })),
+  ...Object.entries(APPLICATION_REVIEW_STATUS_LABELS)
+    .filter(([value]) => Number(value) !== APPLICATION_REVIEW_STATUS.DRAFT)
+    .map(([value, label]) => ({
+      label,
+      value: Number(value),
+    })),
 ]);
 
 const params = ref({
