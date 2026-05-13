@@ -284,6 +284,8 @@ const EXAM_STATUS = Object.freeze({
   SUMMARIZED: 3,
   COMPLETED: 4,
 });
+const VIETNAM_TIMEZONE = "Asia/Ho_Chi_Minh";
+const HAS_TIMEZONE_OFFSET = /(?:Z|[+-]\d{2}:?\d{2})$/i;
 
 const EXAM_STATUS_CONFIG = Object.freeze({
   [EXAM_STATUS.SUBMITTING]: {
@@ -307,6 +309,52 @@ const EXAM_STATUS_CONFIG = Object.freeze({
     isClosed: true,
   },
 });
+
+const nowInVietnam = () => $dayjs().tz(VIETNAM_TIMEZONE);
+
+const toVietnamDayjs = value => {
+  const normalizedValue = String(value);
+  if (HAS_TIMEZONE_OFFSET.test(normalizedValue)) {
+    return $dayjs(normalizedValue).tz(VIETNAM_TIMEZONE);
+  }
+
+  return $dayjs.tz(normalizedValue, VIETNAM_TIMEZONE);
+};
+
+const getExamWindowStatus = exam => {
+  const now = nowInVietnam();
+  const startDate = toVietnamDayjs(exam?.startDate);
+  const endDate = toVietnamDayjs(exam?.endDate);
+
+  if (!startDate.isValid() || !endDate.isValid()) {
+    return null;
+  }
+
+  if (now.isBefore(startDate)) {
+    return {
+      label: "Sắp mở",
+      badgeClass: "bg-sky-50 text-sky-700 ring-sky-200",
+      isClosed: true,
+      isActionDisabled: true,
+    };
+  }
+
+  if (now.isAfter(endDate)) {
+    return {
+      label: "Đã đóng",
+      badgeClass: "bg-slate-100 text-slate-600 ring-slate-200",
+      isClosed: true,
+      isActionDisabled: true,
+    };
+  }
+
+  return {
+    label: "Đang mở",
+    badgeClass: "bg-primary/10 text-primary ring-primary/10",
+    isClosed: false,
+    isActionDisabled: false,
+  };
+};
 
 const getStatusLabel = record => {
   const status = getApplicationStatus(record);
@@ -336,42 +384,27 @@ const query = ref({
 
 const getExamStatus = exam => {
   const examStatus = Number(exam?.idExamStatus);
-  if (EXAM_STATUS_CONFIG[examStatus]) {
+  const statusConfig = EXAM_STATUS_CONFIG[examStatus];
+
+  if (statusConfig?.isClosed) {
     return {
-      label: exam?.examStatusName || EXAM_STATUS_CONFIG[examStatus].label,
-      badgeClass: EXAM_STATUS_CONFIG[examStatus].badgeClass,
-      isClosed: EXAM_STATUS_CONFIG[examStatus].isClosed,
-      isActionDisabled: EXAM_STATUS_CONFIG[examStatus].isClosed,
+      label: exam?.examStatusName || statusConfig.label,
+      badgeClass: statusConfig.badgeClass,
+      isClosed: statusConfig.isClosed,
+      isActionDisabled: statusConfig.isClosed,
     };
   }
 
-  const now = $dayjs();
-  const startDate = $dayjs(exam.startDate);
-  const endDate = $dayjs(exam.endDate);
-
-  if (now.isBefore(startDate)) {
-    return {
-      label: "Sắp mở",
-      badgeClass: "bg-sky-50 text-sky-700 ring-sky-200",
-      isClosed: true,
-      isActionDisabled: false,
-    };
-  }
-
-  if (now.isAfter(endDate)) {
-    return {
-      label: "Đã đóng",
-      badgeClass: "bg-slate-100 text-slate-600 ring-slate-200",
-      isClosed: true,
-      isActionDisabled: true,
-    };
+  const windowStatus = getExamWindowStatus(exam);
+  if (windowStatus) {
+    return windowStatus;
   }
 
   return {
-    label: "Đang mở",
-    badgeClass: "bg-primary/10 text-primary ring-primary/10",
-    isClosed: false,
-    isActionDisabled: false,
+    label: exam?.examStatusName || statusConfig?.label || "Không xác định",
+    badgeClass: statusConfig?.badgeClass || "bg-slate-100 text-slate-600 ring-slate-200",
+    isClosed: true,
+    isActionDisabled: true,
   };
 };
 
@@ -384,8 +417,8 @@ const mapExamItem = exam => {
     startDate: exam.startDate,
     endDate: exam.endDate,
     url: exam.url,
-    start: $dayjs(exam.startDate).format("DD/MM/YYYY"),
-    end: $dayjs(exam.endDate).format("DD/MM/YYYY"),
+    start: toVietnamDayjs(exam.startDate).format("DD/MM/YYYY HH:mm"),
+    end: toVietnamDayjs(exam.endDate).format("DD/MM/YYYY HH:mm"),
     status: status.label,
     badgeClass: status.badgeClass,
     isClosed: status.isClosed,
@@ -567,14 +600,14 @@ const handleExamPageChange = async page => {
 const hasExamApplication = exam => Boolean(exam?.hasApplication);
 
 const isExamWithinRegistrationWindow = exam => {
-  const startDate = $dayjs(exam?.startDate);
-  const endDate = $dayjs(exam?.endDate);
+  const startDate = toVietnamDayjs(exam?.startDate);
+  const endDate = toVietnamDayjs(exam?.endDate);
 
   if (!startDate.isValid() || !endDate.isValid()) {
     return false;
   }
 
-  const now = $dayjs();
+  const now = nowInVietnam();
   return !now.isBefore(startDate) && !now.isAfter(endDate);
 };
 
