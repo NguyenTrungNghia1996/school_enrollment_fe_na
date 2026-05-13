@@ -182,7 +182,7 @@
         </div>
         <div class="rounded-xl border border-slate-200 bg-slate-50 px-4 py-3">
           <div class="text-xs uppercase tracking-[0.2em] text-slate-400">Kỳ tuyển sinh</div>
-          <div class="mt-2 font-bold text-slate-900">{{ selectedReviewRecord?.examName || `#${detailData.idExam || "-"}` }}</div>
+          <div class="mt-2 font-bold text-slate-900">{{ detailData.examName || `#${detailData.idExam || "-"}` }}</div>
         </div>
       </div>
 
@@ -324,7 +324,8 @@ const toPositiveNumber = value => {
 
 const initialExamId = toPositiveNumber(route.query.idExam);
 const selectedExamId = ref(initialExamId);
-const { applicationUser, applicationReviewUser } = useApi();
+const { applicationUser, applicationReviewUser, examUser } = useApi();
+const examNameCache = new Map();
 
 const createFormState = reactive({
   idApplication: undefined,
@@ -679,6 +680,49 @@ const syncDetailForm = detail => {
   detailFormState.reason = detail?.reason || "";
 };
 
+const fetchExamName = async idExam => {
+  const normalizedId = toPositiveNumber(idExam);
+  if (!normalizedId) return null;
+
+  if (examNameCache.has(normalizedId)) {
+    return examNameCache.get(normalizedId);
+  }
+
+  const { data, error } = await examUser.getByRest("detail", {
+    params: { id: normalizedId },
+    key: `user-application-review-exam-detail-${normalizedId}-${Date.now()}`,
+  });
+
+  if (error.value || data.value?.success === false) return null;
+
+  const examName = data.value?.data?.examName || null;
+  if (examName) {
+    examNameCache.set(normalizedId, examName);
+  }
+
+  return examName;
+};
+
+const resolveReviewDetail = async detail => {
+  if (!detail || typeof detail !== "object") return null;
+
+  const normalizedDetail = {
+    ...selectedReviewRecord.value,
+    ...detail,
+    examName: detail.examName || selectedReviewRecord.value?.examName || null,
+    applicationCode: detail.applicationCode || selectedReviewRecord.value?.applicationCode || null,
+    subjectName: detail.subjectName || selectedReviewRecord.value?.subjectName || null,
+  };
+
+  if (normalizedDetail.examName) return normalizedDetail;
+
+  const examName = await fetchExamName(normalizedDetail.idExam);
+  return {
+    ...normalizedDetail,
+    examName: examName || normalizedDetail.examName,
+  };
+};
+
 const fetchReviewDetail = async () => {
   if (!selectedReviewRecord.value?.id) {
     detailError.value = "Không xác định được yêu cầu phúc khảo";
@@ -698,7 +742,7 @@ const fetchReviewDetail = async () => {
       throw new Error(error.value?.data?.message || data.value?.message || "Không tải được chi tiết phúc khảo");
     }
 
-    detailData.value = data.value.data;
+    detailData.value = await resolveReviewDetail(data.value.data);
     syncDetailForm(detailData.value);
   } catch (error) {
     detailData.value = null;

@@ -77,7 +77,7 @@
           </div>
           <div class="rounded-xl border border-slate-200 bg-slate-50 px-4 py-3">
             <div class="text-xs uppercase tracking-[0.2em] text-slate-400">Kỳ tuyển sinh</div>
-            <div class="mt-2 font-bold text-slate-900">#{{ detailData.idExam || "-" }}</div>
+            <div class="mt-2 font-bold text-slate-900">{{ detailData.examName || `#${detailData.idExam || "-"}` }}</div>
           </div>
           <div class="rounded-xl border border-slate-200 bg-slate-50 px-4 py-3">
             <div class="text-xs uppercase tracking-[0.2em] text-slate-400">Trạng thái</div>
@@ -90,8 +90,6 @@
         <a-descriptions bordered :column="2" size="small">
           <a-descriptions-item label="Họ tên">{{ detailData.fullName || "-" }}</a-descriptions-item>
           <a-descriptions-item label="Môn phúc khảo">{{ detailData.subjectName || "-" }}</a-descriptions-item>
-          <a-descriptions-item label="ID người dùng">{{ detailData.idUser || "-" }}</a-descriptions-item>
-          <a-descriptions-item label="ID hồ sơ">{{ detailData.idApplication || "-" }}</a-descriptions-item>
           <a-descriptions-item label="Lý do phúc khảo" :span="2">{{ detailData.reason || "-" }}</a-descriptions-item>
         </a-descriptions>
 
@@ -127,7 +125,7 @@ definePageMeta({
 const config = useRuntimeConfig();
 const adminStore = useAdminStore();
 const message = useSafeMessage();
-const { adminApplicationReview } = useApi();
+const { adminApplicationReview, adminEnrollment } = useApi();
 
 const showEditActions = computed(() => adminStore.canEditCurrentPage);
 const searchText = ref("");
@@ -145,6 +143,7 @@ const importLoading = ref(false);
 const selectedImportFile = ref(null);
 const selectedImportFileName = ref("");
 const importInputKey = ref(0);
+const examNameCache = new Map();
 
 const pagination = reactive({
   current: 1,
@@ -246,7 +245,44 @@ const normalizeReviewDetail = (detail, fallbackRecord = null) => {
     fullName: detail.fullName || fallbackRecord?.fullName || null,
     statusName: detail.statusName || fallbackRecord?.statusName || null,
     examNumber: detail.examNumber || fallbackRecord?.examNumber || null,
+    examName: detail.examName || fallbackRecord?.examName || null,
+    applicationCode: detail.applicationCode || fallbackRecord?.applicationCode || null,
+    subjectName: detail.subjectName || fallbackRecord?.subjectName || null,
     reviewScore: detail.reviewScore ?? fallbackRecord?.reviewScore ?? null,
+  };
+};
+
+const fetchExamName = async idExam => {
+  const normalizedId = Number(idExam);
+  if (!Number.isFinite(normalizedId) || normalizedId <= 0) return null;
+
+  if (examNameCache.has(normalizedId)) {
+    return examNameCache.get(normalizedId);
+  }
+
+  const { data, error } = await adminEnrollment.getByRest("detail", {
+    params: { id: normalizedId },
+    key: `admin-review-exam-detail-${normalizedId}-${Date.now()}`,
+  });
+
+  if (error.value || data.value?.success === false) return null;
+
+  const examName = data.value?.data?.examName || null;
+  if (examName) {
+    examNameCache.set(normalizedId, examName);
+  }
+
+  return examName;
+};
+
+const resolveReviewDetail = async (detail, fallbackRecord = null) => {
+  const normalizedDetail = normalizeReviewDetail(detail, fallbackRecord);
+  if (!normalizedDetail || normalizedDetail.examName) return normalizedDetail;
+
+  const examName = await fetchExamName(normalizedDetail.idExam);
+  return {
+    ...normalizedDetail,
+    examName: examName || normalizedDetail.examName,
   };
 };
 
@@ -274,7 +310,7 @@ const openDetail = async recordOrId => {
       throw new Error(error.value?.data?.message || data.value?.message || "Không thể tải thông tin chi tiết");
     }
 
-    detailData.value = normalizeReviewDetail(data.value.data, selectedRecord.value);
+    detailData.value = await resolveReviewDetail(data.value.data, selectedRecord.value);
   } catch (error) {
     detailVisible.value = false;
     message.error(error?.message || "Không thể tải thông tin chi tiết");
