@@ -25,6 +25,7 @@
             <h1 class="text-xl font-bold text-slate-900">Danh sách phúc khảo</h1>
             <p class="mt-1 text-sm text-slate-500">Theo dõi các yêu cầu phúc khảo đã gửi của bạn.</p>
           </div>
+          <a-button type="primary" @click="openCreateReview">Tạo yêu cầu phúc khảo</a-button>
         </div>
 
         <div v-if="pending" class="py-16 text-center">
@@ -111,6 +112,46 @@
       </section>
     </div>
   </div>
+
+  <a-modal v-model:open="createVisible" title="Tạo yêu cầu phúc khảo" :confirm-loading="createSubmitting" ok-text="Gửi yêu cầu" cancel-text="Hủy" @ok="submitCreateReview" @cancel="closeCreateReview">
+    <div v-if="createApplicationLoading" class="py-8 text-center">
+      <a-spin />
+      <p class="mt-3 text-sm text-slate-500">Đang tải thông tin hồ sơ...</p>
+    </div>
+
+    <div v-else-if="createApplicationError" class="rounded-2xl border border-rose-200 bg-rose-50 px-5 py-6 text-center">
+      <div class="text-base font-semibold text-rose-700">Không tải được hồ sơ phúc khảo</div>
+      <p class="mt-2 text-sm text-rose-600">{{ createApplicationError }}</p>
+      <a-button type="primary" danger class="mt-4" @click="fetchCreateApplication">Thử lại</a-button>
+    </div>
+
+    <template v-else>
+      <div v-if="createApplication" class="mb-4 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3">
+        <div class="text-xs uppercase tracking-[0.18em] text-slate-400">Hồ sơ</div>
+        <div class="mt-2 text-sm font-semibold text-slate-900">{{ createApplication?.applicationCode || `#${createApplication?.id || ""}` }} - {{ createApplication?.fullName || createApplication?.fullname || "-" }}</div>
+        <div class="mt-1 text-sm text-slate-500">{{ createApplication?.examName || `#${createApplication?.idExam || selectedExamId || "-"}` }}</div>
+      </div>
+
+      <a-form ref="createFormRef" :model="createFormState" layout="vertical">
+        <a-form-item label="Hồ sơ phúc khảo" name="idApplication" :rules="createFormRules.idApplication">
+          <a-select
+            v-model:value="createFormState.idApplication"
+            show-search
+            :loading="createApplicationsPending"
+            :options="createApplicationOptions"
+            placeholder="Chọn hồ sơ phúc khảo"
+            :filter-option="filterCreateApplicationOption"
+            @change="handleCreateApplicationChange" />
+        </a-form-item>
+
+        <UserSelectSubject v-model="createFormState.idSubject" label="Môn phúc khảo" name="idSubject" placeholder="Chọn môn phúc khảo" :rules="createFormRules.idSubject" />
+
+        <a-form-item label="Lý do phúc khảo" name="reason" :rules="createFormRules.reason">
+          <a-textarea v-model:value="createFormState.reason" :rows="4" :maxlength="1000" placeholder="Nhập lý do phúc khảo" show-count />
+        </a-form-item>
+      </a-form>
+    </template>
+  </a-modal>
 
   <a-modal v-model:open="detailVisible" title="Chi tiết phúc khảo" :width="820" :footer="null" @cancel="closeReviewDetail">
     <div v-if="detailLoading" class="py-12 text-center">
@@ -249,9 +290,16 @@ definePageMeta({
 
 const userStore = useUserStore();
 const route = useRoute();
+const router = useRouter();
 const message = useSafeMessage();
 const searchText = ref("");
 const loadError = ref("");
+const createVisible = ref(false);
+const createApplicationLoading = ref(false);
+const createApplicationError = ref("");
+const createApplication = ref(null);
+const createFormRef = ref();
+const createSubmitting = ref(false);
 const detailVisible = ref(false);
 const detailLoading = ref(false);
 const detailError = ref("");
@@ -276,7 +324,13 @@ const toPositiveNumber = value => {
 
 const initialExamId = toPositiveNumber(route.query.idExam);
 const selectedExamId = ref(initialExamId);
-const { applicationReviewUser } = useApi();
+const { applicationUser, applicationReviewUser } = useApi();
+
+const createFormState = reactive({
+  idApplication: undefined,
+  idSubject: undefined,
+  reason: "",
+});
 
 const pagination = reactive({
   current: 1,
@@ -291,12 +345,25 @@ const params = ref({
   idExam: initialExamId,
 });
 
+const createApplicationParams = ref({
+  pageIndex: 1,
+  pageSize: 100,
+  search: "",
+  idExam: initialExamId,
+});
+
 const detailFormState = reactive({
   idSubject: undefined,
   reason: "",
 });
 
 const detailFormRules = {
+  idSubject: [{ required: true, message: "Vui lòng chọn môn phúc khảo", trigger: "change" }],
+  reason: [{ required: true, message: "Vui lòng nhập lý do phúc khảo", trigger: "blur" }],
+};
+
+const createFormRules = {
+  idApplication: [{ required: true, message: "Vui lòng chọn hồ sơ phúc khảo", trigger: "change" }],
   idSubject: [{ required: true, message: "Vui lòng chọn môn phúc khảo", trigger: "change" }],
   reason: [{ required: true, message: "Vui lòng nhập lý do phúc khảo", trigger: "blur" }],
 };
@@ -322,12 +389,34 @@ const {
   key: "user-application-review-list",
 });
 
+const {
+  data: createApplicationsResponse,
+  pending: createApplicationsPending,
+  refresh: refreshCreateApplications,
+} = await applicationUser.get({
+  params: createApplicationParams,
+  key: "user-application-review-create-application-list",
+});
+
 const dataSource = computed(() => {
   if (!reviewResponse.value?.success) {
     return [];
   }
 
   return Array.isArray(reviewResponse.value?.data?.items) ? reviewResponse.value.data.items : [];
+});
+
+const createApplicationOptions = computed(() => {
+  if (!createApplicationsResponse.value?.success) return [];
+
+  const items = Array.isArray(createApplicationsResponse.value?.data?.items) ? createApplicationsResponse.value.data.items : [];
+  return items
+    .filter(item => !item?.isDelete && item?.hasScores)
+    .map(item => ({
+      label: `${item.applicationCode || `#${item.id}`} - ${item.fullName || item.fullname || "-"} - ${item.examName || `#${item.idExam || "-"}`}`,
+      value: item.id,
+      application: item,
+    }));
 });
 
 watch(
@@ -365,9 +454,28 @@ watch(
   },
 );
 
+const replaceRouteQuery = queryPatch => {
+  const nextQuery = { ...route.query };
+
+  Object.entries(queryPatch).forEach(([key, value]) => {
+    if (value === undefined || value === null || value === "") {
+      delete nextQuery[key];
+      return;
+    }
+
+    nextQuery[key] = String(value);
+  });
+
+  return router.replace({
+    path: route.path,
+    query: nextQuery,
+  });
+};
+
 const handleSearch = () => {
   params.value.search = searchText.value.trim();
   params.value.idExam = selectedExamId.value || undefined;
+  createApplicationParams.value.idExam = params.value.idExam;
   params.value.pageIndex = 1;
   pagination.current = 1;
 };
@@ -375,8 +483,14 @@ const handleSearch = () => {
 const handleExamChange = value => {
   selectedExamId.value = value || undefined;
   params.value.idExam = selectedExamId.value;
+  createApplicationParams.value.idExam = selectedExamId.value;
   params.value.pageIndex = 1;
   pagination.current = 1;
+
+  replaceRouteQuery({
+    idExam: selectedExamId.value,
+    idApplication: undefined,
+  });
 };
 
 const resetFilters = () => {
@@ -388,8 +502,13 @@ const resetFilters = () => {
     search: "",
     idExam: undefined,
   };
+  createApplicationParams.value.idExam = undefined;
   pagination.current = 1;
   pagination.pageSize = 10;
+  replaceRouteQuery({
+    idExam: undefined,
+    idApplication: undefined,
+  });
 };
 
 const handlePageChange = (page, pageSize) => {
@@ -418,6 +537,141 @@ const formatCurrency = value => {
 const openApplicationDetail = record => {
   if (!record?.idApplication) return;
   navigateTo(`/user/application/${record.idApplication}`);
+};
+
+const resetCreateForm = () => {
+  createFormState.idApplication = undefined;
+  createFormState.idSubject = undefined;
+  createFormState.reason = "";
+};
+
+const syncCreateApplication = application => {
+  createApplication.value = application || null;
+  createFormState.idApplication = toPositiveNumber(application?.id);
+
+  const applicationExamId = toPositiveNumber(application?.idExam);
+  if (applicationExamId) {
+    selectedExamId.value = applicationExamId;
+    params.value.idExam = applicationExamId;
+    createApplicationParams.value.idExam = applicationExamId;
+  }
+
+  replaceRouteQuery({
+    idApplication: createFormState.idApplication,
+    idExam: applicationExamId || selectedExamId.value,
+  });
+};
+
+const fetchCreateApplication = async id => {
+  const idApplication = toPositiveNumber(id || createFormState.idApplication || route.query.idApplication);
+  if (!idApplication) {
+    createApplicationError.value = "Không xác định được hồ sơ phúc khảo";
+    return;
+  }
+
+  createApplicationLoading.value = true;
+  createApplicationError.value = "";
+
+  try {
+    const { data, error } = await applicationUser.getByRest("detail", {
+      params: { id: idApplication },
+      key: `user-application-review-create-application-${idApplication}-${Date.now()}`,
+    });
+
+    if (error.value || data.value?.success === false || !data.value?.data) {
+      throw new Error(error.value?.data?.message || data.value?.message || "Không tải được hồ sơ phúc khảo");
+    }
+
+    syncCreateApplication(data.value.data);
+  } catch (error) {
+    createApplication.value = null;
+    createApplicationError.value = error?.message || "Không tải được hồ sơ phúc khảo";
+  } finally {
+    createApplicationLoading.value = false;
+  }
+};
+
+const filterCreateApplicationOption = (input, option) => {
+  return `${option?.label || ""}`.toLowerCase().includes(`${input || ""}`.toLowerCase());
+};
+
+const handleCreateApplicationChange = async (value, option) => {
+  const selectedApplication = option?.application;
+  if (selectedApplication) {
+    syncCreateApplication(selectedApplication);
+    return;
+  }
+
+  createApplication.value = null;
+  await fetchCreateApplication(value);
+};
+
+const openCreateReview = async () => {
+  const idApplication = toPositiveNumber(route.query.idApplication);
+  resetCreateForm();
+  createApplication.value = null;
+  createApplicationError.value = "";
+  createVisible.value = true;
+
+  if (idApplication) {
+    await fetchCreateApplication(idApplication);
+  } else {
+    createApplicationParams.value.idExam = selectedExamId.value || undefined;
+    await refreshCreateApplications();
+  }
+};
+
+const closeCreateReview = () => {
+  createVisible.value = false;
+  createApplicationLoading.value = false;
+  createApplicationError.value = "";
+  createApplication.value = null;
+  resetCreateForm();
+  createFormRef.value?.clearValidate?.();
+};
+
+const submitCreateReview = async () => {
+  const idApplication = toPositiveNumber(createApplication.value?.id || createFormState.idApplication || route.query.idApplication);
+  if (!idApplication) {
+    message.error("Không xác định được hồ sơ phúc khảo");
+    return;
+  }
+
+  try {
+    await createFormRef.value?.validate();
+  } catch {
+    return;
+  }
+
+  createSubmitting.value = true;
+
+  try {
+    const { data, error } = await applicationReviewUser.post({
+      body: {
+        idApplication,
+        idSubject: Number(createFormState.idSubject),
+        reason: createFormState.reason.trim(),
+      },
+    });
+
+    if (error.value || data.value?.success === false) {
+      throw new Error(error.value?.data?.message || data.value?.message || "Gửi yêu cầu phúc khảo thất bại");
+    }
+
+    message.success(data.value?.message || "Gửi yêu cầu phúc khảo thành công");
+    closeCreateReview();
+    await refreshReviews();
+    await router.replace({
+      path: route.path,
+      query: {
+        ...(selectedExamId.value ? { idExam: selectedExamId.value } : {}),
+      },
+    });
+  } catch (error) {
+    message.error(error?.message || "Gửi yêu cầu phúc khảo thất bại");
+  } finally {
+    createSubmitting.value = false;
+  }
 };
 
 const syncDetailForm = detail => {
@@ -601,6 +855,16 @@ const confirmPayment = async () => {
     confirmPaymentLoading.value = false;
   }
 };
+
+watch(
+  () => route.query.idApplication,
+  async value => {
+    if (toPositiveNumber(value) && !createVisible.value) {
+      await openCreateReview();
+    }
+  },
+  { immediate: true },
+);
 
 useHead({
   title: "Danh sách phúc khảo",
