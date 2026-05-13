@@ -104,13 +104,22 @@
     </a-modal>
 
     <a-modal v-model:open="importVisible" title="Import dữ liệu phúc khảo" :confirm-loading="importLoading" ok-text="Import" cancel-text="Đóng" @ok="submitImport" @cancel="closeImportModal">
-      <div class="rounded-xl border border-slate-200 bg-white p-4">
-        <div class="font-medium text-slate-900">Chọn file import</div>
-        <p class="mt-1 text-sm text-slate-500">Chấp nhận file `.xlsx` hoặc `.xls`.</p>
+      <div class="space-y-4">
+        <div class="hidden rounded-xl border border-slate-200 bg-white p-4">
+          <div class="font-medium text-slate-900">Kỳ tuyển sinh</div>
+          <div class="mt-3">
+            <AdminSelectEnrollment v-model="selectedImportExamId" no-form-item :inlineLabel="false" placeholder="Chọn kỳ tuyển sinh" label="" />
+          </div>
+        </div>
 
-        <input :key="importInputKey" ref="importInputRef" type="file" class="mt-4 block w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-600 file:mr-3 file:rounded-md file:border-0 file:bg-sky-600 file:px-3 file:py-2 file:text-sm file:font-medium file:text-white" accept=".xlsx,.xls" @click="prepareImportFileInput" @change="handleImportFileChange" />
+        <div class="rounded-xl border border-slate-200 bg-white p-4">
+          <div class="font-medium text-slate-900">Chọn file import</div>
+          <p class="mt-1 text-sm text-slate-500">Chấp nhận file `.xlsx` hoặc `.xls`.</p>
 
-        <div v-if="selectedImportFileName" class="mt-3 rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700">Đã chọn: {{ selectedImportFileName }}</div>
+          <input :key="importInputKey" ref="importInputRef" type="file" class="mt-4 block w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-600 file:mr-3 file:rounded-md file:border-0 file:bg-sky-600 file:px-3 file:py-2 file:text-sm file:font-medium file:text-white" accept=".xlsx,.xls" @click="prepareImportFileInput" @change="handleImportFileChange" />
+
+          <div v-if="selectedImportFileName" class="mt-3 rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700">Đã chọn: {{ selectedImportFileName }}</div>
+        </div>
       </div>
     </a-modal>
   </div>
@@ -144,6 +153,7 @@ const importInputRef = ref(null);
 const importLoading = ref(false);
 const selectedImportFile = ref(null);
 const selectedImportFileName = ref("");
+const selectedImportExamId = ref(null);
 const importInputKey = ref(0);
 const examNameCache = new Map();
 
@@ -250,7 +260,9 @@ const resetFilters = () => {
   pagination.pageSize = 10;
 };
 
-const refreshReviewTable = async () => {
+const refreshReviewTable = async examId => {
+  selectedExamId.value = examId || null;
+  params.value.idExam = examId ? Number(examId) : 0;
   params.value.pageIndex = 1;
   params.value.pageSize = pagination.pageSize;
   pagination.current = 1;
@@ -481,11 +493,13 @@ const openImportModal = () => {
     return;
   }
 
+  selectedImportExamId.value = selectedExamId.value || null;
   importVisible.value = true;
 };
 
 const closeImportModal = () => {
   importVisible.value = false;
+  selectedImportExamId.value = null;
   resetImportFile();
 };
 
@@ -530,11 +544,17 @@ const submitImport = async () => {
     return;
   }
 
+  if (!selectedImportExamId.value) {
+    message.warning("Vui lòng chọn kỳ tuyển sinh");
+    return;
+  }
+
   importLoading.value = true;
 
   try {
     const formData = new FormData();
     formData.append("file", selectedImportFile.value);
+    formData.append("idExam", String(selectedImportExamId.value));
 
     const { data, error } = await adminApplicationReview.upload("import", {
       body: formData,
@@ -545,7 +565,7 @@ const submitImport = async () => {
     }
 
     message.success(data.value?.message || "Import dữ liệu phúc khảo thành công");
-    await refreshReviewTable();
+    await refreshReviewTable(selectedImportExamId.value);
     closeImportModal();
   } catch (error) {
     message.error(`${error?.message || "Import dữ liệu phúc khảo thất bại"}. Vui lòng chọn lại file sau khi sửa.`);
