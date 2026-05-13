@@ -47,7 +47,8 @@
 
     <a-modal v-model:open="visible" :title="isEdit ? 'Chỉnh sửa kỳ tuyển sinh' : 'Thêm mới kỳ tuyển sinh'" @cancel="handleCancel" :width="700" :confirm-loading="confirmLoading" :ok-button-props="{ disabled: isEdit && !adminStore.canEditCurrentPage }" @ok="handleOk" centered>
       <a-form ref="formRef" :model="formState" :rules="rules" :disabled="isEditReadOnly" layout="vertical" class="mt-4 max-h-[70vh] overflow-y-auto pr-2" @submit.prevent>
-        <a-alert v-if="isEnrollmentLocked" type="info" show-icon class="mb-4" message="Kỳ tuyển sinh đã có hồ sơ đăng ký. Chỉ được phép cập nhật thời gian phúc khảo và lệ phí phúc khảo." />
+        <a-alert v-if="isEnrollmentLocked" type="info" show-icon class="mb-4" :message="isReviewLocked ? 'Kỳ tuyển sinh đã có hồ sơ đăng ký. Không được phép cập nhật thông tin tuyển sinh.' : 'Kỳ tuyển sinh đã có hồ sơ đăng ký. Chỉ được phép cập nhật thời gian phúc khảo và lệ phí phúc khảo.'" />
+        <a-alert v-if="isReviewLocked" type="info" show-icon class="mb-4" message="Kỳ tuyển sinh đã có hồ sơ phúc khảo. Không được phép cập nhật thời gian phúc khảo và lệ phí phúc khảo." />
 
         <div class="grid grid-cols-1 gap-x-4 md:grid-cols-2">
           <a-form-item label="Tên đợt tuyển sinh" name="examName" class="md:col-span-2">
@@ -161,6 +162,7 @@ const columns = [
 const createInitialFormState = () => ({
   id: null,
   hasApplications: false,
+  hasApplicationsReview: false,
   dateRange: [],
   reviewDateRange: [],
   examName: "",
@@ -180,8 +182,9 @@ const createInitialFormState = () => ({
 
 const formState = reactive(createInitialFormState());
 const isEnrollmentLocked = computed(() => isEdit.value && formState.hasApplications);
+const isReviewLocked = computed(() => isEdit.value && formState.hasApplicationsReview);
 const isGeneralFieldsReadOnly = computed(() => isEnrollmentLocked.value || isEditReadOnly.value);
-const isReviewFieldsReadOnly = computed(() => isEditReadOnly.value);
+const isReviewFieldsReadOnly = computed(() => isReviewLocked.value || isEditReadOnly.value);
 
 const validateRequiredNumber = fieldLabel => ({
   validator: async (_, value) => {
@@ -304,6 +307,7 @@ const editItem = async id => {
       Object.assign(formState, {
         id: detail.id,
         hasApplications: Boolean(detail.hasApplications),
+        hasApplicationsReview: Boolean(detail.hasApplicationsReview),
         dateRange: startDate && endDate ? [startDate, endDate] : [],
         reviewDateRange: reviewStartDate && reviewEndDate ? [reviewStartDate, reviewEndDate] : [],
         examName: detail.examName,
