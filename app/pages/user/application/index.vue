@@ -49,6 +49,7 @@
                   <template v-else-if="column.key === 'action'">
                     <div class="flex justify-center gap-3">
                       <a-button type="link" class="px-0" @click="openDetail(record)">Xem chi tiết</a-button>
+                      <a-button v-if="record.hasScores" type="link" class="px-0" @click="openExamScoreModal(record)">Kết quả thi</a-button>
                       <a-button v-if="record.hasScores" type="link" class="px-0" @click="openReviewModal(record)">Phúc khảo</a-button>
                     </div>
                   </template>
@@ -81,6 +82,7 @@
               </dl>
 
               <div class="mt-4 flex flex-wrap justify-end gap-2">
+                <a-button v-if="record.hasScores" class="rounded-xl" @click="openExamScoreModal(record)">Kết quả thi</a-button>
                 <a-button v-if="record.hasScores" class="rounded-xl" @click="openReviewModal(record)">Phúc khảo</a-button>
                 <a-button type="primary" class="rounded-xl" @click="openDetail(record)">Xem chi tiết</a-button>
               </div>
@@ -95,6 +97,82 @@
     </div>
   </div>
 
+  <a-modal v-model:open="examScoreVisible" title="Kết quả kỳ tuyển sinh" :width="720" :footer="null" centered @cancel="closeExamScoreModal">
+    <div v-if="examScoreLoading" class="py-12 text-center">
+      <a-spin size="large" />
+      <p class="mt-4 text-sm text-slate-500">Đang tải kết quả thi...</p>
+    </div>
+
+    <div v-else-if="examScoreError" class="rounded-2xl border border-rose-200 bg-rose-50 px-5 py-6 text-center">
+      <div class="text-base font-semibold text-rose-700">Không tải được kết quả thi</div>
+      <p class="mt-2 text-sm text-rose-600">{{ examScoreError }}</p>
+      <a-button type="primary" danger class="mt-4" @click="fetchExamScore">Thử lại</a-button>
+    </div>
+
+    <div v-else-if="examScoreData" class="space-y-6">
+      <section>
+        <h3 class="text-base font-bold text-cyan-700">Thông tin dự thi</h3>
+        <div class="mt-4 grid gap-4 border-b border-slate-200 pb-5 text-sm sm:grid-cols-2">
+          <div>
+            <span class="text-slate-500">Số báo danh:</span>
+            <span class="ml-2 font-semibold text-slate-900">{{ examScoreData.examNumber || "-" }}</span>
+          </div>
+          <div>
+            <span class="text-slate-500">Mã hồ sơ:</span>
+            <span class="ml-2 font-semibold text-slate-900">{{ examScoreData.applicationCode || "-" }}</span>
+          </div>
+          <div class="sm:col-span-2">
+            <span class="text-slate-500">Họ tên:</span>
+            <span class="ml-2 font-semibold text-slate-900">{{ examScoreData.fullName || "-" }}</span>
+          </div>
+        </div>
+      </section>
+
+      <section>
+        <h3 class="text-base font-bold text-cyan-700">Thông tin điểm thi</h3>
+        <div class="mt-4 grid gap-4 border-b border-slate-200 pb-5 text-sm sm:grid-cols-3">
+          <div>
+            <span>Toán:</span>
+            <span class="ml-2 font-semibold text-slate-900">{{ formatScore(examScoreData.mathScore) }}</span>
+          </div>
+          <div>
+            <span>Ngữ Văn:</span>
+            <span class="ml-2 font-semibold text-slate-900">{{ formatScore(examScoreData.literatureScore) }}</span>
+          </div>
+          <div>
+            <span>Tiếng Anh:</span>
+            <span class="ml-2 font-semibold text-slate-900">{{ formatScore(examScoreData.englishScore) }}</span>
+          </div>
+          <div class="font-semibold sm:col-span-3">
+            <span>Tổng điểm:</span>
+            <span class="ml-2 text-slate-900">{{ totalExamScore }}</span>
+          </div>
+        </div>
+      </section>
+
+      <section>
+        <h3 class="text-base font-bold text-cyan-700">Thông tin điểm sau phúc khảo</h3>
+        <div class="mt-4 grid gap-4 text-sm sm:grid-cols-3">
+          <div>
+            <span>Toán:</span>
+            <span class="ml-2 font-semibold text-slate-900">{{ formatReviewScore(examScoreData.reviewMathScore, examScoreData.mathScore) }}</span>
+          </div>
+          <div>
+            <span>Ngữ Văn:</span>
+            <span class="ml-2 font-semibold text-slate-900">{{ formatReviewScore(examScoreData.reviewLiteratureScore, examScoreData.literatureScore) }}</span>
+          </div>
+          <div>
+            <span>Tiếng Anh:</span>
+            <span class="ml-2 font-semibold text-slate-900">{{ formatReviewScore(examScoreData.reviewEnglishScore, examScoreData.englishScore) }}</span>
+          </div>
+        </div>
+      </section>
+
+      <div class="flex justify-end pt-6">
+        <a-button class="min-w-24" @click="closeExamScoreModal">Quay lại</a-button>
+      </div>
+    </div>
+  </a-modal>
 </template>
 
 <script setup>
@@ -121,7 +199,7 @@ const toPositiveNumber = value => {
 
 const initialExamId = toPositiveNumber(route.query.idExam);
 const selectedExamId = ref(initialExamId);
-const { applicationUser } = useApi();
+const { applicationUser, examScoreUser } = useApi();
 
 const pagination = reactive({
   current: 1,
@@ -142,8 +220,14 @@ const columns = [
   { title: "Kỳ tuyển sinh", dataIndex: "examName", key: "examName", ellipsis: true },
   { title: "Họ tên", dataIndex: "fullname", key: "fullname", ellipsis: true },
   { title: "Trạng thái", dataIndex: "statusName", key: "statusName", width: 200, align: "center" },
-  { title: "Thao tác", key: "action", width: 220, align: "center" },
+  { title: "Thao tác", key: "action", width: 300, align: "center" },
 ];
+
+const examScoreVisible = ref(false);
+const examScoreLoading = ref(false);
+const examScoreError = ref("");
+const examScoreData = ref(null);
+const selectedScoreApplicationId = ref(undefined);
 
 const {
   data: applicationResponse,
@@ -236,9 +320,92 @@ const handlePageChange = (page, pageSize) => {
 const getStatusColor = value => getApplicationStatusColor(value);
 const getStatusLabel = value => getApplicationStatusLabel(value);
 
+const normalizeScoreNumber = value => {
+  if (value === null || value === undefined || value === "") return null;
+  const normalizedValue = typeof value === "string" ? value.replace(",", ".").trim() : value;
+  const parsedValue = Number(normalizedValue);
+  return Number.isFinite(parsedValue) ? parsedValue : null;
+};
+
+const formatScore = value => {
+  if (value === null || value === undefined || value === "") return "-";
+
+  const numericScore = normalizeScoreNumber(value);
+  if (numericScore === null) return String(value);
+
+  return numericScore.toFixed(2).replace(/\.?0+$/, "");
+};
+
+const formatReviewScore = (reviewScore, originalScore) => {
+  if (reviewScore === null || reviewScore === undefined || reviewScore === "") {
+    return formatScore(originalScore);
+  }
+
+  return formatScore(reviewScore);
+};
+
+const totalExamScore = computed(() => {
+  if (!examScoreData.value) return "-";
+
+  const scores = [examScoreData.value.mathScore, examScoreData.value.literatureScore, examScoreData.value.englishScore].map(normalizeScoreNumber);
+  const validScores = scores.filter(score => score !== null);
+  if (!validScores.length) return "-";
+
+  return `${validScores.reduce((total, score) => total + score, 0).toFixed(2).replace(/\.?0+$/, "")} điểm`;
+});
+
 const openDetail = record => {
   if (!record?.id) return;
   navigateTo(`/user/application/${record.id}`);
+};
+
+const fetchExamScore = async () => {
+  const idApplication = toPositiveNumber(selectedScoreApplicationId.value);
+  if (!idApplication) {
+    examScoreError.value = "Không xác định được hồ sơ";
+    return;
+  }
+
+  examScoreLoading.value = true;
+  examScoreError.value = "";
+
+  try {
+    const { data, error } = await examScoreUser.getByRest("detail", {
+      params: { idApplication },
+      key: `user-exam-score-detail-${idApplication}-${Date.now()}`,
+    });
+
+    if (error.value || data.value?.success === false || !data.value?.data) {
+      throw new Error(error.value?.data?.message || data.value?.message || "Không tải được kết quả thi");
+    }
+
+    examScoreData.value = data.value.data;
+  } catch (error) {
+    examScoreData.value = null;
+    examScoreError.value = error?.message || "Không tải được kết quả thi";
+  } finally {
+    examScoreLoading.value = false;
+  }
+};
+
+const openExamScoreModal = async record => {
+  const idApplication = toPositiveNumber(record?.id);
+  if (!idApplication || !record?.hasScores) return;
+
+  selectedScoreApplicationId.value = idApplication;
+  examScoreData.value = null;
+  examScoreError.value = "";
+  examScoreVisible.value = true;
+
+  await fetchExamScore();
+};
+
+const closeExamScoreModal = () => {
+  examScoreVisible.value = false;
+  examScoreLoading.value = false;
+  examScoreError.value = "";
+  examScoreData.value = null;
+  selectedScoreApplicationId.value = undefined;
 };
 
 const openReviewModal = record => {

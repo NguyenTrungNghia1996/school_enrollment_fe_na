@@ -2,9 +2,10 @@
   <div class="min-h-full bg-white p-2 md:p-4">
     <div class="mb-4 flex flex-col items-start justify-between gap-2 md:flex-row md:items-center">
       <a-input-search v-model:value="searchText" placeholder="Tìm theo mã phúc khảo, họ tên, số báo danh, môn học..." enter-button class="w-full md:min-w-0 md:flex-1" @search="handleSearch" />
-      <div class="w-full py-2 md:w-1/3 md:py-0">
+      <div class="w-full py-2 md:w-1/5 md:py-0">
         <AdminSelectEnrollment v-model="selectedExamId" no-form-item :inlineLabel="false" placeholder="Lọc theo kỳ tuyển sinh" label="" />
       </div>
+      <a-select v-model:value="selectedStatusId" class="w-full md:w-60" placeholder="Lọc theo trạng thái" :options="statusOptions" />
 
       <div class="flex w-full flex-initial gap-2 md:w-auto">
         <template v-if="showEditActions">
@@ -116,7 +117,7 @@
 </template>
 
 <script setup>
-import { getApplicationReviewStatusColor, getApplicationReviewStatusLabel, isPendingConfirmationApplicationReviewStatus } from "~/composables/useApplicationReviewStatus";
+import { APPLICATION_REVIEW_STATUS_LABELS, getApplicationReviewStatusColor, getApplicationReviewStatusLabel, isPendingConfirmationApplicationReviewStatus } from "~/composables/useApplicationReviewStatus";
 
 definePageMeta({
   layout: "admin",
@@ -130,6 +131,7 @@ const { adminApplicationReview, adminEnrollment } = useApi();
 const showEditActions = computed(() => adminStore.canEditCurrentPage);
 const searchText = ref("");
 const selectedExamId = ref(null);
+const selectedStatusId = ref(0);
 const detailVisible = ref(false);
 const detailLoading = ref(false);
 const detailData = ref(null);
@@ -166,11 +168,20 @@ const columns = [
   { title: "Thao tác", key: "action", width: 120, align: "center", fixed: "right" },
 ];
 
+const statusOptions = computed(() => [
+  { label: "Tất cả trạng thái", value: 0 },
+  ...Object.entries(APPLICATION_REVIEW_STATUS_LABELS).map(([value, label]) => ({
+    label,
+    value: Number(value),
+  })),
+]);
+
 const params = ref({
   pageIndex: 1,
   pageSize: 10,
   search: "",
   idExam: 0,
+  idStatus: 0,
 });
 
 const {
@@ -203,6 +214,12 @@ watch(selectedExamId, value => {
   pagination.current = 1;
 });
 
+watch(selectedStatusId, value => {
+  params.value.idStatus = value ? Number(value) : 0;
+  params.value.pageIndex = 1;
+  pagination.current = 1;
+});
+
 const handleTableChange = pag => {
   pagination.current = pag.current;
   pagination.pageSize = pag.pageSize;
@@ -219,11 +236,13 @@ const handleSearch = () => {
 const resetFilters = () => {
   searchText.value = "";
   selectedExamId.value = null;
+  selectedStatusId.value = 0;
   params.value = {
     pageIndex: 1,
     pageSize: 10,
     search: "",
     idExam: 0,
+    idStatus: 0,
   };
   pagination.current = 1;
   pagination.pageSize = 10;
@@ -437,9 +456,7 @@ const exportReviews = async () => {
     const contentDisposition = response.headers.get("content-disposition") || "";
     const utf8Match = contentDisposition.match(/filename\*\s*=\s*UTF-8''([^;]+)/i);
     const fileNameMatch = contentDisposition.match(/filename\s*=\s*"?([^";]+)"?/i);
-    const fileName = utf8Match?.[1]
-      ? decodeURIComponent(utf8Match[1].trim())
-      : (fileNameMatch?.[1]?.trim() || `phuc-khao-ky-tuyen-sinh-${selectedExamId.value}.xlsx`);
+    const fileName = utf8Match?.[1] ? decodeURIComponent(utf8Match[1].trim()) : fileNameMatch?.[1]?.trim() || `phuc-khao-ky-tuyen-sinh-${selectedExamId.value}.xlsx`;
 
     link.href = downloadUrl;
     link.download = fileName;

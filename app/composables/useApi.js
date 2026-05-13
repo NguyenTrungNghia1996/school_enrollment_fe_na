@@ -12,6 +12,7 @@ export const useApi = () => {
     examUser: useCrudApiUser("/api/exam"),
     applicationUser: useCrudApiUser("/api/application"),
     applicationReviewUser: useCrudApiUser("/api/application/review"),
+    examScoreUser: useCrudApiUser("/api/examScore"),
     //admin
     authAdmin: useCrudApiAdmin("/api/admin"),
     adminMenus: useCrudApiAdmin("/api/admin/menus"),
