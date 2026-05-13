@@ -44,7 +44,7 @@
           </div>
         </div> -->
 
-        <div class="hidden rounded-xl border border-slate-200 bg-white p-4">
+        <div class="rounded-xl border border-slate-200 bg-white p-4">
           <div class="font-medium text-slate-900">Kỳ tuyển sinh</div>
           <div class="mt-3">
             <AdminSelectEnrollment v-model="selectedImportExamId" no-form-item :inlineLabel="false" placeholder="Chọn kỳ tuyển sinh" label="" />
@@ -165,6 +165,15 @@ const resetFilters = () => {
   pagination.pageSize = 10;
 };
 
+const refreshScoreTable = async examId => {
+  selectedExamId.value = examId || null;
+  params.value.idExam = examId || undefined;
+  params.value.pageIndex = 1;
+  params.value.pageSize = pagination.pageSize;
+  pagination.current = 1;
+  await refreshScores();
+};
+
 const openImportModal = () => {
   if (!adminStore.canEditCurrentPage) {
     message.warning("Bạn không có quyền import dữ liệu");
@@ -245,7 +254,7 @@ const submitImport = async () => {
     }
 
     message.success(data.value?.message || "Import điểm thi thành công");
-    await refreshScores();
+    await refreshScoreTable(selectedImportExamId.value);
     closeImportModal();
   } catch (error) {
     message.error(`${error?.message || "Import điểm thi thất bại"}. Vui lòng chọn lại file sau khi sửa.`);

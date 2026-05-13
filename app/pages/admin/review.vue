@@ -230,6 +230,13 @@ const resetFilters = () => {
   pagination.pageSize = 10;
 };
 
+const refreshReviewTable = async () => {
+  params.value.pageIndex = 1;
+  params.value.pageSize = pagination.pageSize;
+  pagination.current = 1;
+  await refreshReviews();
+};
+
 const normalizeReviewDetail = (detail, fallbackRecord = null) => {
   if (!detail || typeof detail !== "object") return null;
 
@@ -483,7 +490,7 @@ const submitImport = async () => {
     }
 
     message.success(data.value?.message || "Import dữ liệu phúc khảo thành công");
-    await refreshReviews();
+    await refreshReviewTable();
     closeImportModal();
   } catch (error) {
     message.error(`${error?.message || "Import dữ liệu phúc khảo thất bại"}. Vui lòng chọn lại file sau khi sửa.`);
