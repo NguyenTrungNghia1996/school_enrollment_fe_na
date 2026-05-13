@@ -43,7 +43,7 @@
 
     <a-modal v-model:open="importVisible" title="Import danh sách thí sinh" :confirm-loading="importLoading" ok-text="Import" cancel-text="Đóng" @ok="submitImport" @cancel="closeImportModal">
       <div class="space-y-4">
-        <div class="hidden rounded-xl border border-slate-200 bg-white p-4">
+        <div class="rounded-xl border border-slate-200 bg-white p-4">
           <div class="font-medium text-slate-900">Kỳ tuyển sinh</div>
           <div class="mt-3">
             <AdminSelectEnrollment v-model="selectedImportExamId" no-form-item :inlineLabel="false" placeholder="Chọn kỳ tuyển sinh" label="" :disabled="true" />
@@ -168,6 +168,15 @@ const resetFilters = () => {
   };
   pagination.current = 1;
   pagination.pageSize = 10;
+};
+
+const refreshCandidateTable = async examId => {
+  selectedExamId.value = examId || null;
+  params.value.idExam = examId || undefined;
+  params.value.pageIndex = 1;
+  params.value.pageSize = pagination.pageSize;
+  pagination.current = 1;
+  await refreshCandidates();
 };
 
 const getFileNameFromContentDisposition = (contentDisposition, fallbackFileName) => {
@@ -308,7 +317,7 @@ const submitImport = async () => {
     }
 
     message.success(data.value?.message || "Import danh sách thí sinh thành công");
-    await refreshCandidates();
+    await refreshCandidateTable(selectedImportExamId.value);
     closeImportModal();
   } catch (error) {
     message.error(`${error?.message || "Import danh sách thí sinh thất bại"}. Vui lòng chọn lại file sau khi sửa.`);
@@ -343,7 +352,7 @@ const publishCandidates = async () => {
     }
 
     message.success(data.value?.message || "Công bố danh sách thí sinh thành công");
-    await refreshCandidates();
+    await refreshCandidateTable(selectedExamId.value);
   } catch (error) {
     message.error(error?.message || "Công bố danh sách thí sinh thất bại");
   } finally {
