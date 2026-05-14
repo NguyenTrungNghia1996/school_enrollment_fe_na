@@ -122,34 +122,11 @@ const dataSource = computed(() => {
   if (!scoreResponse.value?.success) return [];
 
   const items = Array.isArray(scoreResponse.value?.data?.items) ? scoreResponse.value.data.items : [];
-  const existedKeys = new Set();
-
-  return items.reduce((result, item, index) => {
-    const rowKey = getScoreRowKey(item, index);
-    const duplicateKey = getScoreDuplicateKey(item);
-
-    if (duplicateKey && existedKeys.has(duplicateKey)) return result;
-    if (duplicateKey) existedKeys.add(duplicateKey);
-
-    result.push({
-      ...item,
-      _rowKey: rowKey,
-    });
-
-    return result;
-  }, []);
+  return items.map((item, index) => ({
+    ...item,
+    _rowKey: getScoreRowKey(item, index),
+  }));
 });
-
-const getScoreDuplicateKey = item => {
-  const id = item?.idExamScore ?? item?.id ?? item?.idApplication ?? item?.applicationCode;
-  if (id !== undefined && id !== null && id !== "") return `id:${id}`;
-
-  if (item?.examNumber !== undefined && item?.examNumber !== null && item?.examNumber !== "") {
-    return `exam:${item.examNumber}`;
-  }
-
-  return "";
-};
 
 const getScoreRowKey = (item, index) => {
   const id = item?.idExamScore ?? item?.id ?? item?.idApplication ?? item?.applicationCode;
