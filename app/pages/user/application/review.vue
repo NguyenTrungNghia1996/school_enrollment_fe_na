@@ -1,6 +1,6 @@
 <template>
   <div class="min-h-screen bg-slate-50 px-2 py-2">
-    <div class="mx-auto max-w-7xl">
+    <div class="container mx-auto">
       <section class="rounded-3xl bg-white p-6 shadow-sm">
         <div class="grid gap-4 lg:grid-cols-[minmax(0,1fr)_260px_auto] lg:items-center">
           <a-input-search v-model:value="searchText" placeholder="Tìm theo mã phúc khảo, họ tên, môn học..." allow-clear enter-button @search="handleSearch" />
@@ -134,17 +134,10 @@
 
       <a-form ref="createFormRef" :model="createFormState" layout="vertical">
         <a-form-item label="Hồ sơ phúc khảo" name="idApplication" :rules="createFormRules.idApplication">
-          <a-select
-            v-model:value="createFormState.idApplication"
-            show-search
-            :loading="createApplicationsPending"
-            :options="createApplicationOptions"
-            placeholder="Chọn hồ sơ phúc khảo"
-            :filter-option="filterCreateApplicationOption"
-            @change="handleCreateApplicationChange" />
+          <a-select class="w-full" v-model:value="createFormState.idApplication" show-search :loading="createApplicationsPending" :options="createApplicationOptions" placeholder="Chọn hồ sơ phúc khảo" :filter-option="filterCreateApplicationOption" @change="handleCreateApplicationChange" />
         </a-form-item>
 
-        <UserSelectSubject v-model="createFormState.idSubject" label="Môn phúc khảo" name="idSubject" placeholder="Chọn môn phúc khảo" :rules="createFormRules.idSubject" />
+        <UserSelectSubject v-model="createFormState.idSubject" label="Môn phúc khảo" name="idSubject" placeholder="Chọn môn phúc khảo" :rules="createFormRules.idSubject" :id-application="createFormState.idApplication" :disabled="!createFormState.idApplication" />
 
         <a-form-item label="Lý do phúc khảo" name="reason" :rules="createFormRules.reason">
           <a-textarea v-model:value="createFormState.reason" :rows="4" :maxlength="1000" placeholder="Nhập lý do phúc khảo" show-count />
@@ -547,8 +540,15 @@ const resetCreateForm = () => {
 };
 
 const syncCreateApplication = application => {
+  const previousIdApplication = createFormState.idApplication;
+
   createApplication.value = application || null;
   createFormState.idApplication = toPositiveNumber(application?.id);
+
+  if (previousIdApplication !== createFormState.idApplication) {
+    createFormState.idSubject = undefined;
+    createFormRef.value?.clearValidate?.(["idSubject"]);
+  }
 
   const applicationExamId = toPositiveNumber(application?.idExam);
   if (applicationExamId) {
@@ -564,6 +564,8 @@ const syncCreateApplication = application => {
 };
 
 const fetchCreateApplication = async id => {
+  if (!import.meta.client) return;
+
   const idApplication = toPositiveNumber(id || createFormState.idApplication || route.query.idApplication);
   if (!idApplication) {
     createApplicationError.value = "Không xác định được hồ sơ phúc khảo";
@@ -587,6 +589,7 @@ const fetchCreateApplication = async id => {
   } catch (error) {
     createApplication.value = null;
     createApplicationError.value = error?.message || "Không tải được hồ sơ phúc khảo";
+    await closeCreateReview();
   } finally {
     createApplicationLoading.value = false;
   }
@@ -622,13 +625,19 @@ const openCreateReview = async () => {
   }
 };
 
-const closeCreateReview = () => {
+const closeCreateReview = async (options = {}) => {
+  const shouldClearQuery = options?.clearQuery !== false;
+
   createVisible.value = false;
   createApplicationLoading.value = false;
   createApplicationError.value = "";
   createApplication.value = null;
   resetCreateForm();
   createFormRef.value?.clearValidate?.();
+
+  if (shouldClearQuery && route.query.idApplication) {
+    await replaceRouteQuery({ idApplication: undefined });
+  }
 };
 
 const submitCreateReview = async () => {
@@ -660,7 +669,7 @@ const submitCreateReview = async () => {
     }
 
     message.success(data.value?.message || "Gửi yêu cầu phúc khảo thành công");
-    closeCreateReview();
+    await closeCreateReview({ clearQuery: false });
     await refreshReviews();
     await router.replace({
       path: route.path,
@@ -903,6 +912,8 @@ const confirmPayment = async () => {
 watch(
   () => route.query.idApplication,
   async value => {
+    if (!import.meta.client) return;
+
     if (toPositiveNumber(value) && !createVisible.value) {
       await openCreateReview();
     }
