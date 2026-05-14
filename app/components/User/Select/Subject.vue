@@ -111,16 +111,19 @@ const props = defineProps({
   noFormItem: { type: Boolean, default: false },
   inlineLabel: { type: Boolean, default: false },
   showNavigationButtons: { type: Boolean, default: false },
+  idApplication: { type: [Number, String], default: undefined },
 });
 
 const emit = defineEmits(["update:modelValue", "change"]);
 
 const search = ref("");
-const params = ref({
+const searchKeyword = ref("");
+const params = computed(() => ({
   pageIndex: 1,
-  pageSize: 100,
-  search: "",
-});
+  pageSize: 10,
+  search: searchKeyword.value,
+  idApplication: props.idApplication,
+}));
 
 const asyncDataKey = `user-subject-select-${instance?.uid ?? Math.random().toString(36).slice(2)}`;
 
@@ -153,7 +156,7 @@ watch(
     if (
       newVal?.success &&
       props.autoSelectFirst &&
-      !params.value.search &&
+      !searchKeyword.value &&
       (props.modelValue === undefined || props.modelValue === null || props.modelValue === "" || (Array.isArray(props.modelValue) && props.modelValue.length === 0))
     ) {
       const firstOption = options.value[0];
@@ -170,7 +173,7 @@ watch(
 const onSearch = val => {
   search.value = val || "";
   if (!search.value.trim()) {
-    params.value.search = "";
+    searchKeyword.value = "";
   }
 };
 
@@ -178,14 +181,14 @@ const onInputKeyDown = event => {
   if (event.key !== "Enter") return;
   event.preventDefault();
   event.stopPropagation();
-  params.value.search = search.value.trim();
+  searchKeyword.value = search.value.trim();
 };
 
 const onClear = () => {
   emit("update:modelValue", props.multiple ? [] : null);
   emit("change", props.multiple ? [] : null, null);
   search.value = "";
-  params.value.search = "";
+  searchKeyword.value = "";
 };
 
 const handleUpdateValue = (val, option) => {
@@ -195,7 +198,7 @@ const handleUpdateValue = (val, option) => {
   const isCleared = val === undefined || val === null || val === "" || (Array.isArray(val) && val.length === 0);
   if (isCleared || search.value) {
     search.value = "";
-    params.value.search = "";
+    searchKeyword.value = "";
   }
 };
 
