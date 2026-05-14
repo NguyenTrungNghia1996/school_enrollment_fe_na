@@ -16,7 +16,7 @@
 
     <ClientOnly>
       <div class="overflow-x-auto lg:block">
-        <a-table :columns="columns" :data-source="dataSource" :pagination="pagination" :loading="loading" :scroll="{ x: 1000 }" bordered size="small" row-key="examNumber" @change="handleTableChange">
+        <a-table :columns="columns" :data-source="dataSource" :pagination="pagination" :loading="loading" :scroll="{ x: 1000 }" bordered size="small" row-key="_rowKey" @change="handleTableChange">
           <template #bodyCell="{ column, record, index }">
             <template v-if="column.key === 'stt'">
               {{ record.stt || (pagination.current - 1) * pagination.pageSize + index + 1 }}
@@ -120,8 +120,44 @@ const {
 
 const dataSource = computed(() => {
   if (!scoreResponse.value?.success) return [];
-  return Array.isArray(scoreResponse.value?.data?.items) ? scoreResponse.value.data.items : [];
+
+  const items = Array.isArray(scoreResponse.value?.data?.items) ? scoreResponse.value.data.items : [];
+  const existedKeys = new Set();
+
+  return items.reduce((result, item, index) => {
+    const rowKey = getScoreRowKey(item, index);
+    const duplicateKey = getScoreDuplicateKey(item);
+
+    if (duplicateKey && existedKeys.has(duplicateKey)) return result;
+    if (duplicateKey) existedKeys.add(duplicateKey);
+
+    result.push({
+      ...item,
+      _rowKey: rowKey,
+    });
+
+    return result;
+  }, []);
 });
+
+const getScoreDuplicateKey = item => {
+  const id = item?.idExamScore ?? item?.id ?? item?.idApplication ?? item?.applicationCode;
+  if (id !== undefined && id !== null && id !== "") return `id:${id}`;
+
+  if (item?.examNumber !== undefined && item?.examNumber !== null && item?.examNumber !== "") {
+    return `exam:${item.examNumber}`;
+  }
+
+  return "";
+};
+
+const getScoreRowKey = (item, index) => {
+  const id = item?.idExamScore ?? item?.id ?? item?.idApplication ?? item?.applicationCode;
+  if (id !== undefined && id !== null && id !== "") return `score-${id}`;
+
+  const examNumber = item?.examNumber ?? "empty";
+  return `score-${params.value.pageIndex}-${params.value.pageSize}-${examNumber}-${index}`;
+};
 
 watch(
   () => scoreResponse.value,
