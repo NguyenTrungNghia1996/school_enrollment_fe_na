@@ -925,12 +925,10 @@ const buildPayload = () => {
     phoneNumber: formState.phoneNumber.trim(),
     idCurrentCommune: Number(formState.idCurrentCommune),
     currentAddress: formState.currentAddress.trim(),
-    documents: documentUploads.value
-      .filter(item => item.files.length)
-      .map(item => ({
-        idExamDocument: Number(item.idExamDocument),
-        url: item.files.map(file => file.url).join(","),
-      })),
+    documents: documentUploads.value.map(item => ({
+      idExamDocument: Number(item.idExamDocument),
+      url: item.files.map(file => file.url).join(","),
+    })),
   };
 };
 

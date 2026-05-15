@@ -870,18 +870,13 @@ const updateDocumentLinks = (idExamDocument, links) => {
   const nextLinks = Array.from(new Set((links || []).filter(Boolean)));
   const documents = Array.isArray(detailData.value.documents) ? [...detailData.value.documents] : [];
   const documentIndex = documents.findIndex(item => Number(item?.idExamDocument || item?.id) === Number(idExamDocument));
-
-  if (!nextLinks.length) {
-    if (documentIndex >= 0) {
-      documents.splice(documentIndex, 1);
-    }
-    detailData.value.documents = documents;
-    return;
-  }
+  const normalizedDocument = normalizedDocuments.value.find(item => Number(item.idExamDocument) === Number(idExamDocument));
 
   const documentPayload = {
     ...(documentIndex >= 0 ? documents[documentIndex] : {}),
     idExamDocument: Number(idExamDocument),
+    documentName: documents[documentIndex]?.documentName || normalizedDocument?.displayName,
+    isRequired: documents[documentIndex]?.isRequired ?? normalizedDocument?.isRequired ?? false,
     url: nextLinks.join(","),
   };
 
