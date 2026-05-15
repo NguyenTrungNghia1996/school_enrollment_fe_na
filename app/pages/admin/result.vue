@@ -10,6 +10,7 @@
         <a-popconfirm v-if="adminStore.canEditCurrentPage" title="Bạn chắc chắn muốn công bố kết quả cho kỳ tuyển sinh đã chọn?" ok-text="Công bố" cancel-text="Hủy" @confirm="publishResults">
           <a-button type="primary" :loading="publishLoading">Công bố kết quả</a-button>
         </a-popconfirm>
+        <a-button type="primary" ghost :loading="exportLoading" :disabled="!selectedExamId || exportLoading" @click="exportResults">Xuất dữ liệu</a-button>
         <a-button @click="resetFilters" class="flex-1 md:flex-none">Đặt lại</a-button>
       </div>
     </div>
@@ -45,11 +46,13 @@ definePageMeta({
 
 const { adminResult } = useApi();
 const adminStore = useAdminStore();
+const config = useRuntimeConfig();
 
 const searchText = ref("");
 const selectedExamId = ref(null);
 const calculateLoading = ref(false);
 const publishLoading = ref(false);
+const exportLoading = ref(false);
 const calculatedItems = ref(null);
 
 const pagination = reactive({
@@ -213,6 +216,69 @@ const publishResults = async () => {
     message.error(error?.message || "Công bố kết quả thất bại");
   } finally {
     publishLoading.value = false;
+  }
+};
+
+const getFileNameFromContentDisposition = (contentDisposition, fallbackFileName) => {
+  const utf8Match = contentDisposition.match(/filename\*\s*=\s*UTF-8''([^;]+)/i);
+  if (utf8Match?.[1]) {
+    return decodeURIComponent(utf8Match[1].trim());
+  }
+
+  const fileNameMatch = contentDisposition.match(/filename\s*=\s*"?([^";]+)"?/i);
+  if (fileNameMatch?.[1]) {
+    return fileNameMatch[1].trim();
+  }
+
+  return fallbackFileName;
+};
+
+const exportResults = async () => {
+  if (!selectedExamId.value) {
+    message.warning("Vui lòng chọn kỳ tuyển sinh");
+    return;
+  }
+
+  if (!adminStore.token) {
+    message.error("Không tìm thấy phiên đăng nhập quản trị");
+    return;
+  }
+
+  exportLoading.value = true;
+
+  try {
+    const exportUrl = new URL("/api/admin/exam/result/export", config.public.baseURL);
+    exportUrl.searchParams.set("idExam", String(selectedExamId.value));
+
+    const response = await fetch(exportUrl.toString(), {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${adminStore.token}`,
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error("Xuất dữ liệu kết quả thất bại");
+    }
+
+    const blob = await response.blob();
+    const downloadUrl = window.URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    const contentDisposition = response.headers.get("content-disposition") || "";
+    const fileName = getFileNameFromContentDisposition(contentDisposition, `ket-qua-ky-tuyen-sinh-${selectedExamId.value}.xlsx`);
+
+    link.href = downloadUrl;
+    link.download = fileName;
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    window.URL.revokeObjectURL(downloadUrl);
+
+    message.success("Xuất dữ liệu kết quả thành công");
+  } catch (error) {
+    message.error(error?.message || "Xuất dữ liệu kết quả thất bại");
+  } finally {
+    exportLoading.value = false;
   }
 };
 
