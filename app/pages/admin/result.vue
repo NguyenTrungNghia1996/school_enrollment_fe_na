@@ -164,7 +164,7 @@ const calculateResults = async () => {
   calculateLoading.value = true;
 
   try {
-    const { data, error } = await adminResult.getByRest("calculate", {
+    const { data, error } = await adminResult.getByRest("caculator", {
       params: {
         pageIndex: params.value.pageIndex,
         pageSize: params.value.pageSize,
