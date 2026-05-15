@@ -150,20 +150,12 @@
         </div>
       </section>
 
-      <section>
+      <section v-if="reviewScoreItems.length">
         <h3 class="text-base font-bold text-cyan-700">Thông tin điểm sau phúc khảo</h3>
         <div class="mt-4 grid gap-4 text-sm sm:grid-cols-3">
-          <div>
-            <span>Toán:</span>
-            <span class="ml-2 font-semibold text-slate-900">{{ formatReviewScore(examScoreData.reviewMathScore, examScoreData.mathScore) }}</span>
-          </div>
-          <div>
-            <span>Ngữ Văn:</span>
-            <span class="ml-2 font-semibold text-slate-900">{{ formatReviewScore(examScoreData.reviewLiteratureScore, examScoreData.literatureScore) }}</span>
-          </div>
-          <div>
-            <span>Tiếng Anh:</span>
-            <span class="ml-2 font-semibold text-slate-900">{{ formatReviewScore(examScoreData.reviewEnglishScore, examScoreData.englishScore) }}</span>
+          <div v-for="item in reviewScoreItems" :key="item.key">
+            <span>{{ item.label }}:</span>
+            <span class="ml-2 font-semibold text-slate-900">{{ formatScore(item.value) }}</span>
           </div>
         </div>
       </section>
@@ -336,13 +328,17 @@ const formatScore = value => {
   return numericScore.toFixed(2).replace(/\.?0+$/, "");
 };
 
-const formatReviewScore = (reviewScore, originalScore) => {
-  if (reviewScore === null || reviewScore === undefined || reviewScore === "") {
-    return formatScore(originalScore);
-  }
+const hasReviewScoreValue = value => value !== null && value !== undefined && value !== "";
 
-  return formatScore(reviewScore);
-};
+const reviewScoreItems = computed(() => {
+  if (!examScoreData.value) return [];
+
+  return [
+    { key: "reviewMathScore", label: "Toán", value: examScoreData.value.reviewMathScore },
+    { key: "reviewLiteratureScore", label: "Ngữ Văn", value: examScoreData.value.reviewLiteratureScore },
+    { key: "reviewEnglishScore", label: "Tiếng Anh", value: examScoreData.value.reviewEnglishScore },
+  ].filter(item => hasReviewScoreValue(item.value));
+});
 
 const totalExamScore = computed(() => {
   if (!examScoreData.value) return "-";
