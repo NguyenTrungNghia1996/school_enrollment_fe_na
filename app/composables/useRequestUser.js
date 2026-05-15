@@ -30,7 +30,7 @@ export class RequestUser {
 
         const isValid = this.isTokenValid(token);
         if (!isValid) {
-          safeMessage.info("Phiên đăng nhập đã hết hạn");
+          // safeMessage.info("Phiên đăng nhập đã hết hạn");
           userStore.logout();
           navigateTo("/");
           return;
