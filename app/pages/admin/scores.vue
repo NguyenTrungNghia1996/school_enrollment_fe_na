@@ -300,6 +300,7 @@ const publishScores = async () => {
       params: {
         idExam: Number(selectedExamId.value),
       },
+      key: `admin-score-publish-${selectedExamId.value}-${Date.now()}`,
     });
     if (error.value || data.value?.success === false) {
       throw new Error(error.value?.data?.message || data.value?.message || "Công bố điểm thi thất bại");

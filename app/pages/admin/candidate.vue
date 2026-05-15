@@ -345,6 +345,7 @@ const publishCandidates = async () => {
       params: {
         idExam: Number(selectedExamId.value),
       },
+      key: `admin-candidate-publish-${selectedExamId.value}-${Date.now()}`,
     });
 
     if (error.value || data.value?.success === false) {
