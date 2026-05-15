@@ -976,9 +976,7 @@ const submitApplication = async () => {
 };
 
 const handleCancel = () => {
-  resetFormState();
-  documentUploads.value = createDocumentUploads(examDetail.value?.documents || []);
-  message.info("Đã hủy thông tin đang nhập");
+  navigateTo("/");
 };
 
 const goBack = () => {

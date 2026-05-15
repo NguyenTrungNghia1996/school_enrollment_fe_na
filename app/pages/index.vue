@@ -193,7 +193,7 @@
       </div>
     </a-modal>
 
-    <a-modal v-model:open="paymentVisible" title="Thanh toán hồ sơ" :width="960" :footer="null" @cancel="closePaymentModal">
+    <a-modal v-model:open="paymentVisible" title="Thanh toán hồ sơ" style="top: 0px" :width="960" :footer="null" @cancel="closePaymentModal">
       <div v-if="qrLoading" class="py-12 text-center">
         <a-spin size="large" />
       </div>
