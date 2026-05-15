@@ -47,7 +47,7 @@ export class RequestAdmin {
 
       async onResponseError(ctx) {
         if (ctx.response.status === 401) {
-          safeMessage.info("Phiên đăng nhập đã hết hạn");
+          // safeMessage.info("Phiên đăng nhập đã hết hạn");
           adminStore.logout();
           await navigateTo("/admin/login");
         }
