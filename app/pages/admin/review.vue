@@ -383,6 +383,7 @@ const publishReviews = async () => {
       params: {
         idExam: Number(selectedExamId.value),
       },
+      key: `admin-application-review-publish-${selectedExamId.value}-${Date.now()}`,
     });
 
     if (error.value || data.value?.success === false) {

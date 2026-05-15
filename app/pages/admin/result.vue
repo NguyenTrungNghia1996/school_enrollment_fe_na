@@ -204,6 +204,7 @@ const publishResults = async () => {
       params: {
         idExam: Number(selectedExamId.value),
       },
+      key: `admin-result-publish-${selectedExamId.value}-${Date.now()}`,
     });
     if (error.value || data.value?.success === false) {
       throw new Error(error.value?.data?.message || data.value?.message || "Công bố kết quả thất bại");
