@@ -136,7 +136,7 @@
 
       <a-form ref="createFormRef" :model="createFormState" layout="vertical">
         <a-form-item label="Hồ sơ phúc khảo" name="idApplication" :rules="createFormRules.idApplication">
-          <a-select class="w-full" :disabled="true" v-model:value="createFormState.idApplication" show-search :loading="createApplicationsPending" :options="createApplicationOptions" placeholder="Chọn hồ sơ phúc khảo" :filter-option="filterCreateApplicationOption" @change="handleCreateApplicationChange" />
+          <a-select class="w-full" v-model:value="createFormState.idApplication" show-search :loading="createApplicationsPending" :options="createApplicationOptions" placeholder="Chọn hồ sơ phúc khảo" :filter-option="filterCreateApplicationOption" @change="handleCreateApplicationChange" />
         </a-form-item>
 
         <UserSelectSubject v-model="createFormState.idSubject" label="Môn phúc khảo" name="idSubject" placeholder="Chọn môn phúc khảo" :rules="createFormRules.idSubject" :id-application="createFormState.idApplication" :disabled="!createFormState.idApplication" />
