@@ -29,7 +29,7 @@
 
           <template v-if="column.key === 'statusName'">
             <a-tag :color="getStatusColor(record)">
-              {{ record.statusName || "Không xác định" }}
+              {{ getStatusLabel(record) }}
             </a-tag>
           </template>
 
@@ -88,7 +88,7 @@
           <div class="rounded-xl border border-slate-200 bg-slate-50 px-4 py-3">
             <div class="text-xs uppercase tracking-[0.2em] text-slate-400">Trạng thái</div>
             <div class="mt-2">
-              <a-tag :color="getStatusColor(detailData)">{{ detailData.statusName || `#${detailData.idStatus}` }}</a-tag>
+              <a-tag :color="getStatusColor(detailData)">{{ getStatusLabel(detailData) }}</a-tag>
             </div>
           </div>
           <div class="rounded-xl border border-slate-200 bg-slate-50 px-4 py-3">
@@ -181,7 +181,7 @@
 
 <script setup>
 import dayjs from "dayjs";
-import { APPLICATION_STATUS_LABELS, getApplicationStatusColor, isDraftApplicationStatus, isPendingReviewApplicationStatus, isPaidPendingVerificationApplicationStatus } from "~/composables/useApplicationStatus";
+import { APPLICATION_STATUS_LABELS, getApplicationStatusColor, getApplicationStatusLabel, isDraftApplicationStatus, isPendingReviewApplicationStatus, isPaidPendingVerificationApplicationStatus } from "~/composables/useApplicationStatus";
 
 definePageMeta({
   layout: "admin",
@@ -408,6 +408,7 @@ const formatGender = value => {
 };
 
 const getStatusColor = record => getApplicationStatusColor(record);
+const getStatusLabel = record => getApplicationStatusLabel(record);
 
 const isActionDisabled = record => {
   return !isPendingReviewApplicationStatus(record);
