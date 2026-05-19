@@ -68,7 +68,7 @@
           </a-form-item>
 
           <a-form-item label="Số lượng chỉ tiêu" name="quantity">
-            <a-input-number v-model:value="formState.quantity" :min="0" class="w-full" :disabled="isGeneralFieldsReadOnly" />
+            <a-input-number v-model:value="formState.quantity" :min="1" class="w-full" :disabled="isGeneralFieldsReadOnly" />
           </a-form-item>
 
           <a-form-item label="Thời gian phúc khảo" name="reviewDateRange" class="md:col-span-2">
@@ -238,7 +238,11 @@ const rules = {
     },
   ],
   fee: [{ required: true, message: "Vui lòng nhập lệ phí thi", trigger: "blur" }, validateRequiredNumber("lệ phí thi")],
-  quantity: [{ required: true, message: "Vui lòng nhập chỉ tiêu", trigger: "blur" }, validateRequiredNumber("chỉ tiêu")],
+  quantity: [
+    { required: true, message: "Vui lòng nhập chỉ tiêu", trigger: "blur" },
+    { type: "number", min: 1, message: "Chỉ tiêu nhỏ nhất là 1", trigger: "blur" },
+    validateRequiredNumber("chỉ tiêu"),
+  ],
   reviewFee: [{ required: true, message: "Vui lòng nhập lệ phí phúc khảo", trigger: "blur" }, validateRequiredNumber("lệ phí phúc khảo")],
   accountNumber: [{ required: true, message: "Vui lòng nhập số tài khoản", trigger: "blur" }],
   accountName: [{ required: true, message: "Vui lòng nhập chủ tài khoản", trigger: "blur" }],
@@ -403,15 +407,15 @@ const handleCancel = () => {
 
 const deleteItem = async id => {
   try {
-    const { data } = await adminEnrollment.delete({ params: { id: id } });
+    const { data, error } = await adminEnrollment.delete({ params: { id: id } });
     if (data.value?.success) {
       message.success(data.value?.message || "Đã xóa");
       await refreshEnrollments();
     } else {
-      message.error(data.value?.message || "Không thể xóa");
+      throw new Error(error.value?.data?.message || "Không thể xóa");
     }
   } catch (err) {
-    message.error("Lỗi khi xóa");
+    message.error(err.message || "Lỗi khi xóa");
   }
 };
 

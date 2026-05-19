@@ -207,25 +207,25 @@ const exportCandidates = async () => {
   exportLoading.value = true;
 
   try {
-    const exportUrl = new URL("/api/admin/examList/export", config.public.baseURL);
-    exportUrl.searchParams.set("idExam", String(selectedExamId.value));
-
-    const response = await fetch(exportUrl.toString(), {
-      method: "GET",
-      headers: {
-        Authorization: `Bearer ${adminStore.token}`,
+    const { data, error } = await adminCandidate.getByRest("export", {
+      params: {
+        idExam: selectedExamId.value,
       },
+      key: `admin-candidate-export-${selectedExamId.value}-${Date.now()}`,
     });
 
-    if (!response.ok) {
-      throw new Error("Xuất dữ liệu danh sách thí sinh thất bại");
+    if (error.value) {
+      throw new Error(error.value.data.message || "Xuất dữ liệu danh sách thí sinh thất bại");
     }
 
-    const blob = await response.blob();
+    const blob = data.value;
+    if (!blob) {
+      throw new Error("Không nhận được dữ liệu file");
+    }
+
     const downloadUrl = window.URL.createObjectURL(blob);
     const link = document.createElement("a");
-    const contentDisposition = response.headers.get("content-disposition") || "";
-    const fileName = getFileNameFromContentDisposition(contentDisposition, `danh-sach-thi-sinh-${selectedExamId.value}.xlsx`);
+    const fileName = getFileNameFromContentDisposition("", `danh-sach-thi-sinh-${selectedExamId.value}.xlsx`);
 
     link.href = downloadUrl;
     link.download = fileName;

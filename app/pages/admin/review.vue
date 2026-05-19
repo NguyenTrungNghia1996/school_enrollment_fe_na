@@ -45,13 +45,11 @@
                   </a-button>
                 </a-tooltip>
 
-                <a-popconfirm title="Xác nhận yêu cầu này đã thanh toán?" ok-text="Xác nhận" cancel-text="Hủy" @confirm="completePayment(record)">
-                  <a-tooltip title="Xác nhận thanh toán">
-                    <a-button type="link" size="small" class="text-emerald-600" :disabled="!canCompletePayment(record) || !adminStore.canEditCurrentPage || completePaymentLoading">
-                      <template #icon><CheckOutlined /></template>
-                    </a-button>
-                  </a-tooltip>
-                </a-popconfirm>
+                <a-tooltip title="Xác nhận thanh toán">
+                  <a-button type="link" size="small" class="text-emerald-600" :disabled="!canCompletePayment(record) || !adminStore.canEditCurrentPage || completePaymentLoading" @click="openPaymentConfirm(record)">
+                    <template #icon><CreditCardOutlined /></template>
+                  </a-button>
+                </a-tooltip>
               </div>
             </template>
           </template>
@@ -96,9 +94,26 @@
 
         <div class="flex flex-wrap justify-end gap-2 border-t border-slate-100 pt-4">
           <a-button @click="closeDetail">Đóng</a-button>
-          <a-popconfirm title="Xác nhận yêu cầu này đã thanh toán?" ok-text="Xác nhận" cancel-text="Hủy" @confirm="completePayment(detailData, true)">
-            <a-button type="primary" :loading="completePaymentLoading" :disabled="!canCompletePayment(detailData) || !adminStore.canEditCurrentPage">Xác nhận thanh toán</a-button>
-          </a-popconfirm>
+          <a-button type="primary" :loading="completePaymentLoading" :disabled="!canCompletePayment(detailData) || !adminStore.canEditCurrentPage" @click="openPaymentConfirm(detailData, true)">Xác nhận thanh toán</a-button>
+        </div>
+      </div>
+    </a-modal>
+
+    <a-modal v-model:open="paymentConfirmVisible" :width="500" :footer="null" centered @cancel="closePaymentConfirm">
+      <div class="space-y-4 pt-2 text-center">
+        <div class="space-y-2">
+          <div class="text-xl font-bold text-slate-900">
+            {{ getPaymentConfirmTitle(selectedRecord) }}
+          </div>
+          <div class="text-sm leading-6 text-slate-600">
+            Bạn có chắc chắn xác nhận thanh toán đơn đề nghị này không?<br />
+            Sau khi xác nhận, đơn đề nghị sẽ không thể khôi phục lại trạng thái trước
+          </div>
+        </div>
+
+        <div class="flex justify-center gap-3 pt-2">
+          <a-button type="primary" :loading="completePaymentLoading" @click="submitCompletePayment">Đồng ý</a-button>
+          <a-button danger ghost @click="closePaymentConfirm">Hủy</a-button>
         </div>
       </div>
     </a-modal>
@@ -148,6 +163,8 @@ const selectedRecord = ref(null);
 const publishLoading = ref(false);
 const exportLoading = ref(false);
 const completePaymentLoading = ref(false);
+const paymentConfirmVisible = ref(false);
+const fromDetailModal = ref(false);
 const importVisible = ref(false);
 const importInputRef = ref(null);
 const importLoading = ref(false);
@@ -173,6 +190,7 @@ const columns = [
   { title: "Họ tên", dataIndex: "fullName", key: "fullName", width: 220, ellipsis: true },
   { title: "Môn phúc khảo", dataIndex: "subjectName", key: "subjectName", width: 170, ellipsis: true },
   { title: "Lý do", dataIndex: "reason", key: "reason", ellipsis: true },
+  { title: "Điểm thi", dataIndex: "score", key: "score", width: 140, align: "center" },
   { title: "Điểm phúc khảo", dataIndex: "reviewScore", key: "reviewScore", width: 140, align: "center" },
   { title: "Trạng thái", dataIndex: "statusName", key: "statusName", width: 170, align: "center" },
   { title: "Thao tác", key: "action", width: 120, align: "center", fixed: "right" },
@@ -435,6 +453,29 @@ const completePayment = async (record, keepModal = false) => {
   } finally {
     completePaymentLoading.value = false;
   }
+};
+
+const getPaymentConfirmTitle = record => {
+  const code = record?.reviewCode || `#${record?.id || ""}`;
+  return `Xác nhận thanh toán đơn ${code}`;
+};
+
+const openPaymentConfirm = (record, fromDetail = false) => {
+  selectedRecord.value = record;
+  fromDetailModal.value = fromDetail;
+  paymentConfirmVisible.value = true;
+};
+
+const closePaymentConfirm = () => {
+  paymentConfirmVisible.value = false;
+  selectedRecord.value = null;
+  fromDetailModal.value = false;
+};
+
+const submitCompletePayment = async () => {
+  if (!selectedRecord.value) return;
+  await completePayment(selectedRecord.value, fromDetailModal.value);
+  closePaymentConfirm();
 };
 
 const exportReviews = async () => {

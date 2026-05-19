@@ -120,7 +120,7 @@
                   </a-form-item>
 
                   <a-form-item label="Ngày sinh" name="dateOfBirth" :rules="[{ required: true, message: 'Vui lòng chọn ngày sinh' }]">
-                    <a-date-picker v-model:value="formState.dateOfBirth" format="DD/MM/YYYY" class="w-full rounded-xl" size="large" placeholder="Chọn ngày sinh" />
+                    <a-date-picker v-model:value="formState.dateOfBirth" format="DD/MM/YYYY" class="w-full rounded-xl" size="large" placeholder="Chọn ngày sinh" :disabled-date="disabledDate" />
                   </a-form-item>
 
                   <div>
@@ -138,7 +138,7 @@
                   </a-form-item>
 
                   <a-form-item label="Ngày cấp CCCD" name="identityIssueDate" :rules="[{ required: true, message: 'Vui lòng chọn ngày cấp CCCD' }]">
-                    <a-date-picker v-model:value="formState.identityIssueDate" format="DD/MM/YYYY" class="w-full rounded-xl" size="large" placeholder="Chọn ngày cấp CCCD" />
+                    <a-date-picker v-model:value="formState.identityIssueDate" format="DD/MM/YYYY" class="w-full rounded-xl" size="large" placeholder="Chọn ngày cấp CCCD" :disabled-date="disabledDate" />
                   </a-form-item>
 
                   <a-form-item label="Nơi cấp CCCD" name="identityIssuePlace" :rules="[{ required: true, message: 'Vui lòng nhập nơi cấp CCCD' }]">
@@ -555,6 +555,11 @@ const formatCurrency = value => {
     style: "currency",
     currency: "VND",
   }).format(value);
+};
+
+const disabledDate = current => {
+  if (!current) return false;
+  return !current.isBefore($dayjs(), "day");
 };
 
 const getFileName = link => {
