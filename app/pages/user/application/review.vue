@@ -61,7 +61,7 @@
                   <template v-else-if="column.key === 'action'">
                     <div class="flex justify-center gap-3">
                       <a-button type="link" class="px-0" @click="openReviewDetail(record)">Chi tiết</a-button>
-                      <a-button v-if="showPayAction(record)" type="link" class="px-0 font-semibold text-primary" @click="openPaymentModal(record)">Thanh toán ngay</a-button>
+                      <a-button v-if="showPayAction(record)" type="link" class="px-0 text-primary" @click="openPaymentModal(record)">Thanh toán</a-button>
                       <a-button v-else type="link" class="px-0" @click="openApplicationDetail(record)">Xem hồ sơ</a-button>
                     </div>
                   </template>
