@@ -1,7 +1,7 @@
 <template>
   <div class="min-h-screen bg-slate-50 px-2 py-2">
     <div class="container mx-auto">
-      <section class="rounded-3xl bg-white p-6 shadow-sm">
+      <section class="hidden rounded-3xl bg-white p-6 shadow-sm">
         <div class="grid gap-4 lg:grid-cols-[minmax(0,1fr)_260px_auto] lg:items-center">
           <a-input-search v-model:value="searchText" placeholder="Tìm theo mã phúc khảo, họ tên, môn học..." allow-clear enter-button @search="handleSearch" />
 
@@ -61,7 +61,8 @@
                   <template v-else-if="column.key === 'action'">
                     <div class="flex justify-center gap-3">
                       <a-button type="link" class="px-0" @click="openReviewDetail(record)">Chi tiết</a-button>
-                      <a-button type="link" class="px-0" @click="openApplicationDetail(record)">Xem hồ sơ</a-button>
+                      <a-button v-if="showPayAction(record)" type="link" class="px-0 font-semibold text-primary" @click="openPaymentModal(record)">Thanh toán ngay</a-button>
+                      <a-button v-else type="link" class="px-0" @click="openApplicationDetail(record)">Xem hồ sơ</a-button>
                     </div>
                   </template>
                 </template>
@@ -100,7 +101,8 @@
 
               <div class="mt-4 flex flex-wrap justify-end gap-2">
                 <a-button class="rounded-xl" @click="openReviewDetail(record)">Chi tiết</a-button>
-                <a-button type="primary" class="rounded-xl" @click="openApplicationDetail(record)">Xem hồ sơ</a-button>
+                <a-button v-if="showPayAction(record)" type="primary" class="rounded-xl" @click="openPaymentModal(record)">Thanh toán ngay</a-button>
+                <a-button v-else type="primary" class="rounded-xl" @click="openApplicationDetail(record)">Xem hồ sơ</a-button>
               </div>
             </article>
           </div>
@@ -134,7 +136,7 @@
 
       <a-form ref="createFormRef" :model="createFormState" layout="vertical">
         <a-form-item label="Hồ sơ phúc khảo" name="idApplication" :rules="createFormRules.idApplication">
-          <a-select class="w-full" v-model:value="createFormState.idApplication" show-search :loading="createApplicationsPending" :options="createApplicationOptions" placeholder="Chọn hồ sơ phúc khảo" :filter-option="filterCreateApplicationOption" @change="handleCreateApplicationChange" />
+          <a-select class="w-full" :disabled="true" v-model:value="createFormState.idApplication" show-search :loading="createApplicationsPending" :options="createApplicationOptions" placeholder="Chọn hồ sơ phúc khảo" :filter-option="filterCreateApplicationOption" @change="handleCreateApplicationChange" />
         </a-form-item>
 
         <UserSelectSubject v-model="createFormState.idSubject" label="Môn phúc khảo" name="idSubject" placeholder="Chọn môn phúc khảo" :rules="createFormRules.idSubject" :id-application="createFormState.idApplication" :disabled="!createFormState.idApplication" />
@@ -204,7 +206,7 @@
 
       <div class="flex flex-wrap justify-end gap-2 border-t border-slate-100 pt-4">
         <a-button @click="openApplicationDetail(detailData)">Xem hồ sơ</a-button>
-        <a-button v-if="showPayAction(detailData)" type="primary" :loading="qrLoading" @click="openPaymentModal">Thanh toán ngay</a-button>
+        <a-button v-if="showPayAction(detailData)" type="primary" :loading="qrLoading" @click="() => openPaymentModal()">Thanh toán ngay</a-button>
         <a-button v-if="isDraftReview(detailData)" type="primary" :loading="saveLoading" @click="submitReviewUpdate">Cập nhật</a-button>
       </div>
     </div>
@@ -831,20 +833,23 @@ const submitReviewUpdate = async () => {
   }
 };
 
-const openPaymentModal = async () => {
-  if (!detailData.value?.id) {
+const openPaymentModal = async (record = null) => {
+  const targetRecord = record && record.id ? record : detailData.value;
+
+  if (!targetRecord?.id) {
     message.error("Không xác định được yêu cầu phúc khảo");
     return;
   }
 
+  detailData.value = targetRecord;
   qrData.value = null;
   paymentVisible.value = true;
   qrLoading.value = true;
 
   try {
     const { data, error } = await applicationReviewUser.getByRest("qr", {
-      params: { id: Number(detailData.value.id) },
-      key: `user-application-review-qr-${detailData.value.id}-${Date.now()}`,
+      params: { id: Number(targetRecord.id) },
+      key: `user-application-review-qr-${targetRecord.id}-${Date.now()}`,
     });
 
     if (error.value || data.value?.success === false || !data.value?.data) {
@@ -886,9 +891,11 @@ const confirmPayment = async () => {
   confirmPaymentLoading.value = true;
 
   try {
-    const isUpdated = await persistReviewUpdate({ showSuccessMessage: false });
-    if (!isUpdated) {
-      return;
+    if (detailVisible.value) {
+      const isUpdated = await persistReviewUpdate({ showSuccessMessage: false });
+      if (!isUpdated) {
+        return;
+      }
     }
 
     const { data, error } = await applicationReviewUser.putByRest("confirmPayment", {
@@ -901,7 +908,10 @@ const confirmPayment = async () => {
 
     message.success(data.value?.message || "Xác nhận thanh toán thành công");
     closePaymentModal();
-    await Promise.all([fetchReviewDetail(), refreshReviews()]);
+    if (detailVisible.value) {
+      await fetchReviewDetail();
+    }
+    await refreshReviews();
   } catch (error) {
     message.error(error?.message || "Xác nhận thanh toán thất bại");
   } finally {
@@ -914,9 +924,9 @@ watch(
   async value => {
     if (!import.meta.client) return;
 
-    if (toPositiveNumber(value) && !createVisible.value) {
-      await openCreateReview();
-    }
+    // if (toPositiveNumber(value) && !createVisible.value) {
+    //   await openCreateReview();
+    // }
   },
   { immediate: true },
 );

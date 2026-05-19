@@ -32,10 +32,10 @@
                   <template #icon><Icon name="lucide:user" class="text-lg" /></template>
                   Hồ sơ của tôi
                 </a-menu-item>
-                <a-menu-item key="review" class="rounded-lg py-3" @click="navigateTo('/user/application/review')">
+                <!-- <a-menu-item key="review" class="rounded-lg py-3" @click="navigateTo('/user/application/review')">
                   <template #icon><Icon name="lucide:search" class="text-lg" /></template>
                   Phúc khảo
-                </a-menu-item>
+                </a-menu-item> -->
                 <a-menu-item key="change-password" class="rounded-lg py-3" @click="userStore.openChangePassword()">
                   <template #icon><Icon name="lucide:key-round" class="text-lg" /></template>
                   Đổi mật khẩu
