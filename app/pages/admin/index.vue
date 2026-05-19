@@ -1,16 +1,10 @@
 <template>
-  <div class="min-h-[calc(100vh-100px)] space-y-6 bg-slate-50/50 p-4 md:p-6">
+  <div class="min-h-[calc(100vh-100px)] space-y-6 bg-slate-50/50 bg-white p-4 md:p-6">
     <!-- Header Section -->
     <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
       <div>
         <h1 class="bg-gradient-to-r from-slate-900 to-slate-700 bg-clip-text text-2xl font-bold tracking-tight text-transparent">Bảng điều khiển</h1>
         <p class="text-sm text-slate-500">Chào mừng bạn trở lại hệ thống quản trị.</p>
-      </div>
-      <div class="flex items-center gap-3">
-        <span class="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-semibold text-emerald-700 ring-1 ring-inset ring-emerald-600/10">
-          <span class="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
-          Docker Server Online
-        </span>
       </div>
     </div>
 
@@ -21,9 +15,9 @@
         <div class="relative flex items-center justify-between">
           <div class="space-y-2">
             <p class="text-sm font-medium text-slate-500">{{ stat.title }}</p>
-            <p class="text-2xl font-bold text-slate-800 tracking-tight">{{ stat.value }}</p>
+            <p class="text-2xl font-bold tracking-tight text-slate-800">{{ stat.value }}</p>
             <div class="flex items-center gap-1.5">
-              <span :class="stat.changeType === 'increase' ? 'text-emerald-600 bg-emerald-50' : 'text-rose-600 bg-rose-50'" class="inline-flex items-center rounded-md px-1.5 py-0.5 text-xs font-medium">
+              <span :class="stat.changeType === 'increase' ? 'bg-emerald-50 text-emerald-600' : 'bg-rose-50 text-rose-600'" class="inline-flex items-center rounded-md px-1.5 py-0.5 text-xs font-medium">
                 {{ stat.change }}
               </span>
               <span class="text-xs text-slate-400">so với tuần trước</span>
@@ -36,150 +30,69 @@
       </div>
     </div>
 
-    <!-- Main Content Row -->
+    <!-- Main Content Layout -->
     <div class="grid grid-cols-1 gap-6 lg:grid-cols-3">
-      <!-- Docker Build & System Metadata Card (Takes 2 cols on lg screens) -->
-      <div class="overflow-hidden rounded-3xl border border-slate-100 bg-white shadow-sm lg:col-span-2">
-        <div class="border-b border-slate-100 bg-slate-50/50 px-6 py-5">
-          <div class="flex items-center justify-between">
-            <div class="flex items-center gap-3">
-              <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-50 text-blue-600">
-                <Icon name="logos:docker-icon" class="text-2xl" />
-              </div>
-              <div>
-                <h3 class="text-base font-bold text-slate-900">Thông tin Docker Container & Bản Build</h3>
-                <p class="text-xs text-slate-500">Metadata và thông số vận hành của container hiện tại</p>
-              </div>
-            </div>
+      <!-- Portal Overview Card (Left 2 columns) -->
+      <div class="relative overflow-hidden rounded-3xl border border-slate-100 bg-white p-6 shadow-sm lg:col-span-2">
+        <div class="absolute -right-16 -top-16 h-48 w-48 rounded-full bg-blue-50/50 opacity-60"></div>
+        <div class="relative z-10 space-y-4">
+          <div class="inline-flex items-center gap-2 rounded-full bg-blue-50 px-3 py-1 text-xs font-semibold text-blue-700">
+            <Icon name="lucide:shield-check" />
+            Cổng Thông Tin Quản Trị
           </div>
-        </div>
-
-        <div class="p-6">
-          <div class="grid gap-6 md:grid-cols-2">
-            <!-- Left Info Block -->
-            <div class="space-y-4">
-              <!-- Build Version -->
-              <div class="flex items-start gap-4 rounded-2xl border border-slate-100 p-4 transition-colors hover:bg-slate-50/50">
-                <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-indigo-50 text-indigo-600">
-                  <Icon name="lucide:server" class="text-lg" />
-                </div>
-                <div class="min-w-0 flex-1">
-                  <p class="text-xs font-semibold uppercase tracking-wider text-slate-400">Phiên bản Build (Docker Tag)</p>
-                  <div class="mt-1 flex items-center gap-2">
-                    <span class="inline-flex items-center rounded-md bg-blue-50 px-2.5 py-1 text-xs font-bold text-blue-700 ring-1 ring-inset ring-blue-700/10">
-                      {{ buildTag || 'local-development' }}
-                    </span>
-                  </div>
-                </div>
-              </div>
-
-              <!-- Commit SHA -->
-              <div class="flex items-start gap-4 rounded-2xl border border-slate-100 p-4 transition-colors hover:bg-slate-50/50">
-                <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-violet-50 text-violet-600">
-                  <Icon name="lucide:git-commit" class="text-lg" />
-                </div>
-                <div class="min-w-0 flex-1">
-                  <p class="text-xs font-semibold uppercase tracking-wider text-slate-400">Mã Commit SHA</p>
-                  <div class="mt-1.5 flex items-center gap-2">
-                    <code class="font-mono text-xs text-slate-600 bg-slate-100 px-2 py-0.5 rounded-md truncate max-w-[200px] md:max-w-full">
-                      {{ buildSha || 'dev-commit-sha-local' }}
-                    </code>
-                    <a-button v-if="buildSha" size="small" type="text" class="flex h-6 w-6 items-center justify-center rounded-md p-0" @click="copySha">
-                      <template #icon>
-                        <Icon :name="copied ? 'lucide:check' : 'lucide:copy'" :class="copied ? 'text-emerald-500' : 'text-slate-400'" class="text-sm" />
-                      </template>
-                    </a-button>
-                  </div>
-                </div>
-              </div>
-
-              <!-- Build Time -->
-              <div class="flex items-start gap-4 rounded-2xl border border-slate-100 p-4 transition-colors hover:bg-slate-50/50">
-                <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-amber-50 text-amber-600">
-                  <Icon name="lucide:clock" class="text-lg" />
-                </div>
-                <div class="min-w-0 flex-1">
-                  <p class="text-xs font-semibold uppercase tracking-wider text-slate-400">Thời gian Build</p>
-                  <p class="mt-1 text-sm font-semibold text-slate-800">
-                    {{ formattedBuildTime }}
-                  </p>
-                </div>
-              </div>
+          <h2 class="text-xl font-bold text-slate-900 md:text-2xl">Hệ thống Quản lý Tuyển sinh Trung học Cơ sở</h2>
+          <p class="text-sm leading-relaxed text-slate-500">Chào mừng bạn đến với trang quản trị tuyển sinh trường THCS Giảng Võ 2. Tại đây, bạn có thể thực hiện kiểm tra và quản lý hồ sơ đăng ký của thí sinh, phê duyệt trạng thái hồ sơ, xác nhận các giao dịch thanh toán lệ phí tuyển sinh, cập nhật chỉ tiêu tuyển sinh và quản lý kết quả học tập.</p>
+          <div class="flex flex-wrap gap-4 pt-2">
+            <div class="min-w-[140px] rounded-2xl border border-slate-100 bg-slate-50/50 p-4">
+              <div class="text-xs font-medium text-slate-400">Phiên đăng nhập</div>
+              <div class="mt-1 text-sm font-bold text-slate-800">Quản trị viên</div>
             </div>
-
-            <!-- Right Info Block (Platform / Environment metadata) -->
-            <div class="space-y-4">
-              <!-- Runtime Environment -->
-              <div class="flex items-start gap-4 rounded-2xl border border-slate-100 p-4 transition-colors hover:bg-slate-50/50">
-                <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-teal-50 text-teal-600">
-                  <Icon name="lucide:terminal" class="text-lg" />
-                </div>
-                <div class="min-w-0 flex-1">
-                  <p class="text-xs font-semibold uppercase tracking-wider text-slate-400">Môi trường vận hành</p>
-                  <p class="mt-1 text-sm font-semibold text-slate-800">Docker (Alpine / Node.js 20)</p>
-                </div>
-              </div>
-
-              <!-- Framework Info -->
-              <div class="flex items-start gap-4 rounded-2xl border border-slate-100 p-4 transition-colors hover:bg-slate-50/50">
-                <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-rose-50 text-rose-600">
-                  <Icon name="lucide:info" class="text-lg" />
-                </div>
-                <div class="min-w-0 flex-1">
-                  <p class="text-xs font-semibold uppercase tracking-wider text-slate-400">Nền tảng phát triển</p>
-                  <p class="mt-1 text-sm font-semibold text-slate-800">Nuxt 4.x & Ant Design Vue 4.x</p>
-                </div>
-              </div>
-
-              <!-- API Gateway -->
-              <div class="flex items-start gap-4 rounded-2xl border border-slate-100 p-4 transition-colors hover:bg-slate-50/50">
-                <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-sky-50 text-sky-600">
-                  <Icon name="lucide:external-link" class="text-lg" />
-                </div>
-                <div class="min-w-0 flex-1">
-                  <p class="text-xs font-semibold uppercase tracking-wider text-slate-400">Cổng kết nối API (Backend URL)</p>
-                  <p class="mt-1 truncate text-sm font-semibold text-slate-800 hover:text-blue-600">
-                    <a :href="apiBaseUrl" target="_blank" class="hover:underline">{{ apiBaseUrl }}</a>
-                  </p>
-                </div>
+            <div class="min-w-[140px] rounded-2xl border border-slate-100 bg-slate-50/50 p-4">
+              <div class="text-xs font-medium text-slate-400">Trạng thái máy chủ</div>
+              <div class="mt-1 flex items-center gap-1 text-sm font-bold text-emerald-600">
+                <span class="h-2 w-2 animate-pulse rounded-full bg-emerald-500"></span>
+                Ổn định
               </div>
             </div>
           </div>
         </div>
       </div>
 
-      <!-- Quick Operations / Status card -->
-      <div class="rounded-3xl border border-slate-100 bg-white p-6 shadow-sm">
-        <h3 class="text-base font-bold text-slate-900">Trạng thái Container</h3>
-        <p class="text-xs text-slate-500">Giám sát tài nguyên và phản hồi của Docker node</p>
-
-        <div class="mt-6 space-y-5">
-          <!-- CPU Mock status -->
-          <div>
-            <div class="mb-2 flex items-center justify-between text-xs">
-              <span class="font-medium text-slate-500">CPU Usage</span>
-              <span class="font-semibold text-slate-800">12.5%</span>
-            </div>
-            <a-progress :percent="12.5" :show-info="false" stroke-color="#1677ff" size="small" />
+      <!-- Redesigned Build Info Panel (Right 1 column) -->
+      <div class="rounded-3xl border border-slate-100 bg-white p-6 shadow-sm lg:col-span-1">
+        <div class="mb-5 flex items-center gap-3 border-b border-slate-100 pb-4">
+          <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-50 text-blue-600">
+            <Icon name="logos:docker-icon" class="text-2xl" />
           </div>
-
-          <!-- Memory Mock status -->
           <div>
-            <div class="mb-2 flex items-center justify-between text-xs">
-              <span class="font-medium text-slate-500">Memory Usage</span>
-              <span class="font-semibold text-slate-800">342MB / 1024MB</span>
-            </div>
-            <a-progress :percent="33.4" :show-info="false" stroke-color="#52c41a" size="small" />
+            <h3 class="text-base font-bold text-slate-900">Thông tin Bản Build</h3>
+            <p class="text-xs text-slate-500">Cập nhật ứng dụng hiện tại</p>
           </div>
+        </div>
 
-          <!-- Network Response -->
-          <div class="rounded-2xl bg-slate-50 p-4">
+        <div class="space-y-5">
+          <!-- Build Tag -->
+          <div class="rounded-2xl border border-slate-100 bg-slate-50/50 p-4 transition-all hover:bg-slate-50">
             <div class="flex items-center justify-between">
-              <div class="flex items-center gap-2">
-                <Icon name="lucide:clock" class="text-slate-400" />
-                <span class="text-xs font-medium text-slate-600">Thời gian phản hồi</span>
+              <div class="flex items-center gap-2.5">
+                <Icon name="lucide:server" class="text-slate-400" />
+                <span class="text-xs font-semibold uppercase tracking-wider text-slate-500">Phiên bản Build</span>
               </div>
-              <span class="text-xs font-bold text-emerald-600">18 ms (Rất tốt)</span>
+              <span class="inline-flex animate-pulse items-center rounded-full bg-emerald-50 px-2.5 py-0.5 text-xs font-bold text-emerald-700 ring-1 ring-inset ring-emerald-600/20">Active</span>
+            </div>
+            <div class="mt-2 text-lg font-bold text-slate-800">
+              {{ buildTag || "local-development" }}
+            </div>
+          </div>
+
+          <!-- Build Time -->
+          <div class="rounded-2xl border border-slate-100 bg-slate-50/50 p-4 transition-all hover:bg-slate-50">
+            <div class="flex items-center gap-2.5">
+              <Icon name="lucide:clock" class="text-slate-400" />
+              <span class="text-xs font-semibold uppercase tracking-wider text-slate-500">Thời gian Build</span>
+            </div>
+            <div class="mt-2 text-sm font-semibold text-slate-800">
+              {{ formattedBuildTime }}
             </div>
           </div>
         </div>
@@ -189,7 +102,6 @@
 </template>
 
 <script setup>
-import { message } from "ant-design-vue";
 import dayjs from "dayjs";
 
 definePageMeta({
@@ -198,27 +110,9 @@ definePageMeta({
 
 const config = useRuntimeConfig();
 
-// Retrieve docker build metadata
+// Retrieve build variables
 const buildTag = computed(() => config.public.buildTag);
-const buildSha = computed(() => config.public.buildSha);
 const buildTime = computed(() => config.public.buildTime);
-const apiBaseUrl = computed(() => config.public.baseURL);
-
-const copied = ref(false);
-
-const copySha = async () => {
-  if (!buildSha.value) return;
-  try {
-    await navigator.clipboard.writeText(buildSha.value);
-    copied.value = true;
-    message.success("Đã sao chép mã commit SHA!");
-    setTimeout(() => {
-      copied.value = false;
-    }, 2000);
-  } catch {
-    message.error("Không thể sao chép tự động.");
-  }
-};
 
 const formattedBuildTime = computed(() => {
   if (!buildTime.value) {
@@ -226,7 +120,7 @@ const formattedBuildTime = computed(() => {
   }
   const parsed = dayjs(buildTime.value);
   if (!parsed.isValid()) return buildTime.value;
-  return parsed.format("DD/MM/YYYY HH:mm:ss (Z)");
+  return parsed.format("DD/MM/YYYY HH:mm:ss");
 });
 
 const stats = ref([
@@ -238,13 +132,29 @@ const stats = ref([
 </script>
 
 <style scoped>
-/* High quality Tailwind dynamic colors declaration styling */
-.text-blue-500 { color: #3b82f6; }
-.bg-blue-50 { background-color: #eff6ff; }
-.text-emerald-500 { color: #10b981; }
-.bg-emerald-50 { background-color: #ecfdf5; }
-.text-amber-500 { color: #f59e0b; }
-.bg-amber-50 { background-color: #fffbeb; }
-.text-rose-500 { color: #f43f5e; }
-.bg-rose-50 { background-color: #fff1f2; }
+/* High quality custom dynamic styles */
+.text-blue-500 {
+  color: #3b82f6;
+}
+.bg-blue-50 {
+  background-color: #eff6ff;
+}
+.text-emerald-500 {
+  color: #10b981;
+}
+.bg-emerald-50 {
+  background-color: #ecfdf5;
+}
+.text-amber-500 {
+  color: #f59e0b;
+}
+.bg-amber-50 {
+  background-color: #fffbeb;
+}
+.text-rose-500 {
+  color: #f43f5e;
+}
+.bg-rose-50 {
+  background-color: #fff1f2;
+}
 </style>
