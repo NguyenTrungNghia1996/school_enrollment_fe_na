@@ -48,8 +48,8 @@
 
                   <template v-else-if="column.key === 'action'">
                     <div class="flex justify-center gap-3">
-                      <a-button type="link" class="px-0" @click="openDetail(record)">Xem chi tiết</a-button>
-                      <a-button v-if="record.hasScores" type="link" class="px-0" @click="openExamScoreModal(record)">Kết quả thi</a-button>
+                      <a-button type="link" class="px-0" @click="openDetail(record)">Chi tiết</a-button>
+                      <a-button v-if="record.hasScores" type="link" class="px-0" @click="openExamScoreModal(record)">Kết quả</a-button>
                       <a-button v-if="record.hasScores" type="link" class="px-0" @click="openReviewModal(record)">Phúc khảo</a-button>
                     </div>
                   </template>
@@ -118,8 +118,8 @@
             <span class="ml-2 font-semibold text-slate-900">{{ examScoreData.examNumber || "-" }}</span>
           </div>
           <div>
-            <span class="text-slate-500">Mã hồ sơ:</span>
-            <span class="ml-2 font-semibold text-slate-900">{{ examScoreData.applicationCode || "-" }}</span>
+            <span class="text-slate-500">Phòng thi:</span>
+            <span class="ml-2 font-semibold text-slate-900">{{ examScoreData.room || "-" }}</span>
           </div>
           <div class="sm:col-span-2">
             <span class="text-slate-500">Họ tên:</span>
@@ -347,7 +347,10 @@ const totalExamScore = computed(() => {
   const validScores = scores.filter(score => score !== null);
   if (!validScores.length) return "-";
 
-  return `${validScores.reduce((total, score) => total + score, 0).toFixed(2).replace(/\.?0+$/, "")} điểm`;
+  return `${validScores
+    .reduce((total, score) => total + score, 0)
+    .toFixed(2)
+    .replace(/\.?0+$/, "")} điểm`;
 });
 
 const openDetail = record => {
