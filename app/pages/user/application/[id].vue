@@ -465,6 +465,7 @@ import { getApplicationStatusColor, getApplicationStatusLabel, isApprovedPending
 
 definePageMeta({
   layout: "default",
+  path: "/user/application/:id/:action?",
 });
 
 const userStore = useUserStore();
@@ -1181,6 +1182,9 @@ const closePaymentModal = () => {
   qrData.value = null;
   qrLoading.value = false;
   confirmPaymentLoading.value = false;
+  if (route.params.action === "pay") {
+    navigateTo(`/user/application/${applicationId.value}`, { replace: true });
+  }
 };
 
 const confirmPayment = async () => {
@@ -1222,6 +1226,13 @@ const confirmPayment = async () => {
 // await fetchDetailData();
 onMounted(async () => {
   await fetchDetailData();
+  if (route.params.action === "pay") {
+    if (showPaymentAction.value) {
+      await openPaymentModal();
+    } else {
+      message.warning("Hồ sơ này không ở trạng thái chờ thanh toán");
+    }
+  }
 });
 useHead({
   title: "Chi tiết hồ sơ",
