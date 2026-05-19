@@ -53,7 +53,7 @@
                 </a-button>
               </a-tooltip> -->
 
-              <a-tooltip v-if="showPaymentInfoAction(record)" title="Thông tin thanh toán">
+              <a-tooltip v-if="showPaymentInfoAction(record)" title="Xác nhận thanh toán">
                 <a-button type="link" size="small" class="text-sky-600" :disabled="!adminStore.canApproveCurrentPage" @click="openPaymentDetail(record)">
                   <template #icon><CreditCardOutlined /></template>
                 </a-button>
@@ -144,27 +144,22 @@
 
         <div class="flex justify-end gap-2 border-t border-slate-100 pt-4">
           <a-button @click="closeDetail">Đóng</a-button>
-          <a-button v-if="showPaymentInfoAction(detailData)" :disabled="!adminStore.canApproveCurrentPage" @click="openPaymentDetail(detailData, true)">Thông tin thanh toán</a-button>
+          <a-button v-if="showPaymentInfoAction(detailData)" :disabled="!adminStore.canApproveCurrentPage" @click="openPaymentDetail(detailData, true)">Xác nhận thanh toán</a-button>
           <a-button type="primary" :disabled="!detailData || isActionDisabled(detailData) || !adminStore.canApproveCurrentPage" @click="approveItem(detailData, true)">Duyệt hồ sơ</a-button>
           <a-button danger :disabled="!detailData || isActionDisabled(detailData) || !adminStore.canApproveCurrentPage" @click="openReject(detailData, true)">Từ chối</a-button>
         </div>
       </div>
     </a-modal>
 
-    <a-modal v-model:open="paymentConfirmVisible" :title="getPaymentConfirmTitle(selectedRecord)" :width="460" :footer="null" centered @cancel="closePaymentConfirm">
+    <a-modal v-model:open="paymentConfirmVisible" :width="460" :footer="null" centered @cancel="closePaymentConfirm">
       <div class="space-y-4 pt-2 text-center">
         <div class="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-sky-50 text-sky-600">
           <span class="text-2xl font-semibold">?</span>
         </div>
 
         <div class="space-y-2">
-          <div class="text-base font-semibold text-slate-900">Xác nhận thanh toán hồ sơ này</div>
+          <div class="text-base font-semibold text-slate-900">{{ getPaymentConfirmTitle(selectedRecord) }}</div>
           <div class="text-sm leading-6 text-slate-500">Sau khi xác nhận, hệ thống sẽ ghi nhận hồ sơ đã thanh toán và không thể hoàn tác về trạng thái trước đó.</div>
-        </div>
-
-        <div class="rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-left">
-          <div class="text-xs uppercase tracking-[0.18em] text-slate-400">Mã hồ sơ</div>
-          <div class="mt-2 text-base font-bold text-slate-900">{{ selectedRecord?.applicationCode || `#${selectedRecord?.id || ""}` }}</div>
         </div>
 
         <div class="flex justify-center gap-3 pt-2">
@@ -384,9 +379,7 @@ const exportApplications = async () => {
     const contentDisposition = response.headers.get("content-disposition") || "";
     const utf8Match = contentDisposition.match(/filename\*\s*=\s*UTF-8''([^;]+)/i);
     const fileNameMatch = contentDisposition.match(/filename\s*=\s*"?([^";]+)"?/i);
-    const fileName = utf8Match?.[1]
-      ? decodeURIComponent(utf8Match[1].trim())
-      : (fileNameMatch?.[1]?.trim() || `ho-so-ky-tuyen-sinh-${selectedExamId.value}.xlsx`);
+    const fileName = utf8Match?.[1] ? decodeURIComponent(utf8Match[1].trim()) : fileNameMatch?.[1]?.trim() || `ho-so-ky-tuyen-sinh-${selectedExamId.value}.xlsx`;
 
     link.href = downloadUrl;
     link.download = fileName;
@@ -517,7 +510,7 @@ const reloadDetailIfOpen = async id => {
 
 const getPaymentConfirmTitle = record => {
   const applicationCode = record?.applicationCode || `#${record?.id || ""}`;
-  return `Xác nhận thanh toán đơn ${applicationCode}`;
+  return `Xác nhận thanh toán hồ sơ ${applicationCode}`;
 };
 
 const openPaymentDetail = (record, fromDetail = false) => {

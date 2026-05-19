@@ -461,7 +461,7 @@
 
 <script setup>
 import dayjs from "dayjs";
-import { getApplicationStatusColor, getApplicationStatusLabel, isApprovedPendingPaymentApplicationStatus, isDraftApplicationStatus } from "~/composables/useApplicationStatus";
+import { getApplicationStatusColor, getApplicationStatusLabel, isApprovedPendingPaymentApplicationStatus, isDraftApplicationStatus, isReturnedApplicationStatus } from "~/composables/useApplicationStatus";
 
 definePageMeta({
   layout: "default",
@@ -595,17 +595,17 @@ const normalizedDocuments = computed(() => {
   });
 });
 
-const showSubmitAction = computed(() => isDraftApplicationStatus(detailData.value));
-const showEditAction = computed(() => isDraftApplicationStatus(detailData.value));
+const showSubmitAction = computed(() => isDraftApplicationStatus(detailData.value) || isReturnedApplicationStatus(detailData.value));
+const showEditAction = computed(() => isDraftApplicationStatus(detailData.value) || isReturnedApplicationStatus(detailData.value));
 const showPaymentAction = computed(() => isApprovedPendingPaymentApplicationStatus(detailData.value));
 const hasUploadingEditDocuments = computed(() => Object.values(documentUploadingMap.value).some(Boolean));
 const isEditingProcessing = computed(() => saveLoading.value || submitLoading.value || avatarUploading.value || hasUploadingEditDocuments.value);
 
-const canEditCurrentApplication = () => isDraftApplicationStatus(detailData.value);
+const canEditCurrentApplication = () => isDraftApplicationStatus(detailData.value) || isReturnedApplicationStatus(detailData.value);
 
 const ensureEditableApplication = () => {
   if (!canEditCurrentApplication()) {
-    throw new Error("Chỉ hồ sơ ở trạng thái nháp mới có thể chỉnh sửa");
+    throw new Error("Chỉ hồ sơ ở trạng thái nháp hoặc trả lại mới có thể chỉnh sửa");
   }
 };
 

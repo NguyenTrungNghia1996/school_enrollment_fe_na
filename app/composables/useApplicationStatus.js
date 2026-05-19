@@ -4,6 +4,7 @@ export const APPLICATION_STATUS = Object.freeze({
   APPROVED_PENDING_PAYMENT: 3,
   PAID_PENDING_VERIFICATION: 4,
   COMPLETED: 5,
+  RETURNED: 6,
 });
 
 export const APPLICATION_STATUS_LABELS = Object.freeze({
@@ -12,6 +13,7 @@ export const APPLICATION_STATUS_LABELS = Object.freeze({
   [APPLICATION_STATUS.APPROVED_PENDING_PAYMENT]: "Duyệt, chờ thanh toán",
   [APPLICATION_STATUS.PAID_PENDING_VERIFICATION]: "Đã thanh toán, chờ xác minh",
   [APPLICATION_STATUS.COMPLETED]: "Hoàn thành",
+  [APPLICATION_STATUS.RETURNED]: "Trả lại",
 });
 
 export const getApplicationStatus = value => Number(value?.idStatus ?? value);
@@ -22,6 +24,7 @@ export const isPendingReviewApplicationStatus = value => getApplicationStatus(va
 export const isApprovedPendingPaymentApplicationStatus = value => getApplicationStatus(value) === APPLICATION_STATUS.APPROVED_PENDING_PAYMENT;
 export const isPaidPendingVerificationApplicationStatus = value => getApplicationStatus(value) === APPLICATION_STATUS.PAID_PENDING_VERIFICATION;
 export const isCompletedApplicationStatus = value => getApplicationStatus(value) === APPLICATION_STATUS.COMPLETED;
+export const isReturnedApplicationStatus = value => getApplicationStatus(value) === APPLICATION_STATUS.RETURNED;
 
 export const getApplicationStatusColor = value => {
   const status = getApplicationStatus(value);
@@ -44,6 +47,10 @@ export const getApplicationStatusColor = value => {
 
   if (status === APPLICATION_STATUS.COMPLETED) {
     return "success";
+  }
+
+  if (status === APPLICATION_STATUS.RETURNED) {
+    return "error";
   }
 
   return "default";
