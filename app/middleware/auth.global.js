@@ -7,8 +7,8 @@ export default defineNuxtRouteMiddleware(async to => {
   const safeMessage = useSafeMessage();
 
   const publicRoutes = ["/login", "/", "/activate"]; // Thêm các route công khai tại đây
-  const publicStartWithRoutes = ["/test/"];
-  const isPublicRoute = publicRoutes.includes(to.path);
+  const publicStartWithRoutes = ["/test/", "/user/application/"];
+  const isPublicRoute = publicRoutes.includes(to.path) || publicStartWithRoutes.some(prefix => to.path.startsWith(prefix));
   const isAdminRoute = to.path.startsWith("/admin");
   const isUserRoute = to.path.startsWith("/user");
 
