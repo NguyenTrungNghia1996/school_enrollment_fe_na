@@ -21,7 +21,7 @@
 
     <ClientOnly>
       <div class="overflow-x-auto lg:block">
-        <a-table :columns="columns" :data-source="dataSource" :pagination="pagination" :loading="loading" :scroll="{ x: 1200 }" bordered size="small" :row-key="record => record.id" @change="handleTableChange">
+        <a-table :columns="columns" :data-source="dataSource" :pagination="pagination" :loading="loading" bordered size="small" :row-key="record => record.id" @change="handleTableChange" :scroll="{ x: 1000 }">
           <template #bodyCell="{ column, record, index }">
             <template v-if="column.key === 'stt'">
               {{ (pagination.current - 1) * pagination.pageSize + index + 1 }}
@@ -106,7 +106,8 @@
             {{ getPaymentConfirmTitle(selectedRecord) }}
           </div>
           <div class="text-sm leading-6 text-slate-600">
-            Bạn có chắc chắn xác nhận thanh toán đơn đề nghị này không?<br />
+            Bạn có chắc chắn xác nhận thanh toán đơn đề nghị này không?
+            <br />
             Sau khi xác nhận, đơn đề nghị sẽ không thể khôi phục lại trạng thái trước
           </div>
         </div>
@@ -184,15 +185,15 @@ const pagination = reactive({
 });
 
 const columns = [
-  { title: "STT", key: "stt", width: 70, align: "center" },
-  { title: "Mã phúc khảo", dataIndex: "reviewCode", key: "reviewCode", width: 150 },
-  { title: "Số báo danh", dataIndex: "examNumber", key: "examNumber", width: 130, align: "center" },
-  { title: "Họ tên", dataIndex: "fullName", key: "fullName", width: 220, ellipsis: true },
-  { title: "Môn phúc khảo", dataIndex: "subjectName", key: "subjectName", width: 170, ellipsis: true },
-  { title: "Lý do", dataIndex: "reason", key: "reason", ellipsis: true },
-  { title: "Điểm thi", dataIndex: "score", key: "score", width: 140, align: "center" },
-  { title: "Điểm phúc khảo", dataIndex: "reviewScore", key: "reviewScore", width: 140, align: "center" },
-  { title: "Trạng thái", dataIndex: "statusName", key: "statusName", width: 170, align: "center" },
+  { title: "STT", key: "stt", width: 60, align: "center" },
+  { title: "Mã phúc khảo", dataIndex: "reviewCode", key: "reviewCode", width: 100 },
+  { title: "Số báo danh", dataIndex: "examNumber", key: "examNumber", width: 100, align: "center" },
+  { title: "Họ tên", dataIndex: "fullName", key: "fullName", width: 100, ellipsis: true },
+  { title: "Môn phúc khảo", dataIndex: "subjectName", key: "subjectName", width: 100, ellipsis: true },
+  // { title: "Lý do", dataIndex: "reason", key: "reason", ellipsis: true },
+  { title: "Điểm thi", dataIndex: "score", key: "score", width: 100, align: "center" },
+  { title: "Điểm phúc khảo", dataIndex: "reviewScore", key: "reviewScore", width: 100, align: "center" },
+  { title: "Trạng thái", dataIndex: "statusName", key: "statusName", width: 100, align: "center" },
   { title: "Thao tác", key: "action", width: 120, align: "center", fixed: "right" },
 ];
 

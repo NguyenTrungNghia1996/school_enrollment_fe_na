@@ -43,7 +43,6 @@
             </a>
           </div>
         </div> -->
-        // Ẩn phần chọn kỳ tuyển sinh trong modal import vì đã có ở ngoài, và tự động đồng bộ giá trị khi mở modal
         <div class="hidden rounded-xl border border-slate-200 bg-white p-4">
           <div class="font-medium text-slate-900">Kỳ tuyển sinh</div>
           <div class="mt-3">
