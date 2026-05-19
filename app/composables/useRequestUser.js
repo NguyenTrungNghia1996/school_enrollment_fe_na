@@ -47,7 +47,7 @@ export class RequestUser {
 
       async onResponseError(ctx) {
         if (ctx.response.status === 401) {
-          safeMessage.info("Phiên đăng nhập đã hết hạn");
+          // safeMessage.info("Phiên đăng nhập đã hết hạn");
           userStore.logout();
           await navigateTo("/");
         }

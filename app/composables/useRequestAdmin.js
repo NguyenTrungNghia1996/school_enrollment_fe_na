@@ -30,7 +30,7 @@ export class RequestAdmin {
 
         const isValid = this.isTokenValid(token);
         if (!isValid) {
-          safeMessage.info("Phiên đăng nhập đã hết hạn");
+          // safeMessage.info("Phiên đăng nhập đã hết hạn");
           adminStore.logout();
           navigateTo("/admin/login");
           return;
