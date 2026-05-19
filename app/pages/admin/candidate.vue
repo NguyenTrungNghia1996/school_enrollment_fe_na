@@ -17,7 +17,7 @@
 
     <ClientOnly>
       <div class="overflow-x-auto lg:block">
-        <a-table :columns="columns" :data-source="dataSource" :pagination="pagination" :loading="loading" :scroll="{ x: 1100 }" bordered size="small" row-key="applicationCode" @change="handleTableChange">
+        <a-table :columns="columns" :data-source="dataSource" :pagination="pagination" :loading="loading" :scroll="{ x: 1000 }" bordered size="small" row-key="applicationCode" @change="handleTableChange">
           <template #bodyCell="{ column, record, index }">
             <template v-if="column.key === 'stt'">
               {{ record.stt || (pagination.current - 1) * pagination.pageSize + index + 1 }}

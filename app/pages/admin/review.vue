@@ -186,14 +186,14 @@ const pagination = reactive({
 
 const columns = [
   { title: "STT", key: "stt", width: 60, align: "center" },
-  { title: "Mã phúc khảo", dataIndex: "reviewCode", key: "reviewCode", width: 100 },
+  { title: "Mã phúc khảo", dataIndex: "reviewCode", key: "reviewCode", width: 100, ellipsis: true },
   { title: "Số báo danh", dataIndex: "examNumber", key: "examNumber", width: 100, align: "center" },
   { title: "Họ tên", dataIndex: "fullName", key: "fullName", width: 100, ellipsis: true },
   { title: "Môn phúc khảo", dataIndex: "subjectName", key: "subjectName", width: 100, ellipsis: true },
-  // { title: "Lý do", dataIndex: "reason", key: "reason", ellipsis: true },
+  { title: "Lý do", dataIndex: "reason", key: "reason", ellipsis: true, width: 100 },
   { title: "Điểm thi", dataIndex: "score", key: "score", width: 100, align: "center" },
   { title: "Điểm phúc khảo", dataIndex: "reviewScore", key: "reviewScore", width: 100, align: "center" },
-  { title: "Trạng thái", dataIndex: "statusName", key: "statusName", width: 100, align: "center" },
+  { title: "Trạng thái", dataIndex: "statusName", key: "statusName", width: 120, align: "center" },
   { title: "Thao tác", key: "action", width: 120, align: "center", fixed: "right" },
 ];
 
