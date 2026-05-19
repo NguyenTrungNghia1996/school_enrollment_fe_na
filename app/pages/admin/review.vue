@@ -26,6 +26,9 @@
             <template v-if="column.key === 'stt'">
               {{ (pagination.current - 1) * pagination.pageSize + index + 1 }}
             </template>
+            <template v-else-if="column.key === 'score'">
+              <span class="font-medium text-slate-700">{{ formatScore(record.score) }}</span>
+            </template>
 
             <template v-else-if="column.key === 'reviewScore'">
               <span class="font-medium text-slate-700">{{ formatScore(record.reviewScore) }}</span>
@@ -190,7 +193,7 @@ const columns = [
   { title: "Số báo danh", dataIndex: "examNumber", key: "examNumber", width: 100, align: "center" },
   { title: "Họ tên", dataIndex: "fullName", key: "fullName", width: 100, ellipsis: true },
   { title: "Môn phúc khảo", dataIndex: "subjectName", key: "subjectName", width: 100, ellipsis: true },
-  { title: "Lý do", dataIndex: "reason", key: "reason", ellipsis: true, width: 100 },
+  // { title: "Lý do", dataIndex: "reason", key: "reason", ellipsis: true, width: 100 },
   { title: "Điểm thi", dataIndex: "score", key: "score", width: 100, align: "center" },
   { title: "Điểm phúc khảo", dataIndex: "reviewScore", key: "reviewScore", width: 100, align: "center" },
   { title: "Trạng thái", dataIndex: "statusName", key: "statusName", width: 120, align: "center" },
