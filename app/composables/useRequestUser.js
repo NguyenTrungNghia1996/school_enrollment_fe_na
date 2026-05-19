@@ -68,6 +68,32 @@ export class RequestUser {
     });
   }
 
+  fetch(url, options = {}) {
+    return $fetch(url, {
+      baseURL: this.baseURL,
+      ...options,
+      ...this.handlers(),
+    });
+  }
+
+  async _mutate(url, options) {
+    const data = ref(null);
+    const error = ref(null);
+
+    try {
+      const res = await this.fetch(url, options);
+      data.value = res;
+    } catch (err) {
+      error.value = {
+        data: err.response?._data || err.data,
+        message: err.message,
+        ...err,
+      };
+    }
+
+    return { data, error };
+  }
+
   // =========================
   // METHODS
   // =========================
@@ -79,28 +105,28 @@ export class RequestUser {
   }
 
   post(url, options) {
-    return this.request(url, {
+    return this._mutate(url, {
       method: "POST",
       ...options,
     });
   }
 
   put(url, options) {
-    return this.request(url, {
+    return this._mutate(url, {
       method: "PUT",
       ...options,
     });
   }
 
   patch(url, options) {
-    return this.request(url, {
+    return this._mutate(url, {
       method: "PATCH",
       ...options,
     });
   }
 
   delete(url, options) {
-    return this.request(url, {
+    return this._mutate(url, {
       method: "DELETE",
       ...options,
     });
