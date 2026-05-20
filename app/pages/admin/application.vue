@@ -59,6 +59,22 @@
                 </a-button>
               </a-tooltip>
 
+              <!-- <a-popconfirm title="Bạn chắc chắn muốn duyệt tuyển thẳng hồ sơ này?" ok-text="Đồng ý" cancel-text="Hủy" @confirm="approveDirectApplication(record)">
+                <a-tooltip title="Tuyển thẳng">
+                  <a-button type="link" size="small" class="text-emerald-600" :loading="isDirectActionLoading(record, 'approve')" :disabled="!adminStore.canApproveCurrentPage || isAnyDirectActionLoading(record)">
+                    Tuyển thẳng
+                  </a-button>
+                </a-tooltip>
+              </a-popconfirm>
+
+              <a-popconfirm title="Bạn chắc chắn muốn hủy tuyển thẳng hồ sơ này?" ok-text="Đồng ý" cancel-text="Hủy" @confirm="cancelDirectApplication(record)">
+                <a-tooltip title="Hủy tuyển thẳng">
+                  <a-button type="link" size="small" danger :loading="isDirectActionLoading(record, 'cancel')" :disabled="!adminStore.canApproveCurrentPage || isAnyDirectActionLoading(record)">
+                    Hủy
+                  </a-button>
+                </a-tooltip>
+              </a-popconfirm> -->
+
               <!-- <a-popconfirm title="Bạn chắc chắn muốn xóa hồ sơ này?" ok-text="Đồng ý" cancel-text="Hủy" @confirm="deleteItem(record.id)">
                 <a-button type="link" size="small" danger :disabled="isDeleteDisabled(record) || !adminStore.canEditCurrentPage">
                   <template #icon><DeleteOutlined /></template>
@@ -114,7 +130,7 @@
           <a-descriptions-item label="Địa chỉ thường trú" :span="2">{{ detailData.permanentAddress || "-" }}</a-descriptions-item>
           <a-descriptions-item label="Số điện thoại">{{ detailData.phoneNumber || "-" }}</a-descriptions-item>
           <a-descriptions-item label="Tỉnh hiện tại">{{ detailData.currentProvinceName || `#${detailData.idCurrentProvince || "-"}` }}</a-descriptions-item>
-          <a-descriptions-item label="Phường/xã hiện tại">{{ detailData.currentCommuneName || `#${detailData.idCurrentCommune || "-"}` }}</a-descriptions-item>
+          <a-descriptions-item label="Phường/xã hiện tại" :span="2">{{ detailData.currentCommuneName || `#${detailData.idCurrentCommune || "-"}` }}</a-descriptions-item>
           <a-descriptions-item label="Địa chỉ hiện tại" :span="2">{{ detailData.currentAddress || "-" }}</a-descriptions-item>
           <a-descriptions-item label="Ghi chú" :span="2">{{ detailData.note || "-" }}</a-descriptions-item>
         </a-descriptions>
@@ -143,10 +159,16 @@
         </div>
 
         <div class="flex justify-end gap-2 border-t border-slate-100 pt-4">
-          <a-button @click="closeDetail">Đóng</a-button>
           <a-button v-if="showPaymentInfoAction(detailData)" :disabled="!adminStore.canApproveCurrentPage" @click="openPaymentDetail(detailData, true)">Xác nhận thanh toán</a-button>
+          <a-popconfirm title="Bạn chắc chắn muốn duyệt tuyển thẳng hồ sơ này?" ok-text="Đồng ý" cancel-text="Hủy" @confirm="approveDirectApplication(detailData, true)">
+            <a-button class="border-emerald-500 text-emerald-600" :loading="isDirectActionLoading(detailData, 'approve')" :disabled="!detailData || !adminStore.canApproveCurrentPage || isAnyDirectActionLoading(detailData)">Tuyển thẳng</a-button>
+          </a-popconfirm>
+          <a-popconfirm title="Bạn chắc chắn muốn hủy tuyển thẳng hồ sơ này?" ok-text="Đồng ý" cancel-text="Hủy" @confirm="cancelDirectApplication(detailData, true)">
+            <a-button danger :loading="isDirectActionLoading(detailData, 'cancel')" :disabled="!detailData || !adminStore.canApproveCurrentPage || isAnyDirectActionLoading(detailData)">Hủy tuyển thẳng</a-button>
+          </a-popconfirm>
           <a-button type="primary" :disabled="!detailData || isActionDisabled(detailData) || !adminStore.canApproveCurrentPage" @click="approveItem(detailData, true)">Duyệt hồ sơ</a-button>
           <a-button danger :disabled="!detailData || isActionDisabled(detailData) || !adminStore.canApproveCurrentPage" @click="openReject(detailData, true)">Từ chối</a-button>
+          <a-button @click="closeDetail">Đóng</a-button>
         </div>
       </div>
     </a-modal>
@@ -204,6 +226,10 @@ const rejectNote = ref("");
 const selectedRecord = ref(null);
 const paymentConfirmVisible = ref(false);
 const completePaymentLoading = ref(false);
+const directActionLoading = reactive({
+  id: null,
+  action: "",
+});
 
 const pagination = reactive({
   current: 1,
@@ -222,7 +248,7 @@ const columns = [
   { title: "Ngày sinh", dataIndex: "dateOfBirth", key: "dateOfBirth", width: 130 },
   { title: "Số CCCD", dataIndex: "identityNumber", key: "identityNumber", width: 150 },
   { title: "Trạng thái", dataIndex: "statusName", key: "statusName", width: 200, align: "center" },
-  { title: "Thao tác", key: "action", width: 150, align: "center", fixed: "right" },
+  { title: "Thao tác", key: "action", width: 260, align: "center", fixed: "right" },
 ];
 
 const statusOptions = computed(() => [
@@ -422,6 +448,14 @@ const showPaymentInfoAction = record => {
   return isPaidPendingVerificationApplicationStatus(record);
 };
 
+const isDirectActionLoading = (record, action) => {
+  return Boolean(record?.id) && directActionLoading.id === record.id && directActionLoading.action === action;
+};
+
+const isAnyDirectActionLoading = record => {
+  return Boolean(record?.id) && directActionLoading.id === record.id && Boolean(directActionLoading.action);
+};
+
 const getFileName = link => {
   if (!link) return "";
 
@@ -583,6 +617,44 @@ const approveItem = async (record, keepModal = false) => {
   } catch (error) {
     message.error(error?.message || "Duyệt hồ sơ thất bại");
   }
+};
+
+const submitDirectApplicationAction = async (record, action, successMessage, fallbackMessage) => {
+  const applicationId = Number(record?.id);
+  if (!Number.isFinite(applicationId) || applicationId <= 0) {
+    message.error("Không xác định được hồ sơ");
+    return;
+  }
+
+  directActionLoading.id = record.id;
+  directActionLoading.action = action;
+
+  try {
+    const { data, error } = await adminApplication.getByRest(`direct/${action}`, {
+      params: { id: applicationId },
+      key: `admin-application-direct-${action}-${applicationId}-${Date.now()}`,
+    });
+    if (error.value || data.value?.success === false) {
+      throw new Error(error.value?.data?.message || data.value?.message || fallbackMessage);
+    }
+
+    message.success(data.value?.message || successMessage);
+    await reloadApplicationTable();
+    await reloadDetailIfOpen(applicationId);
+  } catch (error) {
+    message.error(error?.message || fallbackMessage);
+  } finally {
+    directActionLoading.id = null;
+    directActionLoading.action = "";
+  }
+};
+
+const approveDirectApplication = async record => {
+  await submitDirectApplicationAction(record, "approve", "Duyệt tuyển thẳng thành công", "Duyệt tuyển thẳng thất bại");
+};
+
+const cancelDirectApplication = async record => {
+  await submitDirectApplicationAction(record, "cancel", "Hủy tuyển thẳng thành công", "Hủy tuyển thẳng thất bại");
 };
 
 const openReject = (record, fromDetail = false) => {
