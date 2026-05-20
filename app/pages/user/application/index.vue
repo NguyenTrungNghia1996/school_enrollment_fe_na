@@ -49,8 +49,8 @@
                   <template v-else-if="column.key === 'action'">
                     <div class="flex justify-center gap-3">
                       <a-button type="link" class="px-0" @click="openDetail(record)">Chi tiết</a-button>
-                      <a-button v-if="record.hasScores" type="link" class="px-0" @click="openExamScoreModal(record)">Kết quả</a-button>
-                      <a-button v-if="record.hasScores" type="link" class="px-0" @click="openReviewModal(record)">Phúc khảo</a-button>
+                      <a-button v-if="canViewExamResult(record)" type="link" class="px-0" @click="openExamScoreModal(record)">Kết quả</a-button>
+                      <a-button v-if="canCreateReview(record)" type="link" class="px-0" @click="openReviewModal(record)">Phúc khảo</a-button>
                     </div>
                   </template>
                 </template>
@@ -82,8 +82,8 @@
               </dl>
 
               <div class="mt-4 flex flex-wrap justify-end gap-2">
-                <a-button v-if="record.hasScores" class="rounded-xl" @click="openExamScoreModal(record)">Kết quả thi</a-button>
-                <a-button v-if="record.hasScores" class="rounded-xl" @click="openReviewModal(record)">Phúc khảo</a-button>
+                <a-button v-if="canViewExamResult(record)" class="rounded-xl" @click="openExamScoreModal(record)">Kết quả thi</a-button>
+                <a-button v-if="canCreateReview(record)" class="rounded-xl" @click="openReviewModal(record)">Phúc khảo</a-button>
                 <a-button type="primary" class="rounded-xl" @click="openDetail(record)">Xem chi tiết</a-button>
               </div>
             </article>
@@ -309,6 +309,8 @@ const handlePageChange = (page, pageSize) => {
   params.value.pageSize = pageSize;
 };
 
+const canViewExamResult = record => Boolean(record?.hasRoom);
+const canCreateReview = record => Boolean(record?.hasScores);
 const getStatusColor = value => getApplicationStatusColor(value);
 const getStatusLabel = value => getApplicationStatusLabel(value);
 
@@ -389,7 +391,7 @@ const fetchExamScore = async () => {
 
 const openExamScoreModal = async record => {
   const idApplication = toPositiveNumber(record?.id);
-  if (!idApplication || !record?.hasScores) return;
+  if (!idApplication || !canViewExamResult(record)) return;
 
   selectedScoreApplicationId.value = idApplication;
   examScoreData.value = null;
@@ -410,7 +412,7 @@ const closeExamScoreModal = () => {
 const openReviewModal = record => {
   const idApplication = toPositiveNumber(record?.id);
   const idExam = toPositiveNumber(record?.idExam);
-  if (!idApplication || !record?.hasScores) return;
+  if (!idApplication || !canCreateReview(record)) return;
 
   navigateTo({
     path: "/user/application/review",
