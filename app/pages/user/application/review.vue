@@ -612,6 +612,16 @@ const handleCreateApplicationChange = async (value, option) => {
   await fetchCreateApplication(value);
 };
 
+const selectFirstCreateApplication = async () => {
+  await nextTick();
+
+  const firstOption = createApplicationOptions.value[0];
+  if (!firstOption?.application) return;
+
+  syncCreateApplication(firstOption.application);
+  createFormRef.value?.clearValidate?.(["idApplication"]);
+};
+
 const openCreateReview = async () => {
   const idApplication = toPositiveNumber(route.query.idApplication);
   resetCreateForm();
@@ -624,6 +634,7 @@ const openCreateReview = async () => {
   } else {
     createApplicationParams.value.idExam = selectedExamId.value || undefined;
     await refreshCreateApplications();
+    await selectFirstCreateApplication();
   }
 };
 
