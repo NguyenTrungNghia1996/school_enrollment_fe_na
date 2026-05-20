@@ -59,22 +59,6 @@
                 </a-button>
               </a-tooltip>
 
-              <!-- <a-popconfirm title="Bạn chắc chắn muốn duyệt tuyển thẳng hồ sơ này?" ok-text="Đồng ý" cancel-text="Hủy" @confirm="approveDirectApplication(record)">
-                <a-tooltip title="Tuyển thẳng">
-                  <a-button type="link" size="small" class="text-emerald-600" :loading="isDirectActionLoading(record, 'approve')" :disabled="!adminStore.canApproveCurrentPage || isAnyDirectActionLoading(record)">
-                    Tuyển thẳng
-                  </a-button>
-                </a-tooltip>
-              </a-popconfirm>
-
-              <a-popconfirm title="Bạn chắc chắn muốn hủy tuyển thẳng hồ sơ này?" ok-text="Đồng ý" cancel-text="Hủy" @confirm="cancelDirectApplication(record)">
-                <a-tooltip title="Hủy tuyển thẳng">
-                  <a-button type="link" size="small" danger :loading="isDirectActionLoading(record, 'cancel')" :disabled="!adminStore.canApproveCurrentPage || isAnyDirectActionLoading(record)">
-                    Hủy
-                  </a-button>
-                </a-tooltip>
-              </a-popconfirm> -->
-
               <!-- <a-popconfirm title="Bạn chắc chắn muốn xóa hồ sơ này?" ok-text="Đồng ý" cancel-text="Hủy" @confirm="deleteItem(record.id)">
                 <a-button type="link" size="small" danger :disabled="isDeleteDisabled(record) || !adminStore.canEditCurrentPage">
                   <template #icon><DeleteOutlined /></template>
@@ -248,7 +232,7 @@ const columns = [
   { title: "Ngày sinh", dataIndex: "dateOfBirth", key: "dateOfBirth", width: 130 },
   { title: "Số CCCD", dataIndex: "identityNumber", key: "identityNumber", width: 150 },
   { title: "Trạng thái", dataIndex: "statusName", key: "statusName", width: 200, align: "center" },
-  { title: "Thao tác", key: "action", width: 260, align: "center", fixed: "right" },
+  { title: "Thao tác", key: "action", width: 150, align: "center", fixed: "right" },
 ];
 
 const statusOptions = computed(() => [
@@ -630,7 +614,7 @@ const submitDirectApplicationAction = async (record, action, successMessage, fal
   directActionLoading.action = action;
 
   try {
-    const { data, error } = await adminApplication.getByRest(`direct/${action}`, {
+    const { data, error } = await adminApplication.putByRest(`direct/${action}`, {
       params: { id: applicationId },
       key: `admin-application-direct-${action}-${applicationId}-${Date.now()}`,
     });
