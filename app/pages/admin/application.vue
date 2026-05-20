@@ -188,6 +188,7 @@
 <script setup>
 import dayjs from "dayjs";
 import { APPLICATION_STATUS_LABELS, getApplicationStatusColor, getApplicationStatusLabel, isDraftApplicationStatus, isPendingReviewApplicationStatus, isPaidPendingVerificationApplicationStatus } from "~/composables/useApplicationStatus";
+import { useAdminStore } from "~/stores/adminStore";
 
 definePageMeta({
   layout: "admin",
