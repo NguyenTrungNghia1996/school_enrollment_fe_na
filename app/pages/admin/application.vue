@@ -144,14 +144,14 @@
 
         <div class="flex justify-end gap-2 border-t border-slate-100 pt-4">
           <a-button v-if="showPaymentInfoAction(detailData)" :disabled="!adminStore.canApproveCurrentPage" @click="openPaymentDetail(detailData, true)">Xác nhận thanh toán</a-button>
-          <a-popconfirm title="Bạn chắc chắn muốn duyệt tuyển thẳng hồ sơ này?" ok-text="Đồng ý" cancel-text="Hủy" @confirm="approveDirectApplication(detailData, true)">
-            <a-button class="border-emerald-500 text-emerald-600" :loading="isDirectActionLoading(detailData, 'approve')" :disabled="!detailData || !adminStore.canApproveCurrentPage || isAnyDirectActionLoading(detailData)">Tuyển thẳng</a-button>
+          <a-popconfirm v-if="canShowApproveDirectAction(detailData)" title="Bạn chắc chắn muốn duyệt tuyển thẳng hồ sơ này?" ok-text="Đồng ý" cancel-text="Hủy" @confirm="approveDirectApplication(detailData, true)">
+            <a-button class="border-emerald-500 text-emerald-600" :loading="isDirectActionLoading(detailData, 'approve')" :disabled="isAnyDirectActionLoading(detailData)">Tuyển thẳng</a-button>
           </a-popconfirm>
-          <a-popconfirm title="Bạn chắc chắn muốn hủy tuyển thẳng hồ sơ này?" ok-text="Đồng ý" cancel-text="Hủy" @confirm="cancelDirectApplication(detailData, true)">
-            <a-button danger :loading="isDirectActionLoading(detailData, 'cancel')" :disabled="!detailData || !adminStore.canApproveCurrentPage || isAnyDirectActionLoading(detailData)">Hủy tuyển thẳng</a-button>
+          <a-popconfirm v-if="canShowCancelDirectAction(detailData)" title="Bạn chắc chắn muốn hủy tuyển thẳng hồ sơ này?" ok-text="Đồng ý" cancel-text="Hủy" @confirm="cancelDirectApplication(detailData, true)">
+            <a-button danger :loading="isDirectActionLoading(detailData, 'cancel')" :disabled="isAnyDirectActionLoading(detailData)">Hủy tuyển thẳng</a-button>
           </a-popconfirm>
-          <a-button type="primary" :disabled="!detailData || isActionDisabled(detailData) || !adminStore.canApproveCurrentPage" @click="approveItem(detailData, true)">Duyệt hồ sơ</a-button>
-          <a-button danger :disabled="!detailData || isActionDisabled(detailData) || !adminStore.canApproveCurrentPage" @click="openReject(detailData, true)">Từ chối</a-button>
+          <a-button v-if="canShowApproveAction(detailData)" type="primary" @click="approveItem(detailData, true)">Duyệt hồ sơ</a-button>
+          <a-button v-if="canShowRejectAction(detailData)" danger @click="openReject(detailData, true)">Từ chối</a-button>
           <a-button @click="closeDetail">Đóng</a-button>
         </div>
       </div>
@@ -423,6 +423,23 @@ const getStatusLabel = record => getApplicationStatusLabel(record);
 
 const isActionDisabled = record => {
   return !isPendingReviewApplicationStatus(record);
+};
+
+const canShowApproveAction = record => {
+  return Boolean(record?.canApprove) && adminStore.canApproveCurrentPage;
+};
+
+const canShowRejectAction = record => {
+  // return Boolean(record?.canReject) && adminStore.canApproveCurrentPage;
+  return adminStore.canApproveCurrentPage;
+};
+
+const canShowApproveDirectAction = record => {
+  return Boolean(record?.canApproveDirect) && adminStore.canApproveCurrentPage;
+};
+
+const canShowCancelDirectAction = record => {
+  return Boolean(record?.canCancel) && adminStore.canApproveCurrentPage;
 };
 
 const isDeleteDisabled = record => {

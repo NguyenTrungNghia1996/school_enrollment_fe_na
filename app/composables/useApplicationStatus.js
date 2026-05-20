@@ -5,6 +5,7 @@ export const APPLICATION_STATUS = Object.freeze({
   PAID_PENDING_VERIFICATION: 4,
   COMPLETED: 5,
   RETURNED: 6,
+  DIRECT_PENDING_REVIEW: 7,
 });
 
 export const APPLICATION_STATUS_LABELS = Object.freeze({
@@ -14,17 +15,22 @@ export const APPLICATION_STATUS_LABELS = Object.freeze({
   [APPLICATION_STATUS.PAID_PENDING_VERIFICATION]: "Đã thanh toán, chờ xác minh",
   [APPLICATION_STATUS.COMPLETED]: "Hoàn thành",
   [APPLICATION_STATUS.RETURNED]: "Trả lại",
+  [APPLICATION_STATUS.DIRECT_PENDING_REVIEW]: "Đang xét tuyển thẳng",
 });
 
 export const getApplicationStatus = value => Number(value?.idStatus ?? value);
 export const getApplicationStatusLabel = value => APPLICATION_STATUS_LABELS[getApplicationStatus(value)] || "Không xác định";
 
 export const isDraftApplicationStatus = value => getApplicationStatus(value) === APPLICATION_STATUS.DRAFT;
-export const isPendingReviewApplicationStatus = value => getApplicationStatus(value) === APPLICATION_STATUS.PENDING_REVIEW;
+export const isPendingReviewApplicationStatus = value => {
+  const status = getApplicationStatus(value);
+  return status === APPLICATION_STATUS.PENDING_REVIEW || status === APPLICATION_STATUS.DIRECT_PENDING_REVIEW;
+};
 export const isApprovedPendingPaymentApplicationStatus = value => getApplicationStatus(value) === APPLICATION_STATUS.APPROVED_PENDING_PAYMENT;
 export const isPaidPendingVerificationApplicationStatus = value => getApplicationStatus(value) === APPLICATION_STATUS.PAID_PENDING_VERIFICATION;
 export const isCompletedApplicationStatus = value => getApplicationStatus(value) === APPLICATION_STATUS.COMPLETED;
 export const isReturnedApplicationStatus = value => getApplicationStatus(value) === APPLICATION_STATUS.RETURNED;
+export const isDirectPendingReviewApplicationStatus = value => getApplicationStatus(value) === APPLICATION_STATUS.DIRECT_PENDING_REVIEW;
 
 export const getApplicationStatusColor = value => {
   const status = getApplicationStatus(value);
@@ -33,7 +39,7 @@ export const getApplicationStatusColor = value => {
     return "default";
   }
 
-  if (status === APPLICATION_STATUS.PENDING_REVIEW) {
+  if (status === APPLICATION_STATUS.PENDING_REVIEW || status === APPLICATION_STATUS.DIRECT_PENDING_REVIEW) {
     return "processing";
   }
 
