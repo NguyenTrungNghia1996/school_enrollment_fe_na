@@ -40,7 +40,7 @@
         </div>
 
         <template v-else>
-          <div class="hidden overflow-x-auto lg:block">
+          <div class="overflow-x-auto lg:block">
             <ClientOnly>
               <a-table :columns="columns" :data-source="dataSource" :pagination="false" :row-key="record => record.id" :scroll="{ x: 1280 }" bordered size="middle">
                 <template #bodyCell="{ column, record, index }">
@@ -70,7 +70,7 @@
             </ClientOnly>
           </div>
 
-          <div v-if="!dataSource.length" class="rounded-2xl border border-dashed border-slate-300 bg-slate-50 px-5 py-12 text-center text-slate-500">Chưa có yêu cầu phúc khảo nào.</div>
+          <!-- <div v-if="!dataSource.length" class="rounded-2xl border border-dashed border-slate-300 bg-slate-50 px-5 py-12 text-center text-slate-500">Chưa có yêu cầu phúc khảo nào.</div>
 
           <div v-else class="space-y-4 lg:hidden">
             <article v-for="record in dataSource" :key="record.id" class="rounded-2xl border border-slate-200 bg-slate-50 p-4">
@@ -109,7 +109,7 @@
 
           <div v-if="pagination.total > pagination.pageSize" class="mt-6 flex justify-center">
             <a-pagination v-model:current="pagination.current" v-model:page-size="pagination.pageSize" :total="pagination.total" :show-size-changer="true" :page-size-options="['10', '20', '50', '100']" :show-total="total => `Tổng ${total} yêu cầu`" @change="handlePageChange" />
-          </div>
+          </div> -->
         </template>
       </section>
     </div>
