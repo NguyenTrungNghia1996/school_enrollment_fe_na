@@ -71,6 +71,23 @@
             <a-input-number v-model:value="formState.quantity" :min="1" class="w-full" :disabled="isGeneralFieldsReadOnly" />
           </a-form-item>
 
+          <a-form-item label="Hình thức tuyển sinh" name="examType" class="md:col-span-2">
+            <a-radio-group v-model:value="formState.examType" :disabled="isGeneralFieldsReadOnly">
+              <a-radio :value="1">Thi</a-radio>
+              <a-radio :value="2">Xét tuyển</a-radio>
+            </a-radio-group>
+          </a-form-item>
+
+          <template v-if="formState.examType === 2">
+            <a-form-item label="Hạn kết thúc xét tuyển" name="directEndDate">
+              <a-date-picker v-model:value="formState.directEndDate" format="DD/MM/YYYY HH:mm" show-time class="w-full" :disabled-date="disabledDirectEndDate" placeholder="Chọn ngày giờ kết thúc xét tuyển" :disabled="isGeneralFieldsReadOnly" />
+            </a-form-item>
+
+            <a-form-item label="Chỉ tiêu xét tuyển" name="directQuantity">
+              <a-input-number v-model:value="formState.directQuantity" :min="1" class="w-full" :disabled="isGeneralFieldsReadOnly" />
+            </a-form-item>
+          </template>
+
           <a-form-item label="Thời gian phúc khảo" name="reviewDateRange" class="md:col-span-2">
             <a-range-picker v-model:value="formState.reviewDateRange" format="DD/MM/YYYY HH:mm" show-time class="w-full" :disabled-date="disabledReviewDate" :placeholder="['Chọn ngày giờ bắt đầu phúc khảo', 'Chọn ngày giờ kết thúc phúc khảo']" :disabled="isReviewFieldsReadOnly" />
           </a-form-item>
@@ -177,6 +194,9 @@ const createInitialFormState = () => ({
   idBank: undefined,
   accountNumber: "",
   accountName: "",
+  examType: 1,
+  directEndDate: null,
+  directQuantity: null,
   documents: [],
 });
 
@@ -207,6 +227,13 @@ const disabledReviewDate = current => {
   return !current.endOf("day").isAfter(enrollmentEnd);
 };
 
+const disabledDirectEndDate = current => {
+  const enrollmentStart = formState.dateRange?.[0];
+  const enrollmentEnd = formState.dateRange?.[1];
+  if (!current || !enrollmentStart || !enrollmentEnd) return false;
+  return current.endOf("day").isBefore(enrollmentStart) || current.startOf("day").isAfter(enrollmentEnd);
+};
+
 const validateReviewDateRange = async (_, value) => {
   // if (!Array.isArray(value) || value.length !== 2 || !value[0] || !value[1]) {
   //   throw new Error("Vui lòng chọn thời gian phúc khảo");
@@ -215,6 +242,35 @@ const validateReviewDateRange = async (_, value) => {
   const enrollmentEnd = formState.dateRange?.[1];
   if (enrollmentEnd && !dayjs(value[0]).isAfter(enrollmentEnd)) {
     throw new Error("Thời gian phúc khảo phải sau thời gian nộp hồ sơ");
+  }
+};
+
+const validateDirectEndDate = async (_, value) => {
+  if (formState.examType !== 2) return;
+  if (!value) {
+    throw new Error("Vui lòng chọn hạn kết thúc xét tuyển");
+  }
+
+  const enrollmentStart = formState.dateRange?.[0];
+  const enrollmentEnd = formState.dateRange?.[1];
+  if (!enrollmentStart || !enrollmentEnd) return;
+
+  const directEndDate = dayjs(value);
+  if (directEndDate.isBefore(enrollmentStart) || directEndDate.isAfter(enrollmentEnd)) {
+    throw new Error("Hạn kết thúc xét tuyển phải nằm trong khoảng thời gian tuyển sinh");
+  }
+};
+
+const validateDirectQuantity = async (_, value) => {
+  if (formState.examType !== 2) return;
+  if (value === null || value === undefined || value === "") {
+    throw new Error("Vui lòng nhập chỉ tiêu xét tuyển");
+  }
+  if (Number(value) < 1) {
+    throw new Error("Chỉ tiêu xét tuyển nhỏ nhất là 1");
+  }
+  if (formState.quantity !== null && formState.quantity !== undefined && Number(value) > Number(formState.quantity)) {
+    throw new Error("Chỉ tiêu xét tuyển không được lớn hơn số lượng chỉ tiêu");
   }
 };
 
@@ -230,6 +286,9 @@ const rules = {
       trigger: "change",
     },
   ],
+  examType: [{ required: true, message: "Vui lòng chọn hình thức tuyển sinh", trigger: "change" }],
+  directEndDate: [{ validator: validateDirectEndDate, trigger: "change" }],
+  directQuantity: [{ validator: validateDirectQuantity, trigger: "blur" }],
   reviewDateRange: [
     { required: true, message: "Vui lòng chọn thời gian phúc khảo", trigger: "change" },
     {
@@ -238,11 +297,7 @@ const rules = {
     },
   ],
   fee: [{ required: true, message: "Vui lòng nhập lệ phí thi", trigger: "blur" }, validateRequiredNumber("lệ phí thi")],
-  quantity: [
-    { required: true, message: "Vui lòng nhập chỉ tiêu", trigger: "blur" },
-    { type: "number", min: 1, message: "Chỉ tiêu nhỏ nhất là 1", trigger: "blur" },
-    validateRequiredNumber("chỉ tiêu"),
-  ],
+  quantity: [{ required: true, message: "Vui lòng nhập chỉ tiêu", trigger: "blur" }, { type: "number", min: 1, message: "Chỉ tiêu nhỏ nhất là 1", trigger: "blur" }, validateRequiredNumber("chỉ tiêu")],
   reviewFee: [{ required: true, message: "Vui lòng nhập lệ phí phúc khảo", trigger: "blur" }, validateRequiredNumber("lệ phí phúc khảo")],
   accountNumber: [{ required: true, message: "Vui lòng nhập số tài khoản", trigger: "blur" }],
   accountName: [{ required: true, message: "Vui lòng nhập chủ tài khoản", trigger: "blur" }],
@@ -288,6 +343,30 @@ const handleSearch = () => {
   pagination.current = 1;
 };
 
+watch(
+  () => formState.examType,
+  value => {
+    if (Number(value) !== 2) {
+      formState.directEndDate = null;
+      formState.directQuantity = null;
+      nextTick(() => {
+        formRef.value?.clearValidate(["directEndDate", "directQuantity"]);
+      });
+    }
+  },
+);
+
+watch(
+  () => formState.quantity,
+  () => {
+    if (Number(formState.examType) === 2 && formState.directQuantity !== null && formState.directQuantity !== undefined) {
+      nextTick(() => {
+        formRef.value?.validateFields(["directQuantity"]).catch(() => {});
+      });
+    }
+  },
+);
+
 const showModal = () => {
   isEdit.value = false;
   Object.assign(formState, createInitialFormState());
@@ -308,6 +387,7 @@ const editItem = async id => {
       const endDate = detail.endDate ? dayjs(detail.endDate) : null;
       const reviewStartDate = detail.reviewStartDate ? dayjs(detail.reviewStartDate) : null;
       const reviewEndDate = detail.reviewEndDate ? dayjs(detail.reviewEndDate) : null;
+      const directEndDate = detail.directEndDate ? dayjs(detail.directEndDate) : null;
       Object.assign(formState, {
         id: detail.id,
         hasApplications: Boolean(detail.hasApplications),
@@ -326,6 +406,9 @@ const editItem = async id => {
         idBank: detail.idBank ?? undefined,
         accountNumber: detail.accountNumber || "",
         accountName: detail.accountName || "",
+        examType: Number(detail.examType || 1),
+        directEndDate,
+        directQuantity: detail.directQuantity ?? null,
         documents: detail.documents ? JSON.parse(JSON.stringify(detail.documents)) : [],
       });
       visible.value = true;
@@ -365,6 +448,7 @@ const handleOk = async () => {
       idBank: formState.idBank ?? 0,
       accountNumber: formState.accountNumber.trim(),
       accountName: formState.accountName.trim(),
+      examType: Number(formState.examType || 1),
       documents: Array.isArray(formState.documents)
         ? formState.documents
             .map(doc => ({
@@ -378,6 +462,11 @@ const handleOk = async () => {
       reviewStartDate: serializeLocalDateTime(formState.reviewStartDate),
       reviewEndDate: serializeLocalDateTime(formState.reviewEndDate),
     };
+
+    if (Number(formState.examType) === 2) {
+      payload.directEndDate = serializeLocalDateTime(formState.directEndDate);
+      payload.directQuantity = Number(formState.directQuantity || 0);
+    }
 
     let res;
     if (isEdit.value) {
