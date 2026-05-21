@@ -16,25 +16,47 @@
     </div>
 
     <ClientOnly>
-      <div class="overflow-x-auto lg:block">
-        <a-table :columns="columns" :data-source="dataSource" :pagination="pagination" :loading="isTableLoading" :scroll="{ x: 1000 }" bordered size="small" row-key="applicationCode" @change="handleTableChange">
-          <template #bodyCell="{ column, record, index }">
-            <template v-if="column.key === 'stt'">
-              {{ record.stt || (pagination.current - 1) * pagination.pageSize + index + 1 }}
-            </template>
+      <a-tabs v-model:activeKey="activeTab">
+        <a-tab-pane key="exam-result" tab="Kết quả thi">
+          <div class="overflow-x-auto lg:block">
+            <a-table :columns="resultColumns" :data-source="resultDataSource" :pagination="resultPagination" :loading="isResultTableLoading" :scroll="{ x: 1000 }" bordered size="small" row-key="applicationCode" @change="handleResultTableChange">
+              <template #bodyCell="{ column, record, index }">
+                <template v-if="column.key === 'stt'">
+                  {{ record.stt || (resultPagination.current - 1) * resultPagination.pageSize + index + 1 }}
+                </template>
 
-            <template v-else-if="column.key === 'totalScore'">
-              <span class="font-medium text-slate-700">{{ formatScore(record.totalScore) }}</span>
-            </template>
+                <template v-else-if="column.key === 'totalScore'">
+                  <span class="font-medium text-slate-700">{{ formatScore(record.totalScore) }}</span>
+                </template>
 
-            <template v-else-if="column.key === 'result'">
-              <a-tag :color="getResultColor(record.result)">
-                {{ formatResult(record.result) }}
-              </a-tag>
-            </template>
-          </template>
-        </a-table>
-      </div>
+                <template v-else-if="column.key === 'result'">
+                  <a-tag :color="getResultColor(record.result)">
+                    {{ formatResult(record.result) }}
+                  </a-tag>
+                </template>
+              </template>
+            </a-table>
+          </div>
+        </a-tab-pane>
+
+        <a-tab-pane key="direct-list" tab="Danh sách tuyển thẳng">
+          <div class="overflow-x-auto lg:block">
+            <a-table :columns="directColumns" :data-source="directDataSource" :pagination="directPagination" :loading="directLoading" :scroll="{ x: 800 }" bordered size="small" :row-key="getDirectRowKey" @change="handleDirectTableChange">
+              <template #bodyCell="{ column, record, index }">
+                <template v-if="column.key === 'stt'">
+                  {{ (directPagination.current - 1) * directPagination.pageSize + index + 1 }}
+                </template>
+
+                <template v-else-if="column.key === 'isDirect'">
+                  <a-tag :color="record.isDirect ? 'success' : 'default'">
+                    {{ record.isDirect ? "Tuyển thẳng" : "Không" }}
+                  </a-tag>
+                </template>
+              </template>
+            </a-table>
+          </div>
+        </a-tab-pane>
+      </a-tabs>
     </ClientOnly>
   </div>
 </template>
@@ -50,21 +72,25 @@ const config = useRuntimeConfig();
 
 const searchText = ref("");
 const selectedExamId = ref(null);
+const activeTab = ref("exam-result");
 const calculateLoading = ref(false);
 const publishLoading = ref(false);
 const exportLoading = ref(false);
 const calculatedItems = ref(null);
 
-const pagination = reactive({
+const createPagination = totalLabel => ({
   current: 1,
   pageSize: 10,
   total: 0,
   showSizeChanger: true,
   pageSizeOptions: ["10", "20", "50", "100"],
-  showTotal: total => `Tổng ${total} kết quả`,
+  showTotal: total => `Tổng ${total} ${totalLabel}`,
 });
 
-const columns = [
+const resultPagination = reactive(createPagination("kết quả"));
+const directPagination = reactive(createPagination("bản ghi"));
+
+const resultColumns = [
   { title: "STT", key: "stt", width: 70, align: "center" },
   { title: "Mã hồ sơ", dataIndex: "applicationCode", key: "applicationCode", width: 140 },
   { title: "Số báo danh", dataIndex: "examNumber", key: "examNumber", width: 140, align: "center" },
@@ -73,7 +99,22 @@ const columns = [
   { title: "Kết quả", dataIndex: "result", key: "result", width: 140, align: "center" },
 ];
 
-const params = ref({
+const directColumns = [
+  { title: "STT", key: "stt", width: 70, align: "center" },
+  { title: "Mã hồ sơ", dataIndex: "applicationCode", key: "applicationCode", width: 140 },
+  { title: "Số CCCD", dataIndex: "identityNumber", key: "identityNumber", width: 160, align: "center" },
+  { title: "Họ tên", dataIndex: "fullName", key: "fullName", ellipsis: true },
+  { title: "Trạng thái", dataIndex: "isDirect", key: "isDirect", width: 140, align: "center" },
+];
+
+const resultParams = ref({
+  pageIndex: 1,
+  pageSize: 10,
+  search: "",
+  idExam: undefined,
+});
+
+const directParams = ref({
   pageIndex: 1,
   pageSize: 10,
   search: "",
@@ -85,11 +126,19 @@ const {
   pending: loading,
   refresh: refreshResults,
 } = await adminResult.get({
-  params,
+  params: resultParams,
   key: "admin-result-list",
 });
 
-const isTableLoading = computed(() => loading.value || calculateLoading.value);
+const {
+  data: directResponse,
+  pending: directLoading,
+} = await adminResult.getByRest("direct", {
+  params: directParams,
+  key: "admin-result-direct-list",
+});
+
+const isResultTableLoading = computed(() => loading.value || calculateLoading.value);
 
 const activeResponse = computed(() => {
   if (calculatedItems.value) {
@@ -99,40 +148,70 @@ const activeResponse = computed(() => {
   return resultResponse.value;
 });
 
-const dataSource = computed(() => {
+const resultDataSource = computed(() => {
   if (!activeResponse.value?.success) return [];
   return Array.isArray(activeResponse.value?.data?.items) ? activeResponse.value.data.items : [];
+});
+
+const directDataSource = computed(() => {
+  if (!directResponse.value?.success) return [];
+  return Array.isArray(directResponse.value?.data?.items) ? directResponse.value.data.items : [];
 });
 
 watch(
   activeResponse,
   newValue => {
     if (newValue?.success) {
-      pagination.total = Number(newValue.data?.total || 0);
+      resultPagination.total = Number(newValue.data?.total || 0);
+    }
+  },
+  { immediate: true },
+);
+
+watch(
+  () => directResponse.value,
+  newValue => {
+    if (newValue?.success) {
+      directPagination.total = Number(newValue.data?.total || 0);
     }
   },
   { immediate: true },
 );
 
 watch(selectedExamId, value => {
-  params.value.idExam = value || undefined;
-  params.value.pageIndex = 1;
-  pagination.current = 1;
+  const idExam = value || undefined;
+  resultParams.value.idExam = idExam;
+  resultParams.value.pageIndex = 1;
+  directParams.value.idExam = idExam;
+  directParams.value.pageIndex = 1;
+  resultPagination.current = 1;
+  directPagination.current = 1;
   calculatedItems.value = null;
 });
 
-const handleTableChange = pag => {
-  pagination.current = pag.current;
-  pagination.pageSize = pag.pageSize;
-  params.value.pageIndex = pag.current;
-  params.value.pageSize = pag.pageSize;
+const handleResultTableChange = pag => {
+  resultPagination.current = pag.current;
+  resultPagination.pageSize = pag.pageSize;
+  resultParams.value.pageIndex = pag.current;
+  resultParams.value.pageSize = pag.pageSize;
   calculatedItems.value = null;
 };
 
+const handleDirectTableChange = pag => {
+  directPagination.current = pag.current;
+  directPagination.pageSize = pag.pageSize;
+  directParams.value.pageIndex = pag.current;
+  directParams.value.pageSize = pag.pageSize;
+};
+
 const handleSearch = () => {
-  params.value.search = (searchText.value || "").trim();
-  params.value.pageIndex = 1;
-  pagination.current = 1;
+  const search = (searchText.value || "").trim();
+  resultParams.value.search = search;
+  resultParams.value.pageIndex = 1;
+  directParams.value.search = search;
+  directParams.value.pageIndex = 1;
+  resultPagination.current = 1;
+  directPagination.current = 1;
   calculatedItems.value = null;
 };
 
@@ -140,14 +219,22 @@ const resetFilters = () => {
   searchText.value = "";
   selectedExamId.value = null;
   calculatedItems.value = null;
-  params.value = {
+  resultParams.value = {
     pageIndex: 1,
     pageSize: 10,
     search: "",
     idExam: undefined,
   };
-  pagination.current = 1;
-  pagination.pageSize = 10;
+  directParams.value = {
+    pageIndex: 1,
+    pageSize: 10,
+    search: "",
+    idExam: undefined,
+  };
+  resultPagination.current = 1;
+  resultPagination.pageSize = 10;
+  directPagination.current = 1;
+  directPagination.pageSize = 10;
 };
 
 const calculateResults = async () => {
@@ -166,9 +253,9 @@ const calculateResults = async () => {
   try {
     const { data, error } = await adminResult.getByRest("caculator", {
       params: {
-        pageIndex: params.value.pageIndex,
-        pageSize: params.value.pageSize,
-        search: params.value.search,
+        pageIndex: resultParams.value.pageIndex,
+        pageSize: resultParams.value.pageSize,
+        search: resultParams.value.search,
         idExam: Number(selectedExamId.value),
       },
     });
@@ -304,6 +391,8 @@ const getResultColor = value => {
   if (normalized.includes("không đạt") || normalized.includes("trượt")) return "error";
   return "processing";
 };
+
+const getDirectRowKey = (record, index) => record.applicationCode || record.identityNumber || `${record.fullName || "direct"}-${index}`;
 
 useHead({
   title: "Quản lý kết quả",
