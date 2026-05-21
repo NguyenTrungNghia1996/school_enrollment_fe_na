@@ -6,6 +6,7 @@
         <AdminSelectEnrollment v-model="selectedExamId" no-form-item :inlineLabel="false" placeholder="Lọc theo kỳ tuyển sinh" label="" />
       </div>
       <a-select v-model:value="selectedStatusId" class="w-full md:w-60" placeholder="Lọc theo trạng thái" :options="statusOptions" />
+      <a-checkbox v-model:checked="selectedDirectOnly" class="whitespace-nowrap">Hồ sơ tuyển thẳng</a-checkbox>
       <div class="flex w-full gap-2 md:w-auto">
         <a-popconfirm v-if="adminStore.canEditCurrentPage" title="Bạn chắc chắn muốn công bố danh sách tuyển thẳng cho kỳ tuyển sinh đã chọn?" ok-text="Công bố" cancel-text="Hủy" @confirm="publishDirectApplications">
           <a-button type="primary" :loading="publishDirectLoading" :disabled="!selectedExamId || publishDirectLoading">Công bố tuyển thẳng</a-button>
@@ -204,6 +205,7 @@ const { adminApplication } = useApi();
 const searchText = ref("");
 const selectedExamId = ref(null);
 const selectedStatusId = ref(0);
+const selectedDirectOnly = ref(false);
 const publishDirectLoading = ref(false);
 const exportLoading = ref(false);
 const detailVisible = ref(false);
@@ -333,6 +335,16 @@ watch(selectedStatusId, value => {
   pagination.current = 1;
 });
 
+watch(selectedDirectOnly, value => {
+  const { isDirect, ...nextParams } = params.value;
+  params.value = {
+    ...nextParams,
+    pageIndex: 1,
+    ...(value ? { isDirect: true } : {}),
+  };
+  pagination.current = 1;
+});
+
 const handleTableChange = pag => {
   pagination.current = pag.current;
   pagination.pageSize = pag.pageSize;
@@ -350,6 +362,7 @@ const resetFilters = () => {
   searchText.value = "";
   selectedExamId.value = null;
   selectedStatusId.value = 0;
+  selectedDirectOnly.value = false;
   params.value = {
     pageIndex: 1,
     pageSize: 10,
