@@ -2,11 +2,14 @@
   <div class="min-h-full bg-white p-2 md:p-4">
     <div class="mb-4 flex flex-col items-start justify-between gap-2 md:flex-row md:items-center">
       <a-input-search v-model:value="searchText" placeholder="Tìm theo mã hồ sơ, họ tên, CCCD..." enter-button @search="handleSearch" class="w-full md:min-w-0 md:flex-1" />
-      <div class="w-full py-2 md:w-1/3 md:py-0">
+      <div class="w-1/4 py-2 md:py-0">
         <AdminSelectEnrollment v-model="selectedExamId" no-form-item :inlineLabel="false" placeholder="Lọc theo kỳ tuyển sinh" label="" />
       </div>
       <a-select v-model:value="selectedStatusId" class="w-full md:w-60" placeholder="Lọc theo trạng thái" :options="statusOptions" />
       <div class="flex w-full gap-2 md:w-auto">
+        <a-popconfirm v-if="adminStore.canEditCurrentPage" title="Bạn chắc chắn muốn công bố danh sách tuyển thẳng cho kỳ tuyển sinh đã chọn?" ok-text="Công bố" cancel-text="Hủy" @confirm="publishDirectApplications">
+          <a-button type="primary" :loading="publishDirectLoading" :disabled="!selectedExamId || publishDirectLoading">Công bố tuyển thẳng</a-button>
+        </a-popconfirm>
         <a-button :disabled="!selectedExamId" type="primary" ghost :loading="exportLoading" @click="exportApplications">Xuất dữ liệu</a-button>
         <a-button @click="resetFilters" class="flex-1 md:flex-none">Đặt lại</a-button>
       </div>
@@ -201,6 +204,7 @@ const { adminApplication } = useApi();
 const searchText = ref("");
 const selectedExamId = ref(null);
 const selectedStatusId = ref(0);
+const publishDirectLoading = ref(false);
 const exportLoading = ref(false);
 const detailVisible = ref(false);
 const detailLoading = ref(false);
@@ -404,6 +408,40 @@ const exportApplications = async () => {
     message.error(error?.message || "Xuất dữ liệu thất bại");
   } finally {
     exportLoading.value = false;
+  }
+};
+
+const publishDirectApplications = async () => {
+  if (!adminStore.canEditCurrentPage) {
+    message.warning("Bạn không có quyền công bố dữ liệu");
+    return;
+  }
+
+  if (!selectedExamId.value) {
+    message.warning("Vui lòng chọn kỳ tuyển sinh");
+    return;
+  }
+
+  publishDirectLoading.value = true;
+
+  try {
+    const { data, error } = await adminApplication.putByRest("direct/publish", {
+      params: {
+        idExam: Number(selectedExamId.value),
+      },
+      key: `admin-application-direct-publish-${selectedExamId.value}-${Date.now()}`,
+    });
+
+    if (error.value || data.value?.success === false) {
+      throw new Error(error.value?.data?.message || data.value?.message || "Công bố danh sách tuyển thẳng thất bại");
+    }
+
+    message.success(data.value?.message || "Công bố danh sách tuyển thẳng thành công");
+    await reloadApplicationTable();
+  } catch (error) {
+    message.error(error?.message || "Công bố danh sách tuyển thẳng thất bại");
+  } finally {
+    publishDirectLoading.value = false;
   }
 };
 
