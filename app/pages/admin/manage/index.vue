@@ -40,15 +40,7 @@
       </a-table>
     </ClientOnly>
 
-    <a-modal
-      v-model:open="visible"
-      :title="isEdit ? 'Chỉnh sửa Quản trị viên' : 'Thêm mới Quản trị viên'"
-      @cancel="handleCancel"
-      :width="600"
-      :confirm-loading="confirmLoading"
-      :ok-button-props="{ disabled: isEdit && !adminStore.canEditCurrentPage }"
-      @ok="handleOk"
-    >
+    <a-modal v-model:open="visible" :title="isEdit ? 'Chỉnh sửa Quản trị viên' : 'Thêm mới Quản trị viên'" @cancel="handleCancel" :width="600" :confirm-loading="confirmLoading" :ok-button-props="{ disabled: isEdit && !adminStore.canEditCurrentPage }" @ok="handleOk">
       <a-form ref="formRef" :model="formState" :rules="rules" :disabled="isEditReadOnly" layout="vertical" class="mt-4">
         <div class="grid grid-cols-1 gap-x-4 md:grid-cols-2">
           <a-form-item label="Tên đăng nhập" name="username" v-if="!isEdit">
@@ -259,6 +251,12 @@ const deleteItem = async id => {
     const { data } = await adminManage.delete({ params: { id: id } });
     if (data.value?.success) {
       message.success(data.value?.message || "Đã xóa");
+      const nextTotal = Math.max(Number(pagination.total || 0) - 1, 0);
+      const nextPage = Math.max(1, Math.ceil(nextTotal / pagination.pageSize));
+      if (pagination.current > nextPage) {
+        pagination.current = nextPage;
+        param.value.PageIndex = nextPage;
+      }
       await refreshAdmins();
     } else {
       message.error(data.value?.message || "Không thể xóa");

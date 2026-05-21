@@ -723,6 +723,12 @@ const deleteItem = async id => {
     }
 
     message.success(data.value?.message || "Đã xóa hồ sơ");
+    const nextTotal = Math.max(Number(pagination.total || 0) - 1, 0);
+    const nextPage = Math.max(1, Math.ceil(nextTotal / pagination.pageSize));
+    if (pagination.current > nextPage) {
+      pagination.current = nextPage;
+      params.value.pageIndex = nextPage;
+    }
     await reloadApplicationTable();
 
     if (detailVisible.value && detailData.value?.id === id) {

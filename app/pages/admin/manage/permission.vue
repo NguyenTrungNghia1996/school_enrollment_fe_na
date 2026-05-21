@@ -229,6 +229,12 @@ const deleteItem = async id => {
     const { data } = await adminRoles.delete({ params: { id: id } });
     if (data.value?.success) {
       message.success(data.value?.message || "Đã xóa");
+      const nextTotal = Math.max(Number(pagination.total || 0) - 1, 0);
+      const nextPage = Math.max(1, Math.ceil(nextTotal / pagination.pageSize));
+      if (pagination.current > nextPage) {
+        pagination.current = nextPage;
+        param.value.PageIndex = nextPage;
+      }
       await refreshRoles();
     } else {
       message.error(data.value?.message || "Không thể xóa");

@@ -499,6 +499,12 @@ const deleteItem = async id => {
     const { data, error } = await adminEnrollment.delete({ params: { id: id } });
     if (data.value?.success) {
       message.success(data.value?.message || "Đã xóa");
+      const nextTotal = Math.max(Number(pagination.total || 0) - 1, 0);
+      const nextPage = Math.max(1, Math.ceil(nextTotal / pagination.pageSize));
+      if (pagination.current > nextPage) {
+        pagination.current = nextPage;
+        param.value.pageIndex = nextPage;
+      }
       await refreshEnrollments();
     } else {
       throw new Error(error.value?.data?.message || "Không thể xóa");

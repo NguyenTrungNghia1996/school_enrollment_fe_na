@@ -6,9 +6,12 @@
         <AdminSelectEnrollment v-model="selectedExamId" no-form-item :inlineLabel="false" placeholder="Lọc theo kỳ tuyển sinh" label="" />
       </div>
       <div class="flex w-full flex-initial gap-2 md:w-auto">
-        <a-button v-if="adminStore.canEditCurrentPage" type="primary" ghost :loading="calculateLoading" :disabled="!selectedExamId || calculateLoading" @click="calculateResults">Tính toán kết quả</a-button>
-        <a-popconfirm v-if="adminStore.canEditCurrentPage" title="Bạn chắc chắn muốn công bố kết quả cho kỳ tuyển sinh đã chọn?" ok-text="Công bố" cancel-text="Hủy" @confirm="publishResults">
-          <a-button type="primary" :loading="publishLoading">Công bố kết quả</a-button>
+        <a-button v-if="adminStore.canEditCurrentPage && activeTab === 'exam-result'" type="primary" ghost :loading="calculateLoading" :disabled="!selectedExamId || calculateLoading" @click="calculateResults">Tính toán kết quả</a-button>
+        <a-popconfirm v-if="adminStore.canEditCurrentPage && activeTab === 'exam-result'" title="Bạn chắc chắn muốn công bố kết quả cho kỳ tuyển sinh đã chọn?" ok-text="Công bố" cancel-text="Hủy" @confirm="publishResults">
+          <a-button type="primary" :loading="publishLoading" :disabled="!selectedExamId || publishLoading">Công bố kết quả</a-button>
+        </a-popconfirm>
+        <a-popconfirm v-if="adminStore.canEditCurrentPage && activeTab === 'direct-list'" title="Bạn chắc chắn muốn công bố danh sách tuyển thẳng cho kỳ tuyển sinh đã chọn?" ok-text="Công bố" cancel-text="Hủy" @confirm="publishDirectResults">
+          <a-button type="primary" :loading="publishDirectLoading" :disabled="!selectedExamId || publishDirectLoading">Công bố tuyển thẳng</a-button>
         </a-popconfirm>
         <a-button type="primary" ghost :loading="exportLoading" :disabled="!selectedExamId || exportLoading" @click="exportResults">Xuất dữ liệu</a-button>
         <a-button @click="resetFilters" class="flex-1 md:flex-none">Đặt lại</a-button>
@@ -66,7 +69,7 @@ definePageMeta({
   layout: "admin",
 });
 
-const { adminResult } = useApi();
+const { adminApplication, adminResult } = useApi();
 const adminStore = useAdminStore();
 const config = useRuntimeConfig();
 
@@ -75,6 +78,7 @@ const selectedExamId = ref(null);
 const activeTab = ref("exam-result");
 const calculateLoading = ref(false);
 const publishLoading = ref(false);
+const publishDirectLoading = ref(false);
 const exportLoading = ref(false);
 const calculatedItems = ref(null);
 
@@ -133,6 +137,7 @@ const {
 const {
   data: directResponse,
   pending: directLoading,
+  refresh: refreshDirectResults,
 } = await adminResult.getByRest("direct", {
   params: directParams,
   key: "admin-result-direct-list",
@@ -304,6 +309,39 @@ const publishResults = async () => {
     message.error(error?.message || "Công bố kết quả thất bại");
   } finally {
     publishLoading.value = false;
+  }
+};
+
+const publishDirectResults = async () => {
+  if (!adminStore.canEditCurrentPage) {
+    message.warning("Bạn không có quyền công bố dữ liệu");
+    return;
+  }
+
+  if (!selectedExamId.value) {
+    message.warning("Vui lòng chọn kỳ tuyển sinh");
+    return;
+  }
+
+  publishDirectLoading.value = true;
+
+  try {
+    const { data, error } = await adminApplication.putByRest("direct/publish", {
+      params: {
+        idExam: Number(selectedExamId.value),
+      },
+      key: `admin-direct-publish-${selectedExamId.value}-${Date.now()}`,
+    });
+    if (error.value || data.value?.success === false) {
+      throw new Error(error.value?.data?.message || data.value?.message || "Công bố danh sách tuyển thẳng thất bại");
+    }
+
+    message.success(data.value?.message || "Công bố danh sách tuyển thẳng thành công");
+    await refreshDirectResults();
+  } catch (error) {
+    message.error(error?.message || "Công bố danh sách tuyển thẳng thất bại");
+  } finally {
+    publishDirectLoading.value = false;
   }
 };
 
