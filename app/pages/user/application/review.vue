@@ -22,8 +22,10 @@
       <section class="mt-6 rounded-3xl bg-white p-4 shadow-sm sm:p-6">
         <div class="mb-5 flex items-start justify-between gap-3">
           <div>
-            <h1 class="text-xl font-bold text-slate-900">Danh sách phúc khảo</h1>
-            <p class="mt-1 text-sm text-slate-500">Theo dõi các yêu cầu phúc khảo đã gửi của bạn.</p>
+            <h1 class="flex flex-wrap items-baseline gap-x-3 gap-y-1 text-xl font-bold text-slate-900">
+              <span>Danh sách phúc khảo {{ reviewTitleExamName }}</span>
+            </h1>
+            <!-- <p class="mt-1 text-sm text-slate-500">Theo dõi các yêu cầu phúc khảo đã gửi của bạn.</p> -->
           </div>
           <a-button type="primary" @click="openCreateReview">Tạo yêu cầu phúc khảo</a-button>
         </div>
@@ -319,6 +321,7 @@ const toPositiveNumber = value => {
 
 const initialExamId = toPositiveNumber(route.query.idExam);
 const selectedExamId = ref(initialExamId);
+const selectedExamName = ref("");
 const { applicationUser, applicationReviewUser, examUser } = useApi();
 const examNameCache = new Map();
 
@@ -402,6 +405,15 @@ const dataSource = computed(() => {
   return Array.isArray(reviewResponse.value?.data?.items) ? reviewResponse.value.data.items : [];
 });
 
+const reviewTitleExamName = computed(() => {
+  if (!selectedExamId.value) return "";
+
+  const selectedId = Number(selectedExamId.value);
+  const matchingReview = dataSource.value.find(item => Number(item?.idExam) === selectedId && item?.examName);
+
+  return selectedExamName.value || matchingReview?.examName || "";
+});
+
 const createApplicationOptions = computed(() => {
   if (!createApplicationsResponse.value?.success) return [];
 
@@ -476,8 +488,9 @@ const handleSearch = () => {
   pagination.current = 1;
 };
 
-const handleExamChange = value => {
+const handleExamChange = (value, option) => {
   selectedExamId.value = value || undefined;
+  selectedExamName.value = option?.label || "";
   params.value.idExam = selectedExamId.value;
   createApplicationParams.value.idExam = selectedExamId.value;
   params.value.pageIndex = 1;
@@ -492,6 +505,7 @@ const handleExamChange = value => {
 const resetFilters = () => {
   searchText.value = "";
   selectedExamId.value = undefined;
+  selectedExamName.value = "";
   params.value = {
     pageIndex: 1,
     pageSize: 10,
@@ -555,6 +569,7 @@ const syncCreateApplication = application => {
   const applicationExamId = toPositiveNumber(application?.idExam);
   if (applicationExamId) {
     selectedExamId.value = applicationExamId;
+    selectedExamName.value = application?.examName || selectedExamName.value;
     params.value.idExam = applicationExamId;
     createApplicationParams.value.idExam = applicationExamId;
   }
@@ -724,6 +739,19 @@ const fetchExamName = async idExam => {
 
   return examName;
 };
+
+watch(
+  selectedExamId,
+  async value => {
+    if (!value || selectedExamName.value) return;
+
+    const examName = await fetchExamName(value);
+    if (Number(selectedExamId.value) === Number(value)) {
+      selectedExamName.value = examName || "";
+    }
+  },
+  { immediate: true },
+);
 
 const resolveReviewDetail = async detail => {
   if (!detail || typeof detail !== "object") return null;

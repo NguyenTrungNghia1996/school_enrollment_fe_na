@@ -1,21 +1,23 @@
 <template>
   <div class="min-h-full bg-white p-2 md:p-4">
-    <div class="mb-4 flex flex-col items-start justify-between gap-2 md:flex-row md:items-center">
-      <a-input-search v-model:value="searchText" placeholder="Tìm theo mã phúc khảo, họ tên, số báo danh, môn học..." enter-button class="w-full md:min-w-0 md:flex-1" @search="handleSearch" />
-      <div class="w-full py-2 md:w-1/5 md:py-0">
-        <AdminSelectEnrollment v-model="selectedExamId" no-form-item :inlineLabel="false" placeholder="Lọc theo kỳ tuyển sinh" label="" />
+    <div class="mb-4 space-y-2">
+      <div class="grid grid-cols-1 gap-2 md:grid-cols-2 xl:grid-cols-[minmax(320px,1fr)_260px_220px] xl:items-center">
+        <a-input-search v-model:value="searchText" placeholder="Tìm theo mã phúc khảo, họ tên, số báo danh, môn học..." enter-button class="w-full md:col-span-2 xl:col-span-1" @search="handleSearch" />
+        <div class="w-full">
+          <AdminSelectEnrollment v-model="selectedExamId" no-form-item :inlineLabel="false" placeholder="Lọc theo kỳ tuyển sinh" label="" />
+        </div>
+        <a-select v-model:value="selectedStatusId" class="w-full" placeholder="Lọc theo trạng thái" :options="statusOptions" />
       </div>
-      <a-select v-model:value="selectedStatusId" class="w-full md:w-60" placeholder="Lọc theo trạng thái" :options="statusOptions" />
 
-      <div class="flex w-full flex-initial gap-2 md:w-auto">
+      <div class="grid w-full grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-4 xl:flex xl:justify-end">
         <template v-if="showEditActions">
           <a-popconfirm title="Bạn chắc chắn muốn công bố kết quả phúc khảo cho kỳ tuyển sinh đã chọn?" ok-text="Công bố" cancel-text="Hủy" @confirm="publishReviews">
-            <a-button class="shrink-0 whitespace-nowrap" type="primary" :loading="publishLoading">Công bố</a-button>
+            <a-button class="w-full whitespace-nowrap xl:w-auto" type="primary" :loading="publishLoading">Công bố</a-button>
           </a-popconfirm>
-          <a-button class="shrink-0 whitespace-nowrap" type="primary" ghost :loading="exportLoading" :disabled="!selectedExamId || exportLoading" @click="exportReviews">Xuất dữ liệu</a-button>
-          <a-button class="shrink-0 whitespace-nowrap" type="primary" ghost @click="openImportModal">Import</a-button>
+          <a-button class="w-full whitespace-nowrap xl:w-auto" type="primary" ghost :loading="exportLoading" :disabled="!selectedExamId || exportLoading" @click="exportReviews">Xuất dữ liệu</a-button>
+          <a-button class="w-full whitespace-nowrap xl:w-auto" type="primary" ghost @click="openImportModal">Import</a-button>
         </template>
-        <a-button class="shrink-0 whitespace-nowrap" @click="resetFilters">Đặt lại</a-button>
+        <a-button class="w-full whitespace-nowrap xl:w-auto" @click="resetFilters">Đặt lại</a-button>
       </div>
     </div>
 

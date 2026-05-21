@@ -1,16 +1,19 @@
 <template>
   <div class="min-h-full bg-white p-2 md:p-4">
-    <div class="mb-4 flex flex-col items-start justify-between gap-2 md:flex-row md:items-center">
-      <a-input-search v-model:value="searchText" placeholder="Tìm theo số báo danh, họ tên..." enter-button @search="handleSearch" class="w-full" />
-      <div class="w-full py-2 md:w-1/3 md:py-0">
-        <AdminSelectEnrollment v-model="selectedExamId" no-form-item :inlineLabel="false" placeholder="Lọc theo kỳ tuyển sinh" label="" />
+    <div class="mb-4 space-y-2">
+      <div class="grid grid-cols-1 gap-2 md:grid-cols-[minmax(320px,1fr)_300px] md:items-center">
+        <a-input-search v-model:value="searchText" placeholder="Tìm theo số báo danh, họ tên..." enter-button @search="handleSearch" class="w-full" />
+        <div class="w-full">
+          <AdminSelectEnrollment v-model="selectedExamId" no-form-item :inlineLabel="false" placeholder="Lọc theo kỳ tuyển sinh" label="" />
+        </div>
       </div>
-      <div class="flex w-full flex-initial gap-2 md:w-auto">
+
+      <div class="grid w-full grid-cols-1 gap-2 sm:grid-cols-3 xl:flex xl:justify-end">
         <a-popconfirm v-if="adminStore.canEditCurrentPage" title="Bạn chắc chắn muốn công bố điểm thi cho kỳ tuyển sinh đã chọn?" ok-text="Công bố" cancel-text="Hủy" @confirm="publishScores">
-          <a-button type="primary" :loading="publishLoading">Công bố</a-button>
+          <a-button type="primary" class="w-full whitespace-nowrap xl:w-auto" :loading="publishLoading">Công bố</a-button>
         </a-popconfirm>
-        <a-button v-if="adminStore.canEditCurrentPage" type="primary" ghost @click="openImportModal">Import</a-button>
-        <a-button @click="resetFilters" class="flex-1 md:flex-none">Đặt lại</a-button>
+        <a-button v-if="adminStore.canEditCurrentPage" type="primary" ghost class="w-full whitespace-nowrap xl:w-auto" @click="openImportModal">Import</a-button>
+        <a-button class="w-full whitespace-nowrap xl:w-auto" @click="resetFilters">Đặt lại</a-button>
       </div>
     </div>
 
