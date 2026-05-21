@@ -19,6 +19,8 @@
         </div>
       </section>
 
+      <a-alert v-if="applicationMess" type="info" show-icon class="mt-6 !rounded-2xl !border-cyan-200 !bg-cyan-50" :message="applicationMess" />
+
       <section class="mt-6 rounded-3xl bg-white p-4 shadow-sm sm:p-6">
         <div v-if="pending" class="py-16 text-center">
           <a-spin size="large" />
@@ -168,6 +170,7 @@
 </template>
 
 <script setup>
+import { Modal } from "ant-design-vue";
 import { getApplicationStatusColor, getApplicationStatusLabel } from "~/composables/useApplicationStatus";
 
 definePageMeta({
@@ -178,6 +181,8 @@ const userStore = useUserStore();
 const route = useRoute();
 const searchText = ref("");
 const loadError = ref("");
+const applicationMess = ref("");
+const confirmedMessKey = ref("");
 
 if (!userStore.token) {
   userStore.openLogin();
@@ -240,15 +245,40 @@ const dataSource = computed(() => {
   return items.filter(item => !item?.isDelete);
 });
 
+const showApplicationMessConfirm = (responseMess, responseValue) => {
+  if (!import.meta.client || !responseMess) return;
+
+  const confirmationKey = [responseValue?.data?.total ?? "", params.value.pageIndex ?? "", params.value.pageSize ?? "", params.value.idExam ?? "", params.value.search ?? "", responseMess].join("|");
+  if (confirmedMessKey.value === confirmationKey) return;
+
+  confirmedMessKey.value = confirmationKey;
+  Modal.confirm({
+    title: "Thông báo",
+    content: responseMess,
+    okText: "Đồng ý",
+    cancelText: "Đóng",
+  });
+};
+
 watch(
   () => applicationResponse.value,
   newValue => {
     if (newValue?.success) {
       pagination.total = Number(newValue.data?.total || 0);
       loadError.value = "";
+
+      const responseMess = typeof newValue.data?.mess === "string" ? newValue.data.mess.trim() : "";
+      if (responseMess) {
+        applicationMess.value = responseMess;
+        showApplicationMessConfirm(responseMess, newValue);
+      } else {
+        applicationMess.value = "";
+      }
+
       return;
     }
 
+    applicationMess.value = "";
     if (newValue?.message) {
       loadError.value = newValue.message;
     }
@@ -260,6 +290,7 @@ watch(
   () => applicationError.value,
   error => {
     if (error) {
+      applicationMess.value = "";
       loadError.value = error?.data?.message || error?.message || "Không tải được danh sách hồ sơ";
     }
   },
@@ -271,6 +302,7 @@ watch(
   isPending => {
     if (isPending) {
       loadError.value = "";
+      applicationMess.value = "";
     }
   },
 );
