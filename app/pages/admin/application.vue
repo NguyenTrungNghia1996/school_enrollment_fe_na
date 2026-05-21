@@ -1,18 +1,23 @@
 <template>
   <div class="min-h-full bg-white p-2 md:p-4">
-    <div class="mb-4 flex flex-col items-start justify-between gap-2 md:flex-row md:items-center">
-      <a-input-search v-model:value="searchText" placeholder="Tìm theo mã hồ sơ, họ tên, CCCD..." enter-button @search="handleSearch" class="w-full md:min-w-0 md:flex-1" />
-      <div class="w-1/4 py-2 md:py-0">
-        <AdminSelectEnrollment v-model="selectedExamId" no-form-item :inlineLabel="false" placeholder="Lọc theo kỳ tuyển sinh" label="" />
+    <div class="mb-4 space-y-2">
+      <div class="grid grid-cols-1 gap-2 md:grid-cols-2 xl:grid-cols-[minmax(320px,1fr)_260px_220px_auto] xl:items-center">
+        <a-input-search v-model:value="searchText" placeholder="Tìm theo mã hồ sơ, họ tên, CCCD..." enter-button @search="handleSearch" class="w-full md:col-span-2 xl:col-span-1" />
+        <div class="w-full">
+          <AdminSelectEnrollment v-model="selectedExamId" no-form-item :inlineLabel="false" placeholder="Lọc theo kỳ tuyển sinh" label="" />
+        </div>
+        <a-select v-model:value="selectedStatusId" class="w-full" placeholder="Lọc theo trạng thái" :options="statusOptions" />
+        <div class="flex min-h-8 items-center">
+          <a-checkbox v-model:checked="selectedDirectOnly" class="whitespace-nowrap">Hồ sơ tuyển thẳng</a-checkbox>
+        </div>
       </div>
-      <a-select v-model:value="selectedStatusId" class="w-full md:w-60" placeholder="Lọc theo trạng thái" :options="statusOptions" />
-      <a-checkbox v-model:checked="selectedDirectOnly" class="whitespace-nowrap">Hồ sơ tuyển thẳng</a-checkbox>
-      <div class="flex w-full gap-2 md:w-auto">
+
+      <div class="grid w-full grid-cols-1 gap-2 sm:grid-cols-3 xl:flex xl:justify-end">
         <a-popconfirm v-if="adminStore.canEditCurrentPage" title="Bạn chắc chắn muốn công bố danh sách tuyển thẳng cho kỳ tuyển sinh đã chọn?" ok-text="Công bố" cancel-text="Hủy" @confirm="publishDirectApplications">
-          <a-button type="primary" :loading="publishDirectLoading" :disabled="!selectedExamId || publishDirectLoading">Công bố tuyển thẳng</a-button>
+          <a-button type="primary" class="w-full xl:w-auto" :loading="publishDirectLoading" :disabled="!selectedExamId || publishDirectLoading">Công bố tuyển thẳng</a-button>
         </a-popconfirm>
-        <a-button :disabled="!selectedExamId" type="primary" ghost :loading="exportLoading" @click="exportApplications">Xuất dữ liệu</a-button>
-        <a-button @click="resetFilters" class="flex-1 md:flex-none">Đặt lại</a-button>
+        <a-button :disabled="!selectedExamId" type="primary" ghost class="w-full xl:w-auto" :loading="exportLoading" @click="exportApplications">Xuất dữ liệu</a-button>
+        <a-button @click="resetFilters" class="w-full xl:w-auto">Đặt lại</a-button>
       </div>
     </div>
 
@@ -238,7 +243,7 @@ const columns = [
   { title: "Họ tên", dataIndex: "fullname", key: "fullname", ellipsis: true },
   { title: "Ngày sinh", dataIndex: "dateOfBirth", key: "dateOfBirth", width: 130 },
   { title: "Số CCCD", dataIndex: "identityNumber", key: "identityNumber", width: 150 },
-  { title: "Trạng thái", dataIndex: "statusName", key: "statusName", width: 200, align: "center" },
+  { title: "Trạng thái", dataIndex: "statusName", key: "statusName", width: 190, align: "center" },
   { title: "Thao tác", key: "action", width: 150, align: "center", fixed: "right" },
 ];
 
