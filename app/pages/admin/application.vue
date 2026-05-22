@@ -19,6 +19,8 @@
         <a-button :disabled="!selectedExamId" type="primary" ghost class="w-full xl:w-auto" :loading="exportLoading" @click="exportApplications">Xuất dữ liệu</a-button>
         <a-button @click="resetFilters" class="w-full xl:w-auto">Đặt lại</a-button>
       </div>
+
+      <a-alert v-if="applicationMessage" type="warning" show-icon :message="applicationMessage" />
     </div>
 
     <ClientOnly class="overflow-x-auto">
@@ -199,6 +201,7 @@
 </template>
 
 <script setup>
+import { Modal } from "ant-design-vue";
 import dayjs from "dayjs";
 import { APPLICATION_STATUS_LABELS, getApplicationStatusColor, getApplicationStatusLabel, isDraftApplicationStatus, isPendingReviewApplicationStatus, isPaidPendingVerificationApplicationStatus } from "~/composables/useApplicationStatus";
 import { useAdminStore } from "~/stores/adminStore";
@@ -226,6 +229,7 @@ const rejectNote = ref("");
 const selectedRecord = ref(null);
 const paymentConfirmVisible = ref(false);
 const completePaymentLoading = ref(false);
+const confirmedMessageKey = ref("");
 const directActionLoading = reactive({
   id: null,
   action: "",
@@ -283,6 +287,26 @@ const dataSource = computed(() => {
   return Array.isArray(applicationResponse.value?.data?.items) ? applicationResponse.value.data.items : [];
 });
 
+const applicationMessage = computed(() => {
+  if (!applicationResponse.value?.success) return "";
+  return typeof applicationResponse.value?.data?.mess === "string" ? applicationResponse.value.data.mess.trim() : "";
+});
+
+const showApplicationMessageConfirm = (responseMessage, responseValue) => {
+  if (!import.meta.client || !responseMessage) return;
+
+  const confirmationKey = [responseValue?.data?.total ?? "", params.value.pageIndex ?? "", params.value.pageSize ?? "", params.value.idExam ?? "", params.value.idStatus ?? "", params.value.isDirect ?? "", params.value.search ?? "", responseMessage].join("|");
+  if (confirmedMessageKey.value === confirmationKey) return;
+
+  confirmedMessageKey.value = confirmationKey;
+  Modal.confirm({
+    title: "Thông báo",
+    content: responseMessage,
+    okText: "Đồng ý",
+    cancelText: "Đóng",
+  });
+};
+
 const normalizeApplicationDetail = (detail, fallbackRecord = null) => {
   if (!detail || typeof detail !== "object") {
     return null;
@@ -327,6 +351,7 @@ watch(
   newValue => {
     if (newValue?.success) {
       pagination.total = Number(newValue.data?.total || 0);
+      showApplicationMessageConfirm(applicationMessage.value, newValue);
     }
   },
   { immediate: true },
