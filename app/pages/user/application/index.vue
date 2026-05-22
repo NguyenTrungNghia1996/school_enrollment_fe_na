@@ -159,6 +159,18 @@
             <span>{{ item.label }}:</span>
             <span class="ml-2 font-semibold text-slate-900">{{ formatScore(item.value) }}</span>
           </div>
+          <div class="font-semibold sm:col-span-3">
+            <span>Tổng điểm:</span>
+            <span class="ml-2 text-slate-900">{{ totalReviewScore }}</span>
+          </div>
+        </div>
+      </section>
+
+      <section v-if="admissionResult" class="border-t border-slate-200 pt-5">
+        <h3 class="text-base font-bold text-cyan-700">Thông tin kết quả tuyển sinh</h3>
+        <div class="mt-5 space-y-4 text-sm leading-6 text-slate-800">
+          <div class="text-base font-bold uppercase text-slate-950">[{{ admissionResult.title }}]</div>
+          <p class="mb-0">{{ admissionResult.description }}</p>
         </div>
       </section>
 
@@ -363,6 +375,7 @@ const formatScore = value => {
 };
 
 const hasReviewScoreValue = value => value !== null && value !== undefined && value !== "";
+const getScoreAfterReview = (reviewScore, originalScore) => (hasReviewScoreValue(reviewScore) ? reviewScore : originalScore);
 
 const reviewScoreItems = computed(() => {
   if (!examScoreData.value) return [];
@@ -385,6 +398,46 @@ const totalExamScore = computed(() => {
     .reduce((total, score) => total + score, 0)
     .toFixed(2)
     .replace(/\.?0+$/, "")} điểm`;
+});
+
+const totalReviewScore = computed(() => {
+  if (!examScoreData.value || !reviewScoreItems.value.length) return "-";
+
+  const scores = [getScoreAfterReview(examScoreData.value.reviewMathScore, examScoreData.value.mathScore), getScoreAfterReview(examScoreData.value.reviewLiteratureScore, examScoreData.value.literatureScore), getScoreAfterReview(examScoreData.value.reviewEnglishScore, examScoreData.value.englishScore)].map(normalizeScoreNumber);
+  const validScores = scores.filter(score => score !== null);
+  if (!validScores.length) return "-";
+
+  return `${validScores
+    .reduce((total, score) => total + score, 0)
+    .toFixed(2)
+    .replace(/\.?0+$/, "")} điểm`;
+});
+
+const admissionResult = computed(() => {
+  if (!examScoreData.value) return null;
+
+  if (examScoreData.value.isDirect === true) {
+    return {
+      title: "ĐƯỢC TUYỂN THẲNG",
+      description: "Chúc mừng thí sinh thuộc diện tuyển thẳng và đã đủ điều kiện trúng tuyển.",
+    };
+  }
+
+  if (examScoreData.value.isAdmitted === true) {
+    return {
+      title: "TRÚNG TUYỂN",
+      description: "Chúc mừng thí sinh đã đạt đủ điều kiện trúng tuyển. Vui lòng theo dõi thông báo nhập học từ nhà trường.",
+    };
+  }
+
+  if (examScoreData.value.isAdmitted === false) {
+    return {
+      title: "KHÔNG TRÚNG TUYỂN",
+      description: "Tổng điểm xét tuyển chưa đạt ngưỡng trúng tuyển theo quy định.",
+    };
+  }
+
+  return null;
 });
 
 const openDetail = record => {
