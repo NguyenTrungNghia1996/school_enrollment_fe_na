@@ -159,8 +159,12 @@
           <a-popconfirm v-if="canShowCancelDirectAction(detailData)" title="Bạn chắc chắn muốn hủy tuyển thẳng hồ sơ này?" ok-text="Đồng ý" cancel-text="Hủy" @confirm="cancelDirectApplication(detailData, true)">
             <a-button danger :loading="isDirectActionLoading(detailData, 'cancel')" :disabled="isAnyDirectActionLoading(detailData)">Hủy tuyển thẳng</a-button>
           </a-popconfirm>
-          <a-button v-if="canShowApproveAction(detailData)" type="primary" @click="approveItem(detailData, true)">Duyệt hồ sơ</a-button>
-          <a-button v-if="canShowRejectAction(detailData)" danger @click="openReject(detailData, true)">Từ chối</a-button>
+          <a-popconfirm v-if="canShowApproveAction(detailData)" title="Bạn chắc chắn muốn duyệt hồ sơ này?" ok-text="Đồng ý" cancel-text="Hủy" @confirm="approveItem(detailData, true)">
+            <a-button type="primary">Duyệt hồ sơ</a-button>
+          </a-popconfirm>
+          <a-popconfirm v-if="canShowRejectAction(detailData)" title="Bạn chắc chắn muốn từ chối hồ sơ này?" ok-text="Đồng ý" cancel-text="Hủy" @confirm="openReject(detailData, true)">
+            <a-button danger>Từ chối</a-button>
+          </a-popconfirm>
           <a-button @click="closeDetail">Đóng</a-button>
         </div>
       </div>
@@ -486,8 +490,7 @@ const canShowApproveAction = record => {
 };
 
 const canShowRejectAction = record => {
-  // return Boolean(record?.canReject) && adminStore.canApproveCurrentPage;
-  return adminStore.canApproveCurrentPage;
+  return isPendingReviewApplicationStatus(record) && adminStore.canApproveCurrentPage;
 };
 
 const canShowApproveDirectAction = record => {

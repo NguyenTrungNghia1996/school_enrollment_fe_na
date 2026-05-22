@@ -27,7 +27,10 @@
             </h1>
             <!-- <p class="mt-1 text-sm text-slate-500">Theo dõi các yêu cầu phúc khảo đã gửi của bạn.</p> -->
           </div>
-          <a-button type="primary" @click="openCreateReview">Tạo yêu cầu phúc khảo</a-button>
+          <div class="flex flex-wrap justify-end gap-2">
+            <a-button @click="navigateTo('/user/application')">Quay lại</a-button>
+            <a-button type="primary" @click="openCreateReview">Tạo yêu cầu phúc khảo</a-button>
+          </div>
         </div>
 
         <div v-if="pending" class="py-16 text-center">
