@@ -1,9 +1,9 @@
 <template>
   <div class="min-h-full bg-white p-2 md:p-4">
     <div class="mb-4 space-y-2">
-      <div class="grid grid-cols-1 gap-2 md:grid-cols-[minmax(320px,1fr)_300px] md:items-center">
-        <a-input-search v-model:value="searchText" placeholder="Tìm theo số báo danh, họ tên..." enter-button @search="handleSearch" class="w-full" />
-        <div class="w-full">
+      <div class="grid min-w-0 grid-cols-1 gap-2 xl:grid-cols-[minmax(0,1fr)_minmax(220px,300px)] xl:items-center">
+        <a-input-search v-model:value="searchText" placeholder="Tìm theo số báo danh, họ tên..." enter-button @search="handleSearch" class="w-full min-w-0" />
+        <div class="w-full min-w-0">
           <AdminSelectEnrollment v-model="selectedExamId" no-form-item :inlineLabel="false" placeholder="Lọc theo kỳ tuyển sinh" label="" />
         </div>
       </div>
