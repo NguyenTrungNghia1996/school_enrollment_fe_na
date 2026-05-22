@@ -303,7 +303,7 @@ const showApplicationMessageConfirm = (responseMessage, responseValue) => {
     title: "Thông báo",
     content: responseMessage,
     okText: "Đồng ý",
-    cancelText: "Đóng",
+    okCancel: false,
   });
 };
 
