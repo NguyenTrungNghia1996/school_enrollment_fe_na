@@ -29,11 +29,11 @@
                   <template #icon><KeyOutlined /></template>
                 </a-button>
               </a-popconfirm>
-              <a-popconfirm title="Bạn chắc chắn muốn xóa quản trị viên này?" ok-text="Đồng ý" cancel-text="Hủy" @confirm="deleteItem(record.id)">
+              <!-- <a-popconfirm title="Bạn chắc chắn muốn xóa quản trị viên này?" ok-text="Đồng ý" cancel-text="Hủy" @confirm="deleteItem(record.id)">
                 <a-button type="link" danger size="small" :disabled="!adminStore.canEditCurrentPage">
                   <template #icon><DeleteOutlined /></template>
                 </a-button>
-              </a-popconfirm>
+              </a-popconfirm> -->
             </div>
           </template>
         </template>
