@@ -16,7 +16,7 @@
         <a-popconfirm v-if="adminStore.canEditCurrentPage" title="Bạn chắc chắn muốn công bố danh sách tuyển thẳng cho kỳ tuyển sinh đã chọn?" ok-text="Công bố" cancel-text="Hủy" @confirm="publishDirectApplications">
           <a-button type="primary" class="w-full xl:w-auto" :loading="publishDirectLoading" :disabled="!selectedExamId || publishDirectLoading">Công bố tuyển thẳng</a-button>
         </a-popconfirm>
-        <a-button :disabled="!selectedExamId" type="primary" ghost class="w-full xl:w-auto" :loading="exportLoading" @click="exportApplications">Xuất dữ liệu</a-button>
+        <a-button :disabled="!selectedExamId" type="primary" ghost class="w-full xl:w-auto" :loading="exportLoading" @click="exportApplications">Export</a-button>
         <a-button @click="resetFilters" class="w-full xl:w-auto">Đặt lại</a-button>
       </div>
 

@@ -14,7 +14,7 @@
           <a-popconfirm title="Bạn chắc chắn muốn công bố kết quả phúc khảo cho kỳ tuyển sinh đã chọn?" ok-text="Công bố" cancel-text="Hủy" @confirm="publishReviews">
             <a-button class="w-full whitespace-nowrap xl:w-auto" type="primary" :loading="publishLoading">Công bố</a-button>
           </a-popconfirm>
-          <a-button class="w-full whitespace-nowrap xl:w-auto" type="primary" ghost :loading="exportLoading" :disabled="!selectedExamId || exportLoading" @click="exportReviews">Xuất dữ liệu</a-button>
+          <a-button class="w-full whitespace-nowrap xl:w-auto" type="primary" ghost :loading="exportLoading" :disabled="!selectedExamId || exportLoading" @click="exportReviews">Export</a-button>
           <a-button class="w-full whitespace-nowrap xl:w-auto" type="primary" ghost @click="openImportModal">Import</a-button>
         </template>
         <a-button class="w-full whitespace-nowrap xl:w-auto" @click="resetFilters">Đặt lại</a-button>
