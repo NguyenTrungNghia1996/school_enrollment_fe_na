@@ -13,7 +13,7 @@
         <a-popconfirm v-if="adminStore.canEditCurrentPage && activeTab === 'exam-result'" title="Bạn chắc chắn muốn công bố kết quả cho kỳ tuyển sinh đã chọn?" ok-text="Công bố" cancel-text="Hủy" @confirm="publishResults">
           <a-button type="primary" class="w-full whitespace-nowrap xl:w-auto" :loading="publishLoading" :disabled="!selectedExamId || publishLoading">Công bố kết quả</a-button>
         </a-popconfirm>
-        <a-button type="primary" ghost class="w-full whitespace-nowrap xl:w-auto" :loading="exportLoading" :disabled="!selectedExamId || exportLoading" @click="exportResults">Xuất dữ liệu</a-button>
+        <a-button type="primary" ghost class="w-full whitespace-nowrap xl:w-auto" :loading="exportLoading" :disabled="!selectedExamId || exportLoading" @click="exportResults">Export</a-button>
         <a-button class="w-full whitespace-nowrap xl:w-auto" @click="resetFilters">Đặt lại</a-button>
       </div>
     </div>
