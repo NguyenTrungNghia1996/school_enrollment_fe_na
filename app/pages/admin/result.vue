@@ -258,6 +258,7 @@ const calculateResults = async () => {
         search: resultParams.value.search,
         idExam: Number(selectedExamId.value),
       },
+      key: `admin-result-recalculate-ranking-${selectedExamId.value}-${Date.now()}`,
     });
 
     if (error.value || data.value?.success === false) {
