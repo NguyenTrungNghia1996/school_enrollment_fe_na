@@ -512,7 +512,7 @@ const isActionDisabled = record => {
 };
 
 const canShowApproveAction = record => {
-  return getApplicationStatus(record) !== APPLICATION_STATUS.DIRECT_PENDING_REVIEW && Boolean(record?.canApprove) && adminStore.canApproveCurrentPage;
+  return Boolean(record?.canApprove) && adminStore.canApproveCurrentPage;
 };
 
 const canShowRejectAction = record => {
@@ -520,18 +520,18 @@ const canShowRejectAction = record => {
 };
 
 const canShowApproveDirectAction = record => {
-  return getApplicationStatus(record) !== APPLICATION_STATUS.DIRECT_PENDING_REVIEW && Boolean(record?.canApproveDirect) && adminStore.canApproveCurrentPage;
+  return Boolean(record?.canApproveDirect) && adminStore.canApproveCurrentPage;
 };
 
 const isDirectValue = value => value === true || value === 1 || value === "1";
 const isExamApprovedValue = value => value === false || value === 0 || value === "0";
 
 const canShowCancelApprovalAction = record => {
-  return getApplicationStatus(record) === APPLICATION_STATUS.DIRECT_PENDING_REVIEW && isExamApprovedValue(record?.isDirect) && adminStore.canApproveCurrentPage;
+  return getApplicationStatus(record) === APPLICATION_STATUS.DIRECT_PENDING_REVIEW && isExamApprovedValue(record?.isDirect) && Boolean(record?.canCancel) && adminStore.canApproveCurrentPage;
 };
 
 const canShowCancelDirectAction = record => {
-  return getApplicationStatus(record) === APPLICATION_STATUS.DIRECT_PENDING_REVIEW && isDirectValue(record?.isDirect) && adminStore.canApproveCurrentPage;
+  return getApplicationStatus(record) === APPLICATION_STATUS.DIRECT_PENDING_REVIEW && isDirectValue(record?.isDirect) && Boolean(record?.canCancel) && adminStore.canApproveCurrentPage;
 };
 
 const isDeleteDisabled = record => {
