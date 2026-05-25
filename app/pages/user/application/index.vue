@@ -115,6 +115,10 @@
       <section>
         <h3 class="text-base font-bold text-cyan-700">Thông tin dự thi</h3>
         <div class="mt-4 grid gap-4 border-b border-slate-200 pb-5 text-sm sm:grid-cols-2">
+          <div class="sm:col-span-2">
+            <span class="text-slate-500">Kỳ tuyển sinh:</span>
+            <span class="ml-2 font-semibold text-slate-900">{{ examScoreData.examName || "-" }}</span>
+          </div>
           <div>
             <span class="text-slate-500">Số báo danh:</span>
             <span class="ml-2 font-semibold text-slate-900">{{ examScoreData.examNumber || "-" }}</span>
@@ -130,7 +134,7 @@
         </div>
       </section>
 
-      <section>
+      <section v-if="canDisplayScoreInformation">
         <h3 class="text-base font-bold text-cyan-700">Thông tin điểm thi</h3>
         <div class="mt-4 grid gap-4 border-b border-slate-200 pb-5 text-sm sm:grid-cols-3">
           <div>
@@ -152,7 +156,7 @@
         </div>
       </section>
 
-      <section v-if="reviewScoreItems.length">
+      <section v-if="canDisplayScoreInformation && reviewScoreItems.length">
         <h3 class="text-base font-bold text-cyan-700">Thông tin điểm sau phúc khảo</h3>
         <div class="mt-4 grid gap-4 text-sm sm:grid-cols-3">
           <div v-for="item in reviewScoreItems" :key="item.key">
@@ -166,7 +170,7 @@
         </div>
       </section>
 
-      <section v-if="admissionResult" class="border-t border-slate-200 pt-5">
+      <section v-if="canDisplayAdmissionResult && admissionResult" class="border-t border-slate-200 pt-5">
         <h3 class="text-base font-bold text-cyan-700">Thông tin kết quả tuyển sinh</h3>
         <div class="mt-5 space-y-4 text-sm leading-6 text-slate-800">
           <div class="text-base font-bold uppercase text-slate-950">[{{ admissionResult.title }}]</div>
@@ -237,6 +241,10 @@ const examScoreLoading = ref(false);
 const examScoreError = ref("");
 const examScoreData = ref(null);
 const selectedScoreApplicationId = ref(undefined);
+const EXAM_STATUS = Object.freeze({
+  SUMMARIZED: 3,
+  COMPLETED: 4,
+});
 
 const {
   data: applicationResponse,
@@ -376,6 +384,9 @@ const formatScore = value => {
 
 const hasReviewScoreValue = value => value !== null && value !== undefined && value !== "";
 const getScoreAfterReview = (reviewScore, originalScore) => (hasReviewScoreValue(reviewScore) ? reviewScore : originalScore);
+const examScoreStatusId = computed(() => Number(examScoreData.value?.idExamStatus));
+const canDisplayScoreInformation = computed(() => !Number.isFinite(examScoreStatusId.value) || examScoreStatusId.value >= EXAM_STATUS.SUMMARIZED);
+const canDisplayAdmissionResult = computed(() => !Number.isFinite(examScoreStatusId.value) || examScoreStatusId.value >= EXAM_STATUS.COMPLETED);
 
 const reviewScoreItems = computed(() => {
   if (!examScoreData.value) return [];
