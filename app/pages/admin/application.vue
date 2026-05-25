@@ -164,9 +164,7 @@
           <a-popconfirm v-if="canShowApproveAction(detailData)" title="Bạn chắc chắn muốn duyệt hồ sơ này?" ok-text="Đồng ý" cancel-text="Hủy" @confirm="approveItem(detailData, true)">
             <a-button type="primary">Duyệt hồ sơ</a-button>
           </a-popconfirm>
-          <a-popconfirm v-if="canShowRejectAction(detailData)" title="Bạn chắc chắn muốn từ chối hồ sơ này?" ok-text="Đồng ý" cancel-text="Hủy" @confirm="openReject(detailData, true)">
-            <a-button danger>Từ chối</a-button>
-          </a-popconfirm>
+          <a-button v-if="canShowRejectAction(detailData)" danger @click="openReject(detailData, true)">Từ chối</a-button>
           <a-button @click="closeDetail">Đóng</a-button>
         </div>
       </div>
@@ -203,7 +201,7 @@
 <script setup>
 import { Modal } from "ant-design-vue";
 import dayjs from "dayjs";
-import { APPLICATION_STATUS_LABELS, getApplicationStatusColor, getApplicationStatusLabel, isDraftApplicationStatus, isPendingReviewApplicationStatus, isPaidPendingVerificationApplicationStatus } from "~/composables/useApplicationStatus";
+import { APPLICATION_STATUS, APPLICATION_STATUS_LABELS, getApplicationStatus, getApplicationStatusColor, getApplicationStatusLabel, isDraftApplicationStatus, isPendingReviewApplicationStatus, isPaidPendingVerificationApplicationStatus } from "~/composables/useApplicationStatus";
 import { useAdminStore } from "~/stores/adminStore";
 
 definePageMeta({
@@ -515,7 +513,7 @@ const canShowApproveAction = record => {
 };
 
 const canShowRejectAction = record => {
-  return isPendingReviewApplicationStatus(record) && adminStore.canApproveCurrentPage;
+  return getApplicationStatus(record) === APPLICATION_STATUS.PENDING_REVIEW && adminStore.canApproveCurrentPage;
 };
 
 const canShowApproveDirectAction = record => {
