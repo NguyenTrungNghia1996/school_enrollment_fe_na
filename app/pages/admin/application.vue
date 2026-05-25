@@ -158,7 +158,10 @@
           <a-popconfirm v-if="canShowApproveDirectAction(detailData)" title="Bạn chắc chắn muốn duyệt tuyển thẳng hồ sơ này?" ok-text="Đồng ý" cancel-text="Hủy" @confirm="approveDirectApplication(detailData, true)">
             <a-button class="border-emerald-500 text-emerald-600" :loading="isDirectActionLoading(detailData, 'approve')" :disabled="isAnyDirectActionLoading(detailData)">Tuyển thẳng</a-button>
           </a-popconfirm>
-          <a-popconfirm v-if="canShowCancelDirectAction(detailData)" title="Bạn chắc chắn muốn hủy tuyển thẳng hồ sơ này?" ok-text="Đồng ý" cancel-text="Hủy" @confirm="cancelDirectApplication(detailData, true)">
+          <a-popconfirm v-if="canShowCancelApprovalAction(detailData)" title="Bạn chắc chắn muốn hủy duyệt hồ sơ này?" ok-text="Đồng ý" cancel-text="Hủy" @confirm="cancelApprovedApplication(detailData)">
+            <a-button danger :loading="isDirectActionLoading(detailData, 'cancel')" :disabled="isAnyDirectActionLoading(detailData)">Hủy duyệt hồ sơ</a-button>
+          </a-popconfirm>
+          <a-popconfirm v-if="canShowCancelDirectAction(detailData)" title="Bạn chắc chắn muốn hủy tuyển thẳng hồ sơ này?" ok-text="Đồng ý" cancel-text="Hủy" @confirm="cancelDirectApplication(detailData)">
             <a-button danger :loading="isDirectActionLoading(detailData, 'cancel')" :disabled="isAnyDirectActionLoading(detailData)">Hủy tuyển thẳng</a-button>
           </a-popconfirm>
           <a-popconfirm v-if="canShowApproveAction(detailData)" title="Bạn chắc chắn muốn duyệt hồ sơ này?" ok-text="Đồng ý" cancel-text="Hủy" @confirm="approveItem(detailData, true)">
@@ -509,7 +512,7 @@ const isActionDisabled = record => {
 };
 
 const canShowApproveAction = record => {
-  return Boolean(record?.canApprove) && adminStore.canApproveCurrentPage;
+  return getApplicationStatus(record) !== APPLICATION_STATUS.DIRECT_PENDING_REVIEW && Boolean(record?.canApprove) && adminStore.canApproveCurrentPage;
 };
 
 const canShowRejectAction = record => {
@@ -517,11 +520,18 @@ const canShowRejectAction = record => {
 };
 
 const canShowApproveDirectAction = record => {
-  return Boolean(record?.canApproveDirect) && adminStore.canApproveCurrentPage;
+  return getApplicationStatus(record) !== APPLICATION_STATUS.DIRECT_PENDING_REVIEW && Boolean(record?.canApproveDirect) && adminStore.canApproveCurrentPage;
+};
+
+const isDirectValue = value => value === true || value === 1 || value === "1";
+const isExamApprovedValue = value => value === false || value === 0 || value === "0";
+
+const canShowCancelApprovalAction = record => {
+  return getApplicationStatus(record) === APPLICATION_STATUS.DIRECT_PENDING_REVIEW && isExamApprovedValue(record?.isDirect) && adminStore.canApproveCurrentPage;
 };
 
 const canShowCancelDirectAction = record => {
-  return Boolean(record?.canCancel) && adminStore.canApproveCurrentPage;
+  return getApplicationStatus(record) === APPLICATION_STATUS.DIRECT_PENDING_REVIEW && isDirectValue(record?.isDirect) && adminStore.canApproveCurrentPage;
 };
 
 const isDeleteDisabled = record => {
@@ -739,6 +749,10 @@ const approveDirectApplication = async record => {
 
 const cancelDirectApplication = async record => {
   await submitDirectApplicationAction(record, "cancel", "Hủy tuyển thẳng thành công", "Hủy tuyển thẳng thất bại");
+};
+
+const cancelApprovedApplication = async record => {
+  await submitDirectApplicationAction(record, "cancel", "Hủy duyệt hồ sơ thành công", "Hủy duyệt hồ sơ thất bại");
 };
 
 const openReject = (record, fromDetail = false) => {
