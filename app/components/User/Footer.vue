@@ -66,8 +66,8 @@ const currentYear = new Date().getFullYear();
 // const quickLinks = [{ label: "Trang chủ" }, { label: "Quy chế tuyển sinh" }, { label: "Hướng dẫn đăng ký" }, { label: "Tra cứu kết quả" }, { label: "Tin tức - Sự kiện" }];
 const quickLinks = [
   { label: "Trang chủ", url: "/" },
+  { label: "Hướng dẫn đăng ký", url: "/instructions" },
   // { label: "Quy chế tuyển sinh", url: "/quy-che-tuyen-sinh" },
-  // { label: "Hướng dẫn đăng ký", url: "/huong-dan-dang-ky" },
   // { label: "Tra cứu kết quả", url: "/tra-cuu-ket-qua" },
   // { label: "Tin tức - Sự kiện", url: "/tin-tuc-su-kien" },
 ];
