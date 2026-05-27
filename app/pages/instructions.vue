@@ -92,7 +92,7 @@
             <div class="rounded-2xl border border-slate-200 bg-white/80 p-6 shadow-sm backdrop-blur-md">
               <h3 class="mb-4 flex items-center gap-2 text-lg font-bold text-slate-800">
                 <Icon name="lucide:list" class="text-primary" />
-                Chỉ mục nội dung
+                Chỉ mục
               </h3>
               <nav class="space-y-1">
                 <button
