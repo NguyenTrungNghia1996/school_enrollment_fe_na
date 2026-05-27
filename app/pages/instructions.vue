@@ -1,19 +1,23 @@
 <template>
   <div class="w-full pb-20 bg-slate-50">
     <!-- Hero Section -->
-    <section class="relative overflow-hidden bg-[#071f41] py-16 text-white shadow-lg">
-      <div class="absolute inset-0 opacity-10">
-        <div class="absolute -left-20 -top-20 h-96 w-96 rounded-full bg-primary blur-[120px]"></div>
-        <div class="absolute -bottom-20 -right-20 h-96 w-96 rounded-full bg-primary blur-[120px]"></div>
+    <section class="relative overflow-hidden bg-gradient-to-br from-[#071f41] via-[#0b2b5c] to-[#051630] py-20 text-white shadow-lg">
+      <div class="absolute inset-0 opacity-15">
+        <div class="absolute -left-20 -top-20 h-96 w-96 rounded-full bg-primary blur-[150px]"></div>
+        <div class="absolute -bottom-20 -right-20 h-96 w-96 rounded-full bg-primary blur-[150px]"></div>
       </div>
 
       <div class="container relative z-10 mx-auto px-4 text-center sm:px-6 lg:px-8">
-        <h1 class="text-3xl font-extrabold tracking-tight sm:text-4xl lg:text-5xl flex items-center justify-center gap-3">
-          <Icon name="lucide:book-open" class="text-primary" />
+        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-primary/20 text-blue-300 text-xs font-bold uppercase tracking-wider mb-4 border border-primary/30 backdrop-blur-sm">
+          <Icon name="lucide:info" />
+          HỖ TRỢ THÍ SINH
+        </span>
+        <h1 class="text-3xl font-black tracking-tight sm:text-4xl lg:text-5xl flex items-center justify-center gap-3">
+          <Icon name="lucide:book-open" class="text-primary text-4xl lg:text-5xl" />
           Hướng Dẫn Sử Dụng
         </h1>
-        <p class="mx-auto mt-4 max-w-2xl text-lg text-blue-100">
-          Tài liệu hướng dẫn chi tiết quy trình đăng ký, nộp hồ sơ, thanh toán lệ phí và phúc khảo trực tuyến dành cho thí sinh.
+        <p class="mx-auto mt-4 max-w-2xl text-base lg:text-lg text-blue-100/80 leading-relaxed">
+          Tài liệu hướng dẫn chi tiết quy trình đăng ký, nộp hồ sơ, thanh toán lệ phí và phúc khảo trực tuyến dành cho thí sinh tham gia kỳ tuyển sinh.
         </p>
       </div>
     </section>
@@ -28,14 +32,14 @@
             v-for="section in sections" 
             :key="section.id" 
             :id="section.id" 
-            class="section-element scroll-mt-32 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm transition-shadow duration-300 hover:shadow-md md:p-8"
+            class="section-element scroll-mt-32 rounded-2xl border border-slate-100 bg-white p-6 shadow-[0_4px_20px_rgba(0,0,0,0.02)] transition-all duration-300 hover:shadow-[0_12px_40px_rgba(0,0,0,0.06)] hover:border-slate-200/80 md:p-8"
           >
             <!-- Section Header -->
             <div class="mb-8 flex items-center gap-4 border-b border-slate-100 pb-4">
               <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10 text-primary">
                 <Icon :name="section.icon" class="text-2xl" />
               </div>
-              <h2 class="text-xl font-bold text-slate-800 md:text-2xl">{{ section.title }}</h2>
+              <h2 class="text-xl font-extrabold text-slate-800 md:text-2xl">{{ section.title }}</h2>
             </div>
 
             <!-- Section Content Blocks -->
@@ -48,19 +52,19 @@
                 </p>
 
                 <!-- Step block -->
-                <div v-else-if="block.type === 'step'" class="flex gap-4 rounded-xl bg-slate-50 p-4 border border-slate-100">
-                  <div class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary font-bold text-white text-sm">
+                <div v-else-if="block.type === 'step'" class="flex gap-4 rounded-2xl bg-slate-50/70 p-5 border border-slate-100 transition-all hover:bg-slate-50 duration-200">
+                  <div class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-gradient-to-tr from-primary to-blue-600 font-bold text-white text-sm shadow-md shadow-primary/20">
                     {{ block.number }}
                   </div>
                   <div class="pt-0.5">
-                    <span class="font-bold text-slate-800">Bước {{ block.number }}:</span>
-                    <p class="mt-1 text-base leading-relaxed text-slate-600">{{ block.content }}</p>
+                    <span class="font-extrabold text-slate-800 text-base">Bước {{ block.number }}:</span>
+                    <p class="mt-1.5 text-base leading-relaxed text-slate-600">{{ block.content }}</p>
                   </div>
                 </div>
 
                 <!-- Note block -->
-                <div v-else-if="block.type === 'note'" class="flex gap-4 rounded-r-xl border-l-4 border-amber-500 bg-amber-50/70 p-4 text-amber-900">
-                  <Icon name="lucide:alert-circle" class="mt-1 shrink-0 text-amber-600 text-xl" />
+                <div v-else-if="block.type === 'note'" class="flex gap-4 rounded-r-2xl border-l-4 border-amber-500 bg-amber-50/40 p-5 text-amber-900 shadow-sm">
+                  <Icon name="lucide:alert-circle" class="mt-0.5 shrink-0 text-amber-600 text-2xl" />
                   <div class="text-sm leading-relaxed">
                     <strong class="text-amber-800 font-bold block mb-1">Lưu ý quan trọng:</strong>
                     {{ block.content }}
@@ -68,15 +72,16 @@
                 </div>
 
                 <!-- Image block -->
-                <div v-else-if="block.type === 'image'" class="flex flex-col items-center justify-center py-4 bg-slate-50/50 rounded-xl border border-dashed border-slate-200">
-                  <div class="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm max-w-full hover:shadow-md transition-shadow">
+                <div v-else-if="block.type === 'image'" class="flex flex-col items-center justify-center py-6 px-4 bg-slate-50/30 rounded-2xl border border-dashed border-slate-200/80">
+                  <div class="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-md max-w-full hover:shadow-xl transition-all duration-300">
                     <a-image 
                       :src="block.src" 
                       :alt="block.caption" 
-                      class="max-h-[420px] w-auto max-w-full object-contain cursor-zoom-in"
+                      class="max-h-[460px] w-auto max-w-full object-contain cursor-zoom-in"
                     />
                   </div>
-                  <span v-if="block.caption" class="mt-2 text-xs font-semibold text-slate-400 uppercase tracking-wider">
+                  <span v-if="block.caption" class="mt-3 text-xs font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1">
+                    <Icon name="lucide:image" class="text-sm" />
                     {{ block.caption }}
                   </span>
                 </div>
@@ -89,20 +94,20 @@
         <!-- Right Column: Sticky Sidebar / Index (Table of Contents) -->
         <aside class="hidden lg:block">
           <div class="sticky top-[120px] space-y-6">
-            <div class="rounded-2xl border border-slate-200 bg-white/80 p-6 shadow-sm backdrop-blur-md">
+            <div class="rounded-2xl border border-slate-100 bg-white/90 p-6 shadow-[0_8px_30px_rgb(0,0,0,0.02)] backdrop-blur-md">
               <h3 class="mb-4 flex items-center gap-2 text-lg font-bold text-slate-800">
                 <Icon name="lucide:list" class="text-primary" />
                 Chỉ mục
               </h3>
-              <nav class="space-y-1">
+              <nav class="space-y-1.5">
                 <button
                   v-for="item in sections"
                   :key="item.id"
                   @click="scrollToSection(item.id)"
-                  class="flex w-full items-center gap-3 rounded-xl px-4 py-3 text-left text-sm font-medium transition-all duration-200"
+                  class="flex w-full items-center gap-3 rounded-xl px-4 py-3.5 text-left text-sm font-semibold transition-all duration-300"
                   :class="activeSectionId === item.id 
-                    ? 'bg-primary/10 text-primary font-semibold shadow-sm' 
-                    : 'text-slate-500 hover:bg-slate-50 hover:text-slate-900'"
+                    ? 'bg-primary text-white font-bold shadow-lg shadow-primary/20 translate-x-1' 
+                    : 'text-slate-500 hover:bg-slate-50 hover:text-slate-900 hover:translate-x-0.5'"
                 >
                   <Icon :name="item.icon" class="text-lg shrink-0" />
                   <span class="line-clamp-2">{{ item.title }}</span>
@@ -111,22 +116,30 @@
             </div>
 
             <!-- Sticky Support Box -->
-            <div class="rounded-2xl bg-slate-900 p-6 text-white shadow-md">
-              <h3 class="mb-2 text-base font-bold">Cần hỗ trợ?</h3>
-              <p class="mb-4 text-xs text-slate-400">Nếu bạn gặp khó khăn trong quá trình đăng ký, hãy liên hệ với chúng tôi.</p>
-              <div class="space-y-3">
-                <div class="flex items-center gap-3">
-                  <Icon name="lucide:phone" class="text-primary text-base shrink-0" />
+            <div class="rounded-2xl bg-slate-900 p-6 text-white shadow-xl relative overflow-hidden group">
+              <div class="absolute -right-10 -bottom-10 h-32 w-32 rounded-full bg-primary/10 group-hover:bg-primary/20 transition-all duration-500 blur-xl"></div>
+              <h3 class="mb-2 text-base font-bold flex items-center gap-2">
+                <Icon name="lucide:headphones" class="text-primary text-lg" />
+                Cần hỗ trợ?
+              </h3>
+              <p class="mb-4 text-xs text-slate-400 leading-relaxed">Nếu bạn gặp khó khăn trong quá trình đăng ký, hãy liên hệ với chúng tôi qua các kênh bên dưới.</p>
+              <div class="space-y-3.5 relative z-10">
+                <div class="flex items-center gap-3 hover:translate-x-0.5 transition-transform duration-200">
+                  <div class="flex h-8 w-8 items-center justify-center rounded-lg bg-white/10 text-primary">
+                    <Icon name="lucide:phone" class="text-base" />
+                  </div>
                   <div>
-                    <p class="text-[10px] uppercase text-slate-400">Hotline</p>
-                    <p class="text-sm font-bold">{{ unitStore.phone || 'Chưa cập nhật' }}</p>
+                    <p class="text-[9px] uppercase tracking-wider text-slate-400">Hotline</p>
+                    <p class="text-sm font-bold text-slate-100">{{ unitStore.phone || 'Chưa cập nhật' }}</p>
                   </div>
                 </div>
-                <div class="flex items-center gap-3">
-                  <Icon name="lucide:mail" class="text-primary text-base shrink-0" />
+                <div class="flex items-center gap-3 hover:translate-x-0.5 transition-transform duration-200">
+                  <div class="flex h-8 w-8 items-center justify-center rounded-lg bg-white/10 text-primary">
+                    <Icon name="lucide:mail" class="text-base" />
+                  </div>
                   <div class="min-w-0">
-                    <p class="text-[10px] uppercase text-slate-400">Email</p>
-                    <p class="text-xs font-bold truncate">{{ unitStore.email || 'Chưa cập nhật' }}</p>
+                    <p class="text-[9px] uppercase tracking-wider text-slate-400">Email</p>
+                    <p class="text-xs font-bold text-slate-100 truncate">{{ unitStore.email || 'Chưa cập nhật' }}</p>
                   </div>
                 </div>
               </div>
@@ -137,7 +150,7 @@
       </div>
     </div>
 
-    <!-- Floating Table of Contents for Mobile and Tablets -->
+    <!-- Floating Table of Contents for Mobile and Tablets (Perfect Circle) -->
     <div class="lg:hidden fixed bottom-6 right-6 z-50">
       <a-popover trigger="click" placement="topRight" overlayClassName="mobile-toc-popover">
         <template #content>
@@ -161,9 +174,9 @@
             </nav>
           </div>
         </template>
-        <a-button type="primary" shape="circle" size="large" class="h-14 w-14 shadow-xl bg-primary flex items-center justify-center">
+        <button class="h-14 w-14 shrink-0 rounded-full shadow-2xl bg-gradient-to-r from-primary to-blue-600 flex items-center justify-center text-white cursor-pointer hover:shadow-primary/30 transition-all hover:scale-105 active:scale-95 duration-200 border-none focus:outline-none p-0">
           <Icon name="lucide:list" class="text-2xl text-white" />
-        </a-button>
+        </button>
       </a-popover>
     </div>
   </div>
