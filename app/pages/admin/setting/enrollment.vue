@@ -45,7 +45,7 @@
       </a-table>
     </ClientOnly>
 
-    <a-modal v-model:open="visible" :title="isEdit ? 'Chỉnh sửa kỳ tuyển sinh' : 'Thêm mới kỳ tuyển sinh'" @cancel="handleCancel" :width="700" :confirm-loading="confirmLoading" :ok-button-props="{ disabled: isEdit && !adminStore.canEditCurrentPage }" @ok="handleOk" centered>
+    <a-modal v-model:open="visible" :title="isEdit ? 'Chỉnh sửa kỳ tuyển sinh' : 'Thêm mới kỳ tuyển sinh'" @cancel="handleCancel" :width="700" :confirm-loading="confirmLoading" ok-text="Lưu" :ok-button-props="{ disabled: isEdit && !adminStore.canEditCurrentPage }" @ok="handleOk" centered>
       <a-form ref="formRef" :model="formState" :rules="rules" :disabled="isEditReadOnly" layout="vertical" class="mt-4 max-h-[70vh] overflow-y-auto pr-2" @submit.prevent>
         <a-alert v-if="isEnrollmentLocked" type="info" show-icon class="mb-4" :message="isReviewLocked ? 'Kỳ tuyển sinh đã có hồ sơ đăng ký. Không được phép cập nhật thông tin tuyển sinh.' : 'Kỳ tuyển sinh đã có hồ sơ đăng ký. Chỉ được phép cập nhật thời gian phúc khảo và lệ phí phúc khảo.'" />
         <a-alert v-if="isReviewLocked" type="info" show-icon class="mb-4" message="Kỳ tuyển sinh đã có hồ sơ phúc khảo. Không được phép cập nhật thời gian phúc khảo và lệ phí phúc khảo." />

@@ -56,7 +56,7 @@
         <div class="flex justify-end space-x-2">
           <a-button @click="handleCancel">Hủy</a-button>
           <a-button type="primary" @click="handleOk" :loading="confirmLoading" :disabled="isEdit && !adminStore.canEditCurrentPage">
-            {{ isEdit ? "Cập nhật" : "Thêm mới" }}
+            Lưu
           </a-button>
         </div>
       </template>
