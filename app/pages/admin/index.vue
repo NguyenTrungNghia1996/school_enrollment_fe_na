@@ -256,6 +256,33 @@ const barChartData = computed(() => ({
 }));
 
 const maxChartValue = computed(() => Math.max(0, ...barChartData.value.admitted, ...barChartData.value.submitted));
+const barChartYAxis = computed(() => {
+  if (!maxChartValue.value) {
+    return {
+      max: 5,
+      stepSize: 1,
+    };
+  }
+
+  const paddedMax = maxChartValue.value * 1.15;
+  if (maxChartValue.value > 500) {
+    return {
+      max: Math.ceil(paddedMax / 500) * 500,
+      stepSize: 500,
+    };
+  }
+
+  const rawStep = paddedMax / 5;
+  const magnitude = 10 ** Math.floor(Math.log10(rawStep));
+  const normalizedStep = rawStep / magnitude;
+  const niceMultiplier = normalizedStep <= 1 ? 1 : normalizedStep <= 2 ? 2 : normalizedStep <= 5 ? 5 : 10;
+  const stepSize = Math.max(1, niceMultiplier * magnitude);
+
+  return {
+    max: Math.ceil(paddedMax / stepSize) * stepSize,
+    stepSize,
+  };
+});
 
 const doughnutChartData = computed(() => ({
   labels: examStatusStats.value.map(item => item.title),
@@ -372,12 +399,14 @@ const renderBarChart = async () => {
       },
       y: {
         beginAtZero: true,
-        suggestedMax: maxChartValue.value ? Math.ceil(maxChartValue.value * 1.2) : 5,
+        max: barChartYAxis.value.max,
         grid: {
           color: "rgba(226, 232, 240, 0.8)",
         },
         ticks: {
           color: "#64748b",
+          stepSize: barChartYAxis.value.stepSize,
+          precision: 0,
           callback: value => formatNumber(value),
         },
       },
