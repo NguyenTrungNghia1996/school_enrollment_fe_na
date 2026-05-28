@@ -40,7 +40,7 @@
       </a-table>
     </ClientOnly>
 
-    <a-modal v-model:open="visible" :title="isEdit ? 'Chỉnh sửa Quản trị viên' : 'Thêm mới Quản trị viên'" @cancel="handleCancel" :width="600" :confirm-loading="confirmLoading" :ok-button-props="{ disabled: isEdit && !adminStore.canEditCurrentPage }" @ok="handleOk">
+    <a-modal v-model:open="visible" :title="isEdit ? 'Chỉnh sửa Quản trị viên' : 'Thêm mới Quản trị viên'" @cancel="handleCancel" :width="600" :confirm-loading="confirmLoading" ok-text="Lưu" :ok-button-props="{ disabled: isEdit && !adminStore.canEditCurrentPage }" @ok="handleOk">
       <a-form ref="formRef" :model="formState" :rules="rules" :disabled="isEditReadOnly" layout="vertical" class="mt-4">
         <div class="grid grid-cols-1 gap-x-4 md:grid-cols-2">
           <a-form-item label="Tên đăng nhập" name="username" v-if="!isEdit">
