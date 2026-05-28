@@ -11,38 +11,41 @@
     <a-alert v-if="overviewDashboardError" type="error" show-icon message="Không thể tải dữ liệu dashboard" description="Vui lòng thử tải lại trang hoặc kiểm tra kết nối đến máy chủ." />
 
     <div class="rounded-2xl border border-slate-100 bg-white p-4 shadow-sm">
-      <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <div class="text-sm font-medium text-slate-500">Tổng số hồ sơ</div>
-          <div class="mt-1 text-3xl font-bold tracking-tight text-slate-900">{{ formatNumber(totalApplications) }}</div>
+      <div class="mb-3 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div class="flex items-baseline gap-3">
+          <h2 class="text-base font-bold text-slate-800">Tổng quan hồ sơ</h2>
+          <div class="text-sm text-slate-500">
+            Tổng: <span class="text-xl font-bold text-slate-900">{{ formatNumber(totalApplications) }}</span>
+          </div>
         </div>
-        <a-button :loading="overviewDashboardLoading" @click="refreshOverviewDashboard()">
+        <a-button size="small" :loading="overviewDashboardLoading" @click="refreshOverviewDashboard()">
           <template #icon><Icon name="lucide:refresh-cw" /></template>
           Cập nhật
         </a-button>
       </div>
-    </div>
 
-    <!-- Stats Grid -->
-    <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
-      <template v-if="overviewDashboardLoading && !statusStats.length">
-        <a-skeleton v-for="item in 6" :key="item" active class="rounded-2xl border border-slate-100 bg-white p-5 shadow-sm" />
-      </template>
-      <template v-else>
-        <div v-for="stat in statusStats" :key="stat.title" class="group relative overflow-hidden rounded-2xl border border-slate-100 bg-white p-5 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:border-sky-100 hover:shadow-md">
-          <div :class="stat.accentClass" class="absolute -right-4 -top-4 h-24 w-24 rounded-full opacity-50 transition-all duration-500 group-hover:scale-110"></div>
-          <div class="relative flex items-center justify-between">
-            <div class="space-y-2">
-              <p class="text-sm font-medium text-slate-500">{{ stat.title }}</p>
-              <p class="text-3xl font-bold tracking-tight text-slate-800">{{ formatNumber(stat.value) }}</p>
-              <p class="text-xs text-slate-400">{{ getPercentText(stat.value) }} tổng hồ sơ</p>
-            </div>
-            <div :class="stat.iconClass" class="flex h-12 w-12 items-center justify-center rounded-xl transition-transform duration-300 group-hover:scale-110">
-              <Icon :name="stat.icon" class="text-2xl" />
+      <div class="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3">
+        <template v-if="overviewDashboardLoading && !statusStats.length">
+          <a-skeleton v-for="item in 6" :key="item" active class="rounded-xl border border-slate-100 bg-white p-3" />
+        </template>
+        <template v-else>
+          <div v-for="stat in statusStats" :key="stat.title" class="group relative overflow-hidden rounded-xl border border-slate-100 bg-white p-3 transition-all duration-300 hover:border-sky-100 hover:shadow-sm">
+            <div :class="stat.accentClass" class="absolute -right-5 -top-5 h-16 w-16 rounded-full opacity-50 transition-all duration-500 group-hover:scale-110"></div>
+            <div class="relative flex items-center justify-between gap-3">
+              <div class="min-w-0">
+                <p class="truncate text-xs font-medium text-slate-500">{{ stat.title }}</p>
+                <div class="mt-2 flex items-baseline gap-2">
+                  <p class="text-2xl font-bold tracking-tight text-slate-800">{{ formatNumber(stat.value) }}</p>
+                  <p class="text-xs text-slate-400">{{ getPercentText(stat.value) }}</p>
+                </div>
+              </div>
+              <div :class="stat.iconClass" class="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg transition-transform duration-300 group-hover:scale-110">
+                <Icon :name="stat.icon" class="text-xl" />
+              </div>
             </div>
           </div>
-        </div>
-      </template>
+        </template>
+      </div>
     </div>
 
     <div class="grid grid-cols-1 gap-4 xl:grid-cols-[minmax(0,1.35fr)_minmax(380px,0.9fr)]">
