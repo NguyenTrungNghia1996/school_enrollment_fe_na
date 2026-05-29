@@ -15,7 +15,8 @@
         <div class="flex items-baseline gap-3">
           <h2 class="text-base font-bold text-slate-800">Tổng quan hồ sơ</h2>
           <div class="text-sm text-slate-500">
-            Tổng: <span class="text-xl font-bold text-slate-900">{{ formatNumber(totalApplications) }}</span>
+            Tổng:
+            <span class="text-xl font-bold text-slate-900">{{ formatNumber(totalApplications) }}</span>
           </div>
         </div>
         <a-button size="small" :loading="overviewDashboardLoading" @click="refreshOverviewDashboard()">
@@ -61,11 +62,13 @@
         <a-alert v-if="barChartError" type="error" show-icon message="Không thể tải dữ liệu biểu đồ" class="mb-4" />
 
         <ClientOnly>
-          <div class="relative h-[320px] w-full">
-            <div v-if="barChartLoading" class="absolute inset-0 z-10 flex items-center justify-center bg-white/70">
-              <a-spin />
+          <div class="overflow-x-auto pb-2">
+            <div class="relative h-[320px]" :style="barChartContainerStyle">
+              <div v-if="barChartLoading" class="absolute inset-0 z-10 flex items-center justify-center bg-white/70">
+                <a-spin />
+              </div>
+              <canvas ref="barChartCanvasRef" class="h-full w-full"></canvas>
             </div>
-            <canvas ref="barChartCanvasRef" class="h-full w-full"></canvas>
           </div>
         </ClientOnly>
       </div>
@@ -96,9 +99,15 @@
     </div>
 
     <div class="flex flex-col gap-2 border-t border-slate-100 pt-3 text-xs text-slate-500 sm:flex-row sm:items-center sm:justify-end">
-      <span><span class="font-medium text-slate-600">Phiên bản:</span> {{ buildTag || "local-development" }}</span>
+      <span>
+        <span class="font-medium text-slate-600">Phiên bản:</span>
+        {{ buildTag || "local-development" }}
+      </span>
       <span class="hidden text-slate-300 sm:inline">|</span>
-      <span><span class="font-medium text-slate-600">Thời gian:</span> {{ formattedBuildTime }}</span>
+      <span>
+        <span class="font-medium text-slate-600">Thời gian:</span>
+        {{ formattedBuildTime }}
+      </span>
     </div>
   </div>
 </template>
@@ -254,6 +263,9 @@ const barChartData = computed(() => ({
   admitted: barChartItems.value.map(item => Number(item.totalAdmitted || 0)),
   submitted: barChartItems.value.map(item => Number(item.totalComplete || 0)),
 }));
+const barChartContainerStyle = computed(() => ({
+  minWidth: `${Math.max(920, barChartData.value.labels.length * 180)}px`,
+}));
 
 const maxChartValue = computed(() => Math.max(0, ...barChartData.value.admitted, ...barChartData.value.submitted));
 const barChartYAxis = computed(() => {
@@ -346,8 +358,9 @@ const renderBarChart = async () => {
         borderColor: "rgba(56, 189, 248, 1)",
         borderWidth: 1,
         borderRadius: 2,
-        barPercentage: 0.72,
-        categoryPercentage: 0.58,
+        barPercentage: 0.96,
+        categoryPercentage: 0.42,
+        maxBarThickness: 34,
       },
       {
         label: "Hồ sơ nộp",
@@ -356,8 +369,9 @@ const renderBarChart = async () => {
         borderColor: "rgba(8, 145, 178, 1)",
         borderWidth: 1,
         borderRadius: 2,
-        barPercentage: 0.72,
-        categoryPercentage: 0.58,
+        barPercentage: 0.96,
+        categoryPercentage: 0.42,
+        maxBarThickness: 34,
       },
     ],
   };
