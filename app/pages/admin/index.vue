@@ -56,7 +56,7 @@
             <h2 class="text-lg font-bold text-slate-800">Thống kê hồ sơ</h2>
             <p class="text-sm text-slate-500">So sánh hồ sơ trúng tuyển và hồ sơ nộp theo kỳ tuyển sinh.</p>
           </div>
-          <a-date-picker v-model:value="selectedChartYear" picker="year" format="YYYY" placeholder="Chọn năm" class="w-full sm:w-[220px]" :allow-clear="false" />
+          <a-range-picker v-model:value="selectedChartYearRange" picker="year" format="YYYY" class="w-full sm:w-[280px]" :placeholder="['Từ năm', 'Đến năm']" :allow-clear="false" />
         </div>
 
         <a-alert v-if="barChartError" type="error" show-icon message="Không thể tải dữ liệu biểu đồ" class="mb-4" />
@@ -127,7 +127,8 @@ const buildTag = computed(() => config.public.buildTag);
 const buildTime = computed(() => config.public.buildTime);
 const selectedExamId = ref(null);
 const examDashboardParams = ref({});
-const selectedChartYear = ref(dayjs(String(new Date().getFullYear()), "YYYY"));
+const currentYear = new Date().getFullYear();
+const selectedChartYearRange = ref([dayjs(String(currentYear), "YYYY"), dayjs(String(currentYear), "YYYY")]);
 const barChartCanvasRef = ref(null);
 const doughnutChartCanvasRef = ref(null);
 const barChartInstance = shallowRef(null);
@@ -153,9 +154,18 @@ const {
   immediate: false,
 });
 
-const barChartParams = computed(() => ({
-  year: selectedChartYear.value?.year?.() || new Date().getFullYear(),
-}));
+const getPickerYear = (value, fallback) => value?.year?.() || fallback;
+
+const barChartParams = computed(() => {
+  const [startYearValue, endYearValue] = selectedChartYearRange.value || [];
+  const startYear = getPickerYear(startYearValue, currentYear);
+  const endYear = getPickerYear(endYearValue, startYear);
+
+  return {
+    startYear,
+    endYear,
+  };
+});
 
 const {
   data: barChartResponse,
@@ -500,7 +510,7 @@ watch(selectedExamId, value => {
   refreshExamDashboard();
 });
 
-watch(selectedChartYear, () => {
+watch(barChartParams, () => {
   refreshBarChart();
 });
 
