@@ -262,6 +262,7 @@ const examStatusStats = computed(() =>
 );
 
 const totalApplications = computed(() => statusStats.value.reduce((sum, item) => sum + item.value, 0));
+const maxBarChartLabelLength = 28;
 
 const barChartItems = computed(() => {
   if (!barChartResponse.value?.success) return [];
@@ -273,8 +274,11 @@ const barChartData = computed(() => ({
   admitted: barChartItems.value.map(item => Number(item.totalAdmitted || 0)),
   submitted: barChartItems.value.map(item => Number(item.totalComplete || 0)),
 }));
+
+const getBarChartLabelWidth = label => Math.min(Math.max(String(label || "").length * 8, 180), 420);
+
 const barChartContainerStyle = computed(() => ({
-  minWidth: `${Math.max(920, barChartData.value.labels.length * 180)}px`,
+  minWidth: `${Math.max(920, barChartData.value.labels.reduce((total, label) => total + getBarChartLabelWidth(label), 0))}px`,
 }));
 
 const maxChartValue = computed(() => Math.max(0, ...barChartData.value.admitted, ...barChartData.value.submitted));
@@ -320,8 +324,8 @@ const getPercentText = value => {
 };
 
 const getChartLabel = label => {
-  if (!label || label.length <= 28) return label;
-  return `${label.slice(0, 28)}...`;
+  if (!label || label.length <= maxBarChartLabelLength) return label;
+  return `${label.slice(0, maxBarChartLabelLength)}...`;
 };
 
 const getShortStatusName = statusName => {
@@ -416,6 +420,10 @@ const renderBarChart = async () => {
         },
         ticks: {
           color: "#64748b",
+          autoSkip: false,
+          maxRotation: 0,
+          minRotation: 0,
+          padding: 8,
           callback(value) {
             return getChartLabel(this.getLabelForValue(value));
           },
