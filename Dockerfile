@@ -57,7 +57,7 @@
 # EXPOSE 3000
 
 # CMD ["node", ".output/server/index.mjs"]
-FROM node:20-alpine AS nodebuilder
+FROM node:24-alpine AS nodebuilder
 
 WORKDIR /app
 COPY package.json .
@@ -66,7 +66,7 @@ RUN npm install --legacy-peer-deps
 COPY . .
 RUN npm run build
 
-FROM node:20-alpine AS bin
+FROM node:24-alpine AS bin
 
 # Build metadata (can be overridden by build args)
 ARG BUILD_TAG=dev
