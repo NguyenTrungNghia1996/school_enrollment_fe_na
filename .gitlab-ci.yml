@@ -40,6 +40,7 @@ docker-build-and-push-gitlab:
 
       echo "Building and tagging Docker image..."
       docker build \
+        --network host \
         --build-arg BUILDKIT_INLINE_CACHE=1 \
         --build-arg BUILD_TAG=$TAG_BRANCH \
         --build-arg BUILD_SHA=$TAG_SHA \
