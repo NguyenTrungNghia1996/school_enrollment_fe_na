@@ -1,7 +1,7 @@
 import { defineStore } from "pinia";
 
 const DEFAULT_UNIT = {
-  name: "TRƯỜNG TRUNG HỌC CƠ SỞ GIẢNG VÕ 2",
+  name: "TRƯỜNG THCS GIẢNG VÕ 2",
   address: "Số 1B Trần Huy Liệu, Phường Giảng Võ, TP. Hà Nội",
   email: "c2giangvo2-bd@hanoiedu.vn",
   phone: "088 699 5511",
