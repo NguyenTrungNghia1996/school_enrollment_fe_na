@@ -61,10 +61,10 @@ FROM node:24-alpine AS nodebuilder
 
 WORKDIR /app
 COPY package.json .
-COPY package-lock.json .
-RUN npm install --legacy-peer-deps
+COPY yarn.lock .
+RUN yarn install --frozen-lockfile
 COPY . .
-RUN npm run build
+RUN yarn build
 
 FROM node:24-alpine AS bin
 
