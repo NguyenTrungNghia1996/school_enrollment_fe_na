@@ -5,7 +5,7 @@ export default defineNuxtConfig({
   app: {
     head: {
       titleTemplate: "%s - Trường THCS Giảng Võ 2",
-      title: "Trường THCS Giảng Võ 2",
+      title: "Trường THCS Giảng Võ 2", //
       link: [
         {
           rel: "stylesheet",
