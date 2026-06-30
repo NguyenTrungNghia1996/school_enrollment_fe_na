@@ -63,7 +63,7 @@
             <a-input v-model:value="formState.url" placeholder="Nhập đường dẫn đăng ký hoặc thông tin liên quan" :disabled="isGeneralFieldsReadOnly" />
           </a-form-item>
 
-          <a-form-item label="Lệ phí (VNĐ)" name="fee">
+          <a-form-item label="Lệ phí (VNĐ)" name="fee" v-show="false">
             <a-input-number v-model:value="formState.fee" :min="0" :step="1000" class="w-full" :formatter="value => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')" :parser="value => value.replace(/\$\s?|(,*)/g, '')" :disabled="isGeneralFieldsReadOnly" />
           </a-form-item>
 
@@ -71,7 +71,7 @@
             <a-input-number v-model:value="formState.quantity" :min="1" class="w-full" :disabled="isGeneralFieldsReadOnly" />
           </a-form-item>
 
-          <a-form-item label="Hình thức tuyển sinh" name="examType" class="md:col-span-2">
+          <a-form-item label="Hình thức tuyển sinh" name="examType" class="md:col-span-2" v-show="false">
             <a-radio-group v-model:value="formState.examType" :disabled="isGeneralFieldsReadOnly">
               <a-radio :value="1">Thi</a-radio>
               <a-radio :value="2">Xét tuyển</a-radio>
@@ -92,21 +92,21 @@
             <a-range-picker v-model:value="formState.reviewDateRange" format="DD/MM/YYYY HH:mm" show-time class="w-full" :disabled-date="disabledReviewDate" :placeholder="['Chọn ngày giờ bắt đầu phúc khảo', 'Chọn ngày giờ kết thúc phúc khảo']" :disabled="isReviewFieldsReadOnly" />
           </a-form-item>
 
-          <a-form-item label="Lệ phí phúc khảo (VNĐ)" name="reviewFee">
+          <a-form-item label="Lệ phí phúc khảo (VNĐ)" name="reviewFee" v-show="false">
             <a-input-number v-model:value="formState.reviewFee" :min="0" :step="1000" class="w-full" :formatter="value => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')" :parser="value => value.replace(/\$\s?|(,*)/g, '')" :disabled="isReviewFieldsReadOnly" />
           </a-form-item>
 
           <div />
 
-          <div class="md:col-span-2">
-            <AdminSelectBank v-model="formState.idBank" label="Ngân hàng" name="idBank" placeholder="Chọn ngân hàng" :rules="[{ required: true, message: 'Vui lòng chọn ngân hàng', trigger: 'change' }]" :disabled="isGeneralFieldsReadOnly" />
+          <div class="md:col-span-2" v-show="false">
+            <AdminSelectBank v-model="formState.idBank" label="Ngân hàng" name="idBank" placeholder="Chọn ngân hàng" :disabled="isGeneralFieldsReadOnly" />
           </div>
 
-          <a-form-item label="Số tài khoản" name="accountNumber">
+          <a-form-item label="Số tài khoản" name="accountNumber" v-show="false">
             <a-input v-model:value="formState.accountNumber" placeholder="Nhập số tài khoản" :disabled="isGeneralFieldsReadOnly" />
           </a-form-item>
 
-          <a-form-item label="Chủ tài khoản" name="accountName">
+          <a-form-item label="Chủ tài khoản" name="accountName" v-show="false">
             <a-input v-model:value="formState.accountName" placeholder="Nhập tên chủ tài khoản" :disabled="isGeneralFieldsReadOnly" />
           </a-form-item>
 
@@ -171,7 +171,7 @@ const columns = [
   { title: "STT", key: "stt", width: 60, align: "center" },
   { title: "Tên kỳ tuyển sinh", dataIndex: "examName", key: "examName", ellipsis: true },
   { title: "Thời gian", key: "dates", width: 200 },
-  { title: "Lệ phí", dataIndex: "fee", key: "fee", width: 120, align: "right" },
+  // { title: "Lệ phí", dataIndex: "fee", key: "fee", width: 120, align: "right" },
   { title: "Chỉ tiêu", dataIndex: "quantity", key: "quantity", width: 100, align: "center" },
   { title: "Thao tác", key: "action", width: 100, align: "center", fixed: "right" },
 ];
@@ -187,12 +187,12 @@ const createInitialFormState = () => ({
   endDate: null,
   reviewStartDate: null,
   reviewEndDate: null,
-  fee: null,
+  fee: 0,
   quantity: null,
   url: "",
-  reviewFee: null,
-  idBank: undefined,
-  accountNumber: "",
+  reviewFee: 0,
+  idBank: 1,
+  accountNumber: 0,
   accountName: "",
   examType: 1,
   directEndDate: null,
@@ -296,11 +296,11 @@ const rules = {
       trigger: "change",
     },
   ],
-  fee: [{ required: true, message: "Vui lòng nhập lệ phí thi", trigger: "blur" }, validateRequiredNumber("lệ phí thi")],
+  // fee: [{ required: true, message: "Vui lòng nhập lệ phí thi", trigger: "blur" }, validateRequiredNumber("lệ phí thi")],
   quantity: [{ required: true, message: "Vui lòng nhập chỉ tiêu", trigger: "blur" }, { type: "number", min: 1, message: "Chỉ tiêu nhỏ nhất là 1", trigger: "blur" }, validateRequiredNumber("chỉ tiêu")],
-  reviewFee: [{ required: true, message: "Vui lòng nhập lệ phí phúc khảo", trigger: "blur" }, validateRequiredNumber("lệ phí phúc khảo")],
-  accountNumber: [{ required: true, message: "Vui lòng nhập số tài khoản", trigger: "blur" }],
-  accountName: [{ required: true, message: "Vui lòng nhập chủ tài khoản", trigger: "blur" }],
+  // reviewFee: [{ required: true, message: "Vui lòng nhập lệ phí phúc khảo", trigger: "blur" }, validateRequiredNumber("lệ phí phúc khảo")],
+  // accountNumber: [{ required: true, message: "Vui lòng nhập số tài khoản", trigger: "blur" }],
+  // accountName: [{ required: true, message: "Vui lòng nhập chủ tài khoản", trigger: "blur" }],
 };
 
 const param = ref({ pageIndex: 1, pageSize: 10, search: "" });
@@ -404,7 +404,7 @@ const editItem = async id => {
         url: detail.url || "",
         reviewFee: detail.reviewFee ?? 0,
         idBank: detail.idBank ?? undefined,
-        accountNumber: detail.accountNumber || "",
+        accountNumber: detail.accountNumber || 0,
         accountName: detail.accountName || "",
         examType: Number(detail.examType || 1),
         directEndDate,
@@ -443,11 +443,11 @@ const handleOk = async () => {
       examName: formState.examName.trim(),
       fee: Number(formState.fee || 0),
       quantity: Number(formState.quantity || 0),
-      url: formState.url.trim(),
+      url: String(formState.url || "").trim(),
       reviewFee: Number(formState.reviewFee || 0),
       idBank: formState.idBank ?? 0,
-      accountNumber: formState.accountNumber.trim(),
-      accountName: formState.accountName.trim(),
+      accountNumber: String(formState.accountNumber || "0").trim(),
+      accountName: String(formState.accountName || "A").trim(),
       examType: Number(formState.examType || 1),
       documents: Array.isArray(formState.documents)
         ? formState.documents

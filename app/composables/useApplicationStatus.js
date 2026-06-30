@@ -11,11 +11,11 @@ export const APPLICATION_STATUS = Object.freeze({
 export const APPLICATION_STATUS_LABELS = Object.freeze({
   [APPLICATION_STATUS.DRAFT]: "Nháp",
   [APPLICATION_STATUS.PENDING_REVIEW]: "Chờ duyệt",
-  [APPLICATION_STATUS.APPROVED_PENDING_PAYMENT]: "Duyệt, chờ thanh toán",
-  [APPLICATION_STATUS.PAID_PENDING_VERIFICATION]: "Đã thanh toán, chờ xác minh",
+  // [APPLICATION_STATUS.APPROVED_PENDING_PAYMENT]: "Duyệt, chờ thanh toán",
+  // [APPLICATION_STATUS.PAID_PENDING_VERIFICATION]: "Đã thanh toán, chờ xác minh",
   [APPLICATION_STATUS.COMPLETED]: "Hoàn thành",
   [APPLICATION_STATUS.RETURNED]: "Trả lại",
-  [APPLICATION_STATUS.DIRECT_PENDING_REVIEW]: "Đang xét tuyển thẳng",
+  // [APPLICATION_STATUS.DIRECT_PENDING_REVIEW]: "Đang xét tuyển thẳng",
 });
 
 export const getApplicationStatus = value => Number(value?.idStatus ?? value);

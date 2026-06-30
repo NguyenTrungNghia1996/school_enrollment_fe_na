@@ -8,16 +8,17 @@
         </div>
         <a-select v-model:value="selectedStatusId" class="w-full" placeholder="Lọc theo trạng thái" :options="statusOptions" />
         <div class="flex min-h-8 items-center">
-          <a-checkbox v-model:checked="selectedDirectOnly" class="whitespace-nowrap">Hồ sơ tuyển thẳng</a-checkbox>
+          <!-- <a-checkbox v-model:checked="selectedDirectOnly" class="whitespace-nowrap">Hồ sơ tuyển thẳng</a-checkbox> -->
+         <a-button :disabled="!selectedExamId" type="primary" ghost class="w-full xl:w-auto mr-1" :loading="exportLoading" @click="exportApplications">Export</a-button>
+        <a-button @click="resetFilters" class="w-full xl:w-auto">Đặt lại</a-button>
         </div>
       </div>
 
       <div class="grid w-full grid-cols-1 gap-2 sm:grid-cols-3 xl:flex xl:justify-end">
-        <a-popconfirm v-if="adminStore.canEditCurrentPage" title="Bạn chắc chắn muốn công bố danh sách tuyển thẳng cho kỳ tuyển sinh đã chọn?" ok-text="Công bố" cancel-text="Hủy" @confirm="publishDirectApplications">
+        <!-- <a-popconfirm v-if="adminStore.canEditCurrentPage" title="Bạn chắc chắn muốn công bố danh sách tuyển thẳng cho kỳ tuyển sinh đã chọn?" ok-text="Công bố" cancel-text="Hủy" @confirm="publishDirectApplications">
           <a-button type="primary" class="w-full xl:w-auto" :loading="publishDirectLoading" :disabled="!selectedExamId || publishDirectLoading">Công bố tuyển thẳng</a-button>
-        </a-popconfirm>
-        <a-button :disabled="!selectedExamId" type="primary" ghost class="w-full xl:w-auto" :loading="exportLoading" @click="exportApplications">Export</a-button>
-        <a-button @click="resetFilters" class="w-full xl:w-auto">Đặt lại</a-button>
+        </a-popconfirm> -->
+       
       </div>
 
       <a-alert v-if="applicationMessage" type="warning" show-icon :message="applicationMessage" />
