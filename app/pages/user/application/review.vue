@@ -53,9 +53,9 @@
                     {{ (pagination.current - 1) * pagination.pageSize + index + 1 }}
                   </template>
 
-                  <template v-else-if="column.key === 'reviewFee'">
+                  <!-- <template v-else-if="column.key === 'reviewFee'">
                     {{ formatCurrency(record.reviewFee) }}
-                  </template>
+                  </template> -->
 
                   <template v-else-if="column.key === 'statusName'">
                     <a-tag :color="getReviewStatusColor(record)">
@@ -262,14 +262,14 @@
             <div class="px-4 py-3 text-xs font-semibold uppercase tracking-[0.15em] text-slate-400">Họ tên</div>
             <div class="px-4 py-3 text-sm font-semibold text-slate-900">{{ qrData.fullName || "-" }}</div>
           </div>
-          <div class="grid grid-cols-[180px_minmax(0,1fr)] border-b border-slate-200">
+          <!-- <div class="grid grid-cols-[180px_minmax(0,1fr)] border-b border-slate-200">
             <div class="px-4 py-3 text-xs font-semibold uppercase tracking-[0.15em] text-slate-400">Lệ phí</div>
             <div class="px-4 py-3 text-sm font-semibold text-slate-900">{{ formatCurrency(qrData.fee) }}</div>
           </div>
           <div class="grid grid-cols-[180px_minmax(0,1fr)] bg-emerald-50">
             <div class="px-4 py-3 text-xs font-semibold uppercase tracking-[0.15em] text-emerald-600">Cần thanh toán</div>
             <div class="px-4 py-3 text-base font-bold text-emerald-700">{{ formatCurrency(qrData.fee) }}</div>
-          </div>
+          </div> -->
         </div>
 
         <div class="flex justify-end gap-2">
@@ -376,7 +376,7 @@ const columns = [
   { title: "Họ tên", dataIndex: "fullName", key: "fullName", width: 220, ellipsis: true },
   { title: "Môn phúc khảo", dataIndex: "subjectName", key: "subjectName", width: 180, ellipsis: true },
   { title: "Lý do", dataIndex: "reason", key: "reason", ellipsis: true },
-  { title: "Lệ phí", dataIndex: "reviewFee", key: "reviewFee", width: 150, align: "right" },
+  // { title: "Lệ phí", dataIndex: "reviewFee", key: "reviewFee", width: 150, align: "right" },
   { title: "Trạng thái", dataIndex: "statusName", key: "statusName", width: 180, align: "center" },
   { title: "Thao tác", key: "action", width: 180, align: "center" },
 ];

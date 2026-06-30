@@ -39,10 +39,10 @@
                   <div class="text-[11px] font-bold uppercase tracking-widest text-slate-400">Thời gian còn lại</div>
                   <div class="mt-1 text-lg font-bold text-slate-900">{{ remainingText }}</div>
                 </div>
-                <div class="flex min-w-[140px] flex-col justify-center rounded-2xl border border-slate-100 bg-white p-4 shadow-sm">
+                <!-- <div class="flex min-w-[140px] flex-col justify-center rounded-2xl border border-slate-100 bg-white p-4 shadow-sm">
                   <div class="text-[11px] font-bold uppercase tracking-widest text-slate-400">Lệ phí</div>
                   <div class="mt-1 text-lg font-bold text-blue-600">{{ formatCurrency(examDetail.fee) }}</div>
-                </div>
+                </div> -->
               </div>
             </div>
           </div>

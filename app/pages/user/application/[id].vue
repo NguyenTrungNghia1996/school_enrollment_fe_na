@@ -437,14 +437,14 @@
               <div class="bg-slate-50 px-4 py-3 text-sm font-medium text-slate-500">Tên thí sinh</div>
               <div class="px-4 py-3 text-sm font-semibold text-slate-900">{{ qrData.fullName || "-" }}</div>
             </div>
-            <div class="grid grid-cols-[160px_1fr] border-b border-slate-200">
+            <!-- <div class="grid grid-cols-[160px_1fr] border-b border-slate-200">
               <div class="bg-slate-50 px-4 py-3 text-sm font-medium text-slate-500">Lệ phí</div>
               <div class="px-4 py-3 text-sm font-semibold text-slate-900">{{ formatCurrency(qrData.fee) }}</div>
             </div>
             <div class="grid grid-cols-[160px_1fr]">
               <div class="bg-emerald-50 px-4 py-3 text-sm font-bold text-emerald-700">Tổng thanh toán</div>
               <div class="px-4 py-3 text-base font-bold text-emerald-700">{{ formatCurrency(qrData.fee) }}</div>
-            </div>
+            </div> -->
           </div>
 
           <div class="mt-6 rounded-2xl bg-slate-50 px-4 py-4 text-sm leading-6 text-slate-500">Sau khi chuyển khoản thành công, hồ sơ sẽ được nhà trường xác nhận theo quy trình đối soát.</div>
