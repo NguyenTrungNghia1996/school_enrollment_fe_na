@@ -39,10 +39,10 @@
                   <div class="text-[11px] font-bold uppercase tracking-widest text-slate-400">Thời gian còn lại</div>
                   <div class="mt-1 text-lg font-bold text-slate-900">{{ remainingText }}</div>
                 </div>
-                <div class="flex min-w-[140px] flex-col justify-center rounded-2xl border border-slate-100 bg-white p-4 shadow-sm">
+                <!-- <div class="flex min-w-[140px] flex-col justify-center rounded-2xl border border-slate-100 bg-white p-4 shadow-sm">
                   <div class="text-[11px] font-bold uppercase tracking-widest text-slate-400">Lệ phí</div>
                   <div class="mt-1 text-lg font-bold text-blue-600">{{ formatCurrency(examDetail.fee) }}</div>
-                </div>
+                </div> -->
               </div>
             </div>
           </div>
@@ -131,19 +131,29 @@
                     label="Số CCCD"
                     name="identityNumber"
                     :rules="[
-                      { required: true, message: 'Vui lòng nhập số CCCD' },
                       { pattern: /^\d{9,12}$/, message: 'Số CCCD phải gồm 9 đến 12 chữ số' },
                     ]">
                     <a-input v-model:value="formState.identityNumber" placeholder="Nhập số CCCD" size="large" class="rounded-xl" />
                   </a-form-item>
 
-                  <a-form-item label="Ngày cấp CCCD" name="identityIssueDate" :rules="[{ required: true, message: 'Vui lòng chọn ngày cấp CCCD' }]">
-                    <a-date-picker v-model:value="formState.identityIssueDate" format="DD/MM/YYYY" class="w-full rounded-xl" size="large" placeholder="Chọn ngày cấp CCCD" :disabled-date="disabledDate" />
+                  <a-form-item
+                    label="Mã học sinh"
+                    name="student_code"
+                    :rules="[
+                      { required: true, message: 'Vui lòng nhập mã học sinh' },
+                      { pattern: /^\d{10}$/, message: 'Mã học sinh phải gồm đúng 10 chữ số' },
+                    ]"
+                  >
+                    <a-input v-model:value="formState.student_code" placeholder="Nhập mã học sinh" :maxlength="10" size="large" class="rounded-xl" />
                   </a-form-item>
 
-                  <a-form-item label="Nơi cấp CCCD" name="identityIssuePlace" :rules="[{ required: true, message: 'Vui lòng nhập nơi cấp CCCD' }]">
+                  <!-- <a-form-item label="Ngày cấp CCCD" name="identityIssueDate" :rules="[{ required: true, message: 'Vui lòng chọn ngày cấp CCCD' }]">
+                    <a-date-picker v-model:value="formState.identityIssueDate" format="DD/MM/YYYY" class="w-full rounded-xl" size="large" placeholder="Chọn ngày cấp CCCD" :disabled-date="disabledDate" />
+                  </a-form-item> -->
+
+                  <!-- <a-form-item label="Nơi cấp CCCD" name="identityIssuePlace" :rules="[{ required: true, message: 'Vui lòng nhập nơi cấp CCCD' }]">
                     <a-input v-model:value="formState.identityIssuePlace" placeholder="Nhập nơi cấp CCCD" size="large" class="rounded-xl" />
-                  </a-form-item>
+                  </a-form-item> -->
 
                   <div>
                     <UserSelectEthnicity v-model="formState.idEthnicity" label="Dân tộc" name="idEthnicity" placeholder="Chọn dân tộc" :rules="[{ required: true, message: 'Vui lòng chọn dân tộc' }]" size="large" class="rounded-xl" />
@@ -155,7 +165,7 @@
 
                   <div class="grid gap-x-6 gap-y-5 md:col-span-3 md:grid-cols-3">
                     <div>
-                      <UserSelectProvince v-model="formState.permanentProvinceId" label="Tỉnh/thành phố cư trú" name="permanentProvinceId" placeholder="Chọn tỉnh thành phố" :rules="[{ required: true, message: 'Vui lòng chọn tỉnh/thành phố cư trú' }]" size="large" class="rounded-xl" />
+                      <UserSelectProvince v-model="formState.permanentProvinceId" label="Tỉnh/thành phố cư trú" name="permanentProvinceId" placeholder="Chọn tỉnh thành phố" :rules="[{ required: true, message: 'Vui lòng chọn tỉnh/thành phố cư trú' }]" size="large" disabled class="rounded-xl" />
                     </div>
 
                     <div>
@@ -418,11 +428,12 @@ const createDefaultFormState = () => ({
   dateOfBirth: null,
   idProvince: undefined,
   identityNumber: "",
-  identityIssueDate: null,
-  identityIssuePlace: "",
+  student_code: "",
+  identityIssueDate: $dayjs(),
+  identityIssuePlace: "Hà Nội",
   idEthnicity: undefined,
   gender: undefined,
-  permanentProvinceId: null,
+  permanentProvinceId: DEFAULT_PROVINCE_ID,
   idCommune: undefined,
   permanentAddress: "",
   phoneNumber: "",
@@ -921,6 +932,7 @@ const buildPayload = () => {
     dateOfBirth: toIsoStringOrNull(formState.dateOfBirth),
     idProvince: Number(formState.idProvince),
     identityNumber: formState.identityNumber.trim(),
+    student_code: formState.student_code.trim(),
     identityIssueDate: toIsoStringOrNull(formState.identityIssueDate),
     identityIssuePlace: formState.identityIssuePlace.trim(),
     idEthnicity: Number(formState.idEthnicity),
