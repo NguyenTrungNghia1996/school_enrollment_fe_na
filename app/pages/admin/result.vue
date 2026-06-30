@@ -105,7 +105,7 @@ const resultColumns = [
 const directColumns = [
   { title: "STT", key: "stt", width: 70, align: "center" },
   { title: "Mã hồ sơ", dataIndex: "applicationCode", key: "applicationCode", width: 140 },
-  { title: "Mã học sinh", dataIndex: "identityNumber", key: "identityNumber", width: 160, align: "center" },
+  { title: "Số CCCD", dataIndex: "identityNumber", key: "identityNumber", width: 160, align: "center" },
   { title: "Họ tên", dataIndex: "fullName", key: "fullName", ellipsis: true },
   { title: "Trạng thái", dataIndex: "isDirect", key: "isDirect", width: 140, align: "center" },
 ];

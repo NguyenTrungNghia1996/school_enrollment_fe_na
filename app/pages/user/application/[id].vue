@@ -133,17 +133,21 @@
                         <a-date-picker v-model:value="detailData.dateOfBirth" format="DD/MM/YYYY" class="w-full rounded-xl" size="large" placeholder="Chọn ngày sinh" />
                       </a-form-item>
                       <UserSelectProvince v-model="detailData.idProvince" label="Nơi sinh" name="idProvince" placeholder="Chọn tỉnh thành phố" :rules="detailFormRules.idProvince" size="large" class="rounded-xl" />
-                      <a-form-item label="Mã học sinh" name="identityNumber" :rules="detailFormRules.identityNumber">
-                        <a-input v-model:value="detailData.identityNumber" placeholder="Nhập mã học sinh" size="large" class="rounded-xl" />
+                      <a-form-item label="Số CCCD" name="identityNumber" :rules="detailFormRules.identityNumber">
+                        <a-input v-model:value="detailData.identityNumber" placeholder="Nhập số CCCD" size="large" class="rounded-xl" />
                       </a-form-item>
 
-                      <a-form-item label="Ngày cấp CCCD" name="identityIssueDate" :rules="detailFormRules.identityIssueDate">
+                      <a-form-item label="Mã học sinh" name="student_code" :rules="detailFormRules.student_code">
+                        <a-input v-model:value="detailData.student_code" placeholder="Nhập mã học sinh" :maxlength="10" size="large" class="rounded-xl" />
+                      </a-form-item>
+
+                      <!-- <a-form-item label="Ngày cấp CCCD" name="identityIssueDate" :rules="detailFormRules.identityIssueDate">
                         <a-date-picker v-model:value="detailData.identityIssueDate" format="DD/MM/YYYY" class="w-full rounded-xl" size="large" placeholder="Chọn ngày cấp CCCD" />
-                      </a-form-item>
+                      </a-form-item> -->
 
-                      <a-form-item label="Nơi cấp CCCD" name="identityIssuePlace" :rules="detailFormRules.identityIssuePlace">
+                      <!-- <a-form-item label="Nơi cấp CCCD" name="identityIssuePlace" :rules="detailFormRules.identityIssuePlace">
                         <a-input v-model:value="detailData.identityIssuePlace" placeholder="Nhập nơi cấp CCCD" size="large" class="rounded-xl" />
-                      </a-form-item>
+                      </a-form-item> -->
                       <UserSelectEthnicity v-model="detailData.idEthnicity" label="Dân tộc" name="idEthnicity" placeholder="Chọn dân tộc" :rules="detailFormRules.idEthnicity" size="large" class="rounded-xl" />
                       <a-form-item label="Giới tính" name="gender" :rules="detailFormRules.gender">
                         <a-select v-model:value="genderValue" :options="genderOptions" placeholder="Chọn giới tính" size="large" class="rounded-xl" />
@@ -219,17 +223,21 @@
                       <div class="mt-1.5 font-medium text-slate-900">{{ formatDate(detailData.dateOfBirth) }}</div>
                     </div>
                     <div class="rounded-xl border border-slate-100 bg-white p-4 shadow-sm">
-                      <div class="text-[11px] font-bold uppercase tracking-widest text-slate-400">Mã học sinh</div>
+                      <div class="text-[11px] font-bold uppercase tracking-widest text-slate-400">Số CCCD</div>
                       <div class="mt-1.5 font-medium text-slate-900">{{ detailData.identityNumber || "-" }}</div>
                     </div>
                     <div class="rounded-xl border border-slate-100 bg-white p-4 shadow-sm">
+                      <div class="text-[11px] font-bold uppercase tracking-widest text-slate-400">Mã học sinh</div>
+                      <div class="mt-1.5 font-medium text-slate-900">{{ detailData.student_code || "-" }}</div>
+                    </div>
+                    <!-- <div class="rounded-xl border border-slate-100 bg-white p-4 shadow-sm">
                       <div class="text-[11px] font-bold uppercase tracking-widest text-slate-400">Ngày cấp CCCD</div>
                       <div class="mt-1.5 font-medium text-slate-900">{{ formatDate(detailData.identityIssueDate) }}</div>
-                    </div>
-                    <div class="rounded-xl border border-slate-100 bg-white p-4 shadow-sm">
+                    </div> -->
+                    <!-- <div class="rounded-xl border border-slate-100 bg-white p-4 shadow-sm">
                       <div class="text-[11px] font-bold uppercase tracking-widest text-slate-400">Nơi cấp CCCD</div>
                       <div class="mt-1.5 font-medium text-slate-900">{{ detailData.identityIssuePlace || "-" }}</div>
-                    </div>
+                    </div> -->
                     <div class="rounded-xl border border-slate-100 bg-white p-4 shadow-sm">
                       <div class="text-[11px] font-bold uppercase tracking-widest text-slate-400">Giới tính</div>
                       <div class="mt-1.5 font-medium text-slate-900">{{ formatGender(detailData.gender) }}</div>
@@ -535,8 +543,11 @@ const detailFormRules = {
   dateOfBirth: [{ required: true, message: "Vui lòng chọn ngày sinh" }],
   idProvince: [{ required: true, message: "Vui lòng chọn nơi sinh" }],
   identityNumber: [
+    { pattern: /^\d{9,12}$/, message: "Số CCCD phải gồm 9 đến 12 chữ số" },
+  ],
+  student_code: [
     { required: true, message: "Vui lòng nhập mã học sinh" },
-    // { pattern: /^\d{9,12}$/, message: "Mã học sinh phải gồm 9 đến 12 chữ số" },
+    { pattern: /^\d{10}$/, message: "Mã học sinh phải gồm đúng 10 chữ số" },
   ],
   identityIssueDate: [{ required: true, message: "Vui lòng chọn ngày cấp CCCD" }],
   identityIssuePlace: [{ required: true, message: "Vui lòng nhập nơi cấp CCCD" }],
@@ -1014,6 +1025,7 @@ const buildApplicationPayload = ({ includeAvatar = true } = {}) => {
     dateOfBirth: serializeLocalDate(dateOfBirth),
     idProvince: Number(detailData.value.idProvince),
     identityNumber: (detailData.value.identityNumber || "").trim(),
+    student_code: (detailData.value.student_code || "").trim(),
     identityIssueDate: serializeLocalDate(identityIssueDate),
     identityIssuePlace: (detailData.value.identityIssuePlace || "").trim(),
     idEthnicity: Number(detailData.value.idEthnicity),
