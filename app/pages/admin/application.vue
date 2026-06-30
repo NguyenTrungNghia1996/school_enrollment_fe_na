@@ -721,12 +721,17 @@ const submitCompletePayment = async record => {
 
 const approveItem = async (record, keepModal = false) => {
   try {
+    const params = { id: record.id };
+    const pGroup = approvalForm.priority_group?.trim();
+    if (pGroup) {
+      params.priority_group = pGroup;
+    }
+    if (approvalForm.priority_points !== null && approvalForm.priority_points !== "" && approvalForm.priority_points !== undefined) {
+      params.priority_points = approvalForm.priority_points;
+    }
+
     const { data, error } = await adminApplication.putByRest("approve", {
-      params: {
-        id: record.id,
-        priority_group: approvalForm.priority_group.trim(),
-        priority_points: approvalForm.priority_points,
-      },
+      params,
     });
     if (error.value || data.value?.success === false) {
       throw new Error(error.value?.data?.message || data.value?.message || "Duyệt hồ sơ thất bại");
