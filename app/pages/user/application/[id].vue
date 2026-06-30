@@ -133,8 +133,8 @@
                         <a-date-picker v-model:value="detailData.dateOfBirth" format="DD/MM/YYYY" class="w-full rounded-xl" size="large" placeholder="Chọn ngày sinh" />
                       </a-form-item>
                       <UserSelectProvince v-model="detailData.idProvince" label="Nơi sinh" name="idProvince" placeholder="Chọn tỉnh thành phố" :rules="detailFormRules.idProvince" size="large" class="rounded-xl" />
-                      <a-form-item label="Số CCCD" name="identityNumber" :rules="detailFormRules.identityNumber">
-                        <a-input v-model:value="detailData.identityNumber" placeholder="Nhập số CCCD" size="large" class="rounded-xl" />
+                      <a-form-item label="Mã học sinh" name="identityNumber" :rules="detailFormRules.identityNumber">
+                        <a-input v-model:value="detailData.identityNumber" placeholder="Nhập mã học sinh" size="large" class="rounded-xl" />
                       </a-form-item>
 
                       <a-form-item label="Ngày cấp CCCD" name="identityIssueDate" :rules="detailFormRules.identityIssueDate">
@@ -219,7 +219,7 @@
                       <div class="mt-1.5 font-medium text-slate-900">{{ formatDate(detailData.dateOfBirth) }}</div>
                     </div>
                     <div class="rounded-xl border border-slate-100 bg-white p-4 shadow-sm">
-                      <div class="text-[11px] font-bold uppercase tracking-widest text-slate-400">Số CCCD</div>
+                      <div class="text-[11px] font-bold uppercase tracking-widest text-slate-400">Mã học sinh</div>
                       <div class="mt-1.5 font-medium text-slate-900">{{ detailData.identityNumber || "-" }}</div>
                     </div>
                     <div class="rounded-xl border border-slate-100 bg-white p-4 shadow-sm">
@@ -535,8 +535,8 @@ const detailFormRules = {
   dateOfBirth: [{ required: true, message: "Vui lòng chọn ngày sinh" }],
   idProvince: [{ required: true, message: "Vui lòng chọn nơi sinh" }],
   identityNumber: [
-    { required: true, message: "Vui lòng nhập số CCCD" },
-    { pattern: /^\d{9,12}$/, message: "Số CCCD phải gồm 9 đến 12 chữ số" },
+    { required: true, message: "Vui lòng nhập mã học sinh" },
+    // { pattern: /^\d{9,12}$/, message: "Mã học sinh phải gồm 9 đến 12 chữ số" },
   ],
   identityIssueDate: [{ required: true, message: "Vui lòng chọn ngày cấp CCCD" }],
   identityIssuePlace: [{ required: true, message: "Vui lòng nhập nơi cấp CCCD" }],

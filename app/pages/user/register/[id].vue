@@ -128,13 +128,13 @@
                   </div>
 
                   <a-form-item
-                    label="Số CCCD"
+                    label="Mã học sinh"
                     name="identityNumber"
                     :rules="[
-                      { required: true, message: 'Vui lòng nhập số CCCD' },
-                      { pattern: /^\d{9,12}$/, message: 'Số CCCD phải gồm 9 đến 12 chữ số' },
+                      { required: true, message: 'Vui lòng nhập mã học sinh' },
+                      // { pattern: /^\d{9,12}$/, message: 'Mã học sinh phải gồm 9 đến 12 chữ số' },
                     ]">
-                    <a-input v-model:value="formState.identityNumber" placeholder="Nhập số CCCD" size="large" class="rounded-xl" />
+                    <a-input v-model:value="formState.identityNumber" placeholder="Nhập mã học sinh" size="large" class="rounded-xl" />
                   </a-form-item>
 
                   <!-- <a-form-item label="Ngày cấp CCCD" name="identityIssueDate" :rules="[{ required: true, message: 'Vui lòng chọn ngày cấp CCCD' }]">

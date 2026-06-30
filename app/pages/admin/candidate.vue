@@ -2,7 +2,7 @@
   <div class="min-h-full bg-white p-2 md:p-4">
     <div class="mb-4 space-y-2">
       <div class="grid min-w-0 grid-cols-1 gap-2 xl:grid-cols-[minmax(0,1fr)_minmax(220px,300px)] xl:items-center">
-        <a-input-search v-model:value="searchText" placeholder="Tìm theo mã hồ sơ, họ tên, CCCD, số báo danh..." enter-button @search="handleSearch" class="w-full min-w-0" />
+        <a-input-search v-model:value="searchText" placeholder="Tìm theo mã hồ sơ, họ tên, mã học sinh, số báo danh..." enter-button @search="handleSearch" class="w-full min-w-0" />
         <div class="w-full min-w-0">
           <AdminSelectEnrollment v-model="selectedExamId" no-form-item :inlineLabel="false" placeholder="Lọc theo kỳ tuyển sinh" label="" />
         </div>
@@ -105,7 +105,7 @@ const columns = [
   { title: "Họ tên", dataIndex: "fullName", key: "fullName", ellipsis: true },
   { title: "Giới tính", dataIndex: "gender", key: "gender", width: 120, align: "center" },
   { title: "Ngày sinh", dataIndex: "dateOfBirth", key: "dateOfBirth", width: 130, align: "center" },
-  { title: "Số CCCD", dataIndex: "identityNumber", key: "identityNumber", width: 150 },
+  { title: "Mã học sinh", dataIndex: "identityNumber", key: "identityNumber", width: 150 },
   { title: "Số báo danh", dataIndex: "examNumber", key: "examNumber", width: 140, align: "center" },
   { title: "Phòng thi", dataIndex: "room", key: "room", width: 110, align: "center" },
 ];

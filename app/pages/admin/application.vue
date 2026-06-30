@@ -2,7 +2,7 @@
   <div class="min-h-full bg-white p-2 md:p-4">
     <div class="mb-4 space-y-2">
       <div class="grid grid-cols-1 gap-2 md:grid-cols-2 xl:grid-cols-[minmax(320px,1fr)_260px_220px_auto] xl:items-center">
-        <a-input-search v-model:value="searchText" placeholder="Tìm theo mã hồ sơ, họ tên, CCCD..." enter-button @search="handleSearch" class="w-full md:col-span-2 xl:col-span-1" />
+        <a-input-search v-model:value="searchText" placeholder="Tìm theo mã hồ sơ, họ tên, mã học sinh..." enter-button @search="handleSearch" class="w-full md:col-span-2 xl:col-span-1" />
         <div class="w-full">
           <AdminSelectEnrollment v-model="selectedExamId" no-form-item :inlineLabel="false" placeholder="Lọc theo kỳ tuyển sinh" label="" />
         </div>
@@ -114,7 +114,7 @@
         <a-descriptions bordered :column="2" size="small">
           <a-descriptions-item label="Họ tên">{{ detailData.fullName || "-" }}</a-descriptions-item>
           <a-descriptions-item label="Ngày sinh">{{ formatDate(detailData.dateOfBirth) }}</a-descriptions-item>
-          <a-descriptions-item label="Số CCCD">{{ detailData.identityNumber || "-" }}</a-descriptions-item>
+          <a-descriptions-item label="Mã học sinh">{{ detailData.identityNumber || "-" }}</a-descriptions-item>
           <a-descriptions-item label="Ngày cấp CCCD">{{ formatDate(detailData.identityIssueDate) }}</a-descriptions-item>
           <a-descriptions-item label="Nơi cấp CCCD">{{ detailData.identityIssuePlace || "-" }}</a-descriptions-item>
           <a-descriptions-item label="Giới tính">{{ formatGender(detailData.gender) }}</a-descriptions-item>
@@ -268,7 +268,7 @@ const columns = [
   { title: "Kỳ tuyển sinh", dataIndex: "examName", key: "examName", width: 120, align: "center" },
   { title: "Họ tên", dataIndex: "fullname", key: "fullname", ellipsis: true },
   { title: "Ngày sinh", dataIndex: "dateOfBirth", key: "dateOfBirth", width: 130 },
-  { title: "Số CCCD", dataIndex: "identityNumber", key: "identityNumber", width: 150 },
+  { title: "Mã học sinh", dataIndex: "identityNumber", key: "identityNumber", width: 150 },
   { title: "Trạng thái", dataIndex: "statusName", key: "statusName", width: 190, align: "center" },
   { title: "Thao tác", key: "action", width: 150, align: "center", fixed: "right" },
 ];
