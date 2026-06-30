@@ -137,13 +137,13 @@
                     <a-input v-model:value="formState.identityNumber" placeholder="Nhập số CCCD" size="large" class="rounded-xl" />
                   </a-form-item>
 
-                  <a-form-item label="Ngày cấp CCCD" name="identityIssueDate" :rules="[{ required: true, message: 'Vui lòng chọn ngày cấp CCCD' }]">
+                  <!-- <a-form-item label="Ngày cấp CCCD" name="identityIssueDate" :rules="[{ required: true, message: 'Vui lòng chọn ngày cấp CCCD' }]">
                     <a-date-picker v-model:value="formState.identityIssueDate" format="DD/MM/YYYY" class="w-full rounded-xl" size="large" placeholder="Chọn ngày cấp CCCD" :disabled-date="disabledDate" />
-                  </a-form-item>
+                  </a-form-item> -->
 
-                  <a-form-item label="Nơi cấp CCCD" name="identityIssuePlace" :rules="[{ required: true, message: 'Vui lòng nhập nơi cấp CCCD' }]">
+                  <!-- <a-form-item label="Nơi cấp CCCD" name="identityIssuePlace" :rules="[{ required: true, message: 'Vui lòng nhập nơi cấp CCCD' }]">
                     <a-input v-model:value="formState.identityIssuePlace" placeholder="Nhập nơi cấp CCCD" size="large" class="rounded-xl" />
-                  </a-form-item>
+                  </a-form-item> -->
 
                   <div>
                     <UserSelectEthnicity v-model="formState.idEthnicity" label="Dân tộc" name="idEthnicity" placeholder="Chọn dân tộc" :rules="[{ required: true, message: 'Vui lòng chọn dân tộc' }]" size="large" class="rounded-xl" />
@@ -418,8 +418,8 @@ const createDefaultFormState = () => ({
   dateOfBirth: null,
   idProvince: undefined,
   identityNumber: "",
-  identityIssueDate: null,
-  identityIssuePlace: "",
+  identityIssueDate: $dayjs(),
+  identityIssuePlace: "Hà Nội",
   idEthnicity: undefined,
   gender: undefined,
   permanentProvinceId: DEFAULT_PROVINCE_ID,
