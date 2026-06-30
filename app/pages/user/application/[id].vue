@@ -838,7 +838,7 @@ const handleAvatarUpload = async event => {
   avatarUploading.value = true;
 
   try {
-    await validateAvatarRatio(file);
+    //await validateAvatarRatio(file);
     const sanitizedFileName = sanitizeOriginalFileName(file.name);
     const previousAvatar = detailData.value.avatar;
 
