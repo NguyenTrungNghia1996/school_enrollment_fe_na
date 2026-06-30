@@ -128,15 +128,6 @@
                   </div>
 
                   <a-form-item
-                    label="Số CCCD"
-                    name="identityNumber"
-                    :rules="[
-                      { pattern: /^\d{9,12}$/, message: 'Số CCCD phải gồm 9 đến 12 chữ số' },
-                    ]">
-                    <a-input v-model:value="formState.identityNumber" placeholder="Nhập số CCCD" size="large" class="rounded-xl" />
-                  </a-form-item>
-
-                  <a-form-item
                     label="Mã học sinh"
                     name="student_code"
                     :rules="[
@@ -147,20 +138,29 @@
                     <a-input v-model:value="formState.student_code" placeholder="Nhập mã học sinh" :maxlength="10" size="large" class="rounded-xl" />
                   </a-form-item>
 
-                  <!-- <a-form-item label="Ngày cấp CCCD" name="identityIssueDate" :rules="[{ required: true, message: 'Vui lòng chọn ngày cấp CCCD' }]">
-                    <a-date-picker v-model:value="formState.identityIssueDate" format="DD/MM/YYYY" class="w-full rounded-xl" size="large" placeholder="Chọn ngày cấp CCCD" :disabled-date="disabledDate" />
-                  </a-form-item> -->
-
-                  <!-- <a-form-item label="Nơi cấp CCCD" name="identityIssuePlace" :rules="[{ required: true, message: 'Vui lòng nhập nơi cấp CCCD' }]">
-                    <a-input v-model:value="formState.identityIssuePlace" placeholder="Nhập nơi cấp CCCD" size="large" class="rounded-xl" />
-                  </a-form-item> -->
-
                   <div>
                     <UserSelectEthnicity v-model="formState.idEthnicity" label="Dân tộc" name="idEthnicity" placeholder="Chọn dân tộc" :rules="[{ required: true, message: 'Vui lòng chọn dân tộc' }]" size="large" class="rounded-xl" />
                   </div>
 
                   <a-form-item label="Giới tính" name="gender" :rules="[{ required: true, message: 'Vui lòng chọn giới tính' }]">
                     <a-select v-model:value="genderValue" :options="genderOptions" placeholder="Chọn giới tính" size="large" class="rounded-xl" />
+                  </a-form-item>
+
+                  <a-form-item
+                    label="Số CCCD"
+                    name="identityNumber"
+                    :rules="[
+                      { pattern: /^\d{9,12}$/, message: 'Số CCCD phải gồm 9 đến 12 chữ số' },
+                    ]">
+                    <a-input v-model:value="formState.identityNumber" placeholder="Nhập số CCCD" size="large" class="rounded-xl" />
+                  </a-form-item>
+
+                  <a-form-item label="Ngày cấp CCCD" name="identityIssueDate">
+                    <a-date-picker v-model:value="formState.identityIssueDate" format="DD/MM/YYYY" class="w-full rounded-xl" size="large" placeholder="Chọn ngày cấp CCCD" :disabled-date="disabledDate" />
+                  </a-form-item>
+
+                  <a-form-item label="Nơi cấp CCCD" name="identityIssuePlace">
+                    <a-input v-model:value="formState.identityIssuePlace" placeholder="Nhập nơi cấp CCCD" size="large" class="rounded-xl" />
                   </a-form-item>
 
                   <div class="grid gap-x-6 gap-y-5 md:col-span-3 md:grid-cols-3">
@@ -429,8 +429,10 @@ const createDefaultFormState = () => ({
   idProvince: undefined,
   identityNumber: "",
   student_code: "",
-  identityIssueDate: $dayjs(),
-  identityIssuePlace: "Hà Nội",
+  // identityIssueDate: $dayjs(),
+  identityIssueDate: null,
+  // identityIssuePlace: "Hà Nội",
+  identityIssuePlace: "",
   idEthnicity: undefined,
   gender: undefined,
   permanentProvinceId: DEFAULT_PROVINCE_ID,
