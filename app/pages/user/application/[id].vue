@@ -179,12 +179,24 @@
                     </div>
                   </section>
 
+                  <div class="my-10 h-px w-full bg-gradient-to-r from-transparent via-slate-200 to-transparent"></div>
+                  <section class="pb-10">
+                    <div class="mb-8 flex items-center gap-3">
+                      <div class="flex h-10 w-10 items-center justify-center rounded-2xl bg-amber-50 text-amber-600">
+                        <Icon name="lucide:badge-plus" class="text-xl" />
+                      </div>
+                      <h2 class="text-xl font-bold text-slate-900">Thông tin điểm cộng</h2>
+                    </div>
+                    <div class="grid gap-x-6 gap-y-5 md:grid-cols-2">
+                      <UserSelectPriorityPoint v-model="detailData.id_priority_point" name="id_priority_point" size="large" class="rounded-xl" />
+                      <UserSelectBonusPoint v-model="detailData.id_bonus_point" name="id_bonus_point" size="large" class="rounded-xl" />
+                    </div>
+                  </section>
+
                   <a-form-item name="commitmentAccepted" :rules="commitmentRules" class="mt-8">
                     <div class="select-none rounded-2xl border border-blue-100 bg-blue-50/50 p-5">
                       <a-checkbox v-model:checked="detailData.commitmentAccepted">
-                        <span class="leading-6 text-slate-700">
-                          Tôi cam kết rằng toàn bộ thông tin tôi cung cấp tại đây là đúng sự thật và tôi xin chịu hoàn toàn trách nhiệm trước pháp luật về tính chính xác của các thông tin này.
-                        </span>
+                        <span class="leading-6 text-slate-700">Tôi cam kết rằng toàn bộ thông tin tôi cung cấp tại đây là đúng sự thật và tôi xin chịu hoàn toàn trách nhiệm trước pháp luật về tính chính xác của các thông tin này.</span>
                       </a-checkbox>
                     </div>
                   </a-form-item>
@@ -286,6 +298,14 @@
                     <div class="rounded-xl border border-slate-100 bg-white p-4 shadow-sm md:col-span-3">
                       <div class="text-[11px] font-bold uppercase tracking-widest text-slate-400">Địa chỉ hiện tại</div>
                       <div class="mt-1.5 font-medium text-slate-900">{{ detailData.currentAddress || "-" }}</div>
+                    </div>
+                    <div class="rounded-xl border border-slate-100 bg-white p-4 shadow-sm">
+                      <div class="text-[11px] font-bold uppercase tracking-widest text-slate-400">Điểm ưu tiên</div>
+                      <div class="mt-1.5 font-medium text-slate-900">{{ detailData.priority_point_name || `#${detailData.id_priority_point || "-"}` }}</div>
+                    </div>
+                    <div class="rounded-xl border border-slate-100 bg-white p-4 shadow-sm">
+                      <div class="text-[11px] font-bold uppercase tracking-widest text-slate-400">Điểm khuyến khích</div>
+                      <div class="mt-1.5 font-medium text-slate-900">{{ detailData.bonus_point_name || `#${detailData.id_bonus_point || "-"}` }}</div>
                     </div>
                     <a-alert v-if="detailData.note" type="warning" show-icon class="!rounded-2xl !border-amber-200 !bg-amber-50 md:col-span-3">
                       <template #message>
@@ -555,9 +575,7 @@ const detailFormRules = {
   fullName: [{ required: true, message: "Vui lòng nhập họ tên đầy đủ" }],
   dateOfBirth: [{ required: true, message: "Vui lòng chọn ngày sinh" }],
   idProvince: [{ required: true, message: "Vui lòng chọn nơi sinh" }],
-  identityNumber: [
-    { pattern: /^\d{9,12}$/, message: "Số CCCD phải gồm 9 đến 12 chữ số" },
-  ],
+  identityNumber: [{ pattern: /^\d{9,12}$/, message: "Số CCCD phải gồm 9 đến 12 chữ số" }],
   student_code: [
     { required: true, message: "Vui lòng nhập mã học sinh" },
     { pattern: /^\d{10}$/, message: "Mã học sinh phải gồm đúng 10 chữ số" },
@@ -1053,6 +1071,8 @@ const buildApplicationPayload = ({ includeAvatar = true } = {}) => {
     phoneNumber: (detailData.value.phoneNumber || "").trim(),
     idCurrentCommune: Number(detailData.value.idCurrentCommune),
     currentAddress: (detailData.value.currentAddress || "").trim(),
+    id_priority_point: detailData.value.id_priority_point ? Number(detailData.value.id_priority_point) : null,
+    id_bonus_point: detailData.value.id_bonus_point ? Number(detailData.value.id_bonus_point) : null,
     documents: normalizedDocuments.value.map(document => ({
       idExamDocument: Number(document.idExamDocument),
       url: document.links.join(","),
