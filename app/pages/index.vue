@@ -9,7 +9,7 @@
 
       <div class="container relative z-10 mx-auto px-4 text-center sm:px-6 lg:px-8">
         <h1 class="text-4xl font-extrabold tracking-tight sm:text-5xl lg:text-6xl">Cổng Thông Tin Tuyển Sinh Trực Tuyến</h1>
-        <p class="mx-auto mt-6 max-w-2xl text-xl text-blue-100">Hệ thống quản lý hồ sơ đăng ký và theo dõi thông tin tuyển sinh dành cho thí sinh và phụ huynh của {{ unitStore.name }}.</p>
+        <p class="mx-auto mt-6 max-w-2xl text-xl text-blue-100">Hệ thống quản lý hồ sơ đăng ký và theo dõi thông tin tuyển sinh dành cho học sinh và phụ huynh của {{ unitStore.name }}.</p>
         <div class="mt-10 flex justify-center gap-4">
           <a-button v-if="!userStore.token" type="primary" size="large" class="h-12 rounded-lg bg-primary px-8 font-bold hover:bg-primary/90" @click="handleCta">BẮT ĐẦU ĐĂNG KÝ</a-button>
           <a-button ghost size="large" class="h-12 rounded-lg border-white px-8 font-bold hover:bg-white hover:text-[#071f41]" @click="navigateTo('/instructions')">HƯỚNG DẪN THỦ TỤC</a-button>
