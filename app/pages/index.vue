@@ -21,53 +21,45 @@
     <div class="container mx-auto mt-12 px-4 sm:px-6 lg:px-8">
       <div class="grid grid-cols-1 gap-12 lg:grid-cols-[1fr_320px]">
         <!-- Left: Exams and News -->
-        <div class="space-y-16">
+        <div class="space-y-16 lg:col-span-2">
           <!-- Active Exams Section -->
           <section>
-            <!-- <div class="mb-8 flex items-center justify-between border-b border-slate-200 pb-4">
-              <h2 class="flex items-center gap-3 text-2xl font-bold text-slate-800">
-                <Icon name="lucide:book-open" class="text-primary" />
-                Các Đợt Khảo Thí Đang Mở
-              </h2>
-              <a-button v-if="showViewMoreButton" type="link" class="font-semibold text-primary" :loading="loading" @click="handleViewMore">Xem thêm</a-button>
-            </div> -->
-
-            <div v-if="examsExpanded" class="mb-6">
-              <a-input-search v-model:value="examSearchText" placeholder="Tìm kiếm kỳ khảo thí..." allow-clear @search="handleExamSearch" @change="onExamSearchChange" />
-            </div>
-
-            <div class="grid grid-cols-1 gap-6 md:grid-cols-3">
-              <article v-for="exam in exams" :key="exam.id" class="group relative flex flex-col justify-between rounded-xl border border-slate-200 bg-white p-6 transition-all duration-300 hover:border-primary/30 hover:shadow-xl">
-                <div>
-                  <div class="mb-4">
-                    <span class="inline-flex items-center rounded-md px-2 py-1 text-xs font-bold uppercase tracking-wider ring-1 ring-inset" :class="exam.badgeClass">
-                      {{ exam.status }}
-                    </span>
-                  </div>
-                  <NuxtLink :to="exam.url || '#'" target="_blank" class="text-xl font-bold text-slate-900 transition-colors group-hover:text-primary">{{ exam.title }}</NuxtLink>
-                  <div class="mt-4 space-y-2 text-sm text-slate-600">
-                    <div class="flex items-center gap-2">
-                      <Icon name="lucide:calendar-check" class="text-slate-400" />
-                      <span>
-                        Ngày bắt đầu nộp hồ sơ trực tuyến:
-                        <strong>{{ exam.start }}</strong>
-                      </span>
-                    </div>
-                    <div class="flex items-center gap-2 text-error">
-                      <Icon name="lucide:alert-circle" />
-                      <span>
-                        Hết hạn nộp hồ sơ trực tuyến:
-                        <strong>{{ exam.end }}</strong>
-                      </span>
-                    </div>
+            <div v-if="activeExam" class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+              <div class="flex flex-col gap-5 border-b border-slate-100 px-5 py-5 sm:px-7 lg:flex-row lg:items-center lg:justify-between">
+                <div class="flex min-w-0 items-center gap-3">
+                  <span class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-[#213d8f] text-white">
+                    <Icon name="lucide:calendar-days" size="22" />
+                  </span>
+                  <div class="min-w-0">
+                    <h2 class="text-xl font-extrabold uppercase text-slate-800">Lịch tuyển sinh</h2>
+                    <p class="mt-1 truncate text-sm font-medium text-slate-500">{{ activeExam.title }}</p>
                   </div>
                 </div>
-                <div class="mt-8">
-                  <a-button block type="primary" class="h-11 rounded-lg bg-primary font-bold hover:bg-primary/90" :disabled="isExamActionDisabled(exam)" :loading="openingApplicationExamId === exam.id" @click="handleRegistration(exam)">
-                    {{ getExamActionLabel(exam) }}
-                  </a-button>
+
+                <div class="flex flex-col items-start gap-2 lg:items-end">
+                  <span class="rounded-full border border-blue-200 bg-blue-50 px-4 py-1.5 text-sm font-bold text-[#213d8f]">Hiện tại: {{ activeExam.status }}</span>
+                  <span v-if="examCountdown" class="inline-flex items-center gap-2 rounded-full border border-amber-300 bg-amber-50 px-4 py-1.5 text-sm font-bold text-amber-900">
+                    <Icon name="lucide:hourglass" size="16" />
+                    {{ examCountdown }}
+                  </span>
                 </div>
-              </article>
+              </div>
+
+              <div class="grid grid-cols-1 gap-4 bg-slate-50/60 p-4 sm:grid-cols-2 sm:p-6 xl:grid-cols-4">
+                <article v-for="milestone in examMilestones" :key="milestone.label" class="min-h-[172px] rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+                  <span class="flex h-10 w-10 items-center justify-center rounded-xl text-white" :class="milestone.iconClass">
+                    <Icon :name="milestone.icon" size="21" />
+                  </span>
+                  <p class="mt-5 text-xs font-extrabold uppercase leading-5 text-slate-500">{{ milestone.label }}</p>
+                  <p class="mt-2 text-xl font-extrabold text-slate-900">{{ milestone.value }}</p>
+                </article>
+              </div>
+
+              <div class="flex justify-end border-t border-slate-100 px-5 py-4 sm:px-7">
+                <a-button type="primary" class="h-11 rounded-lg bg-primary px-7 font-bold hover:bg-primary/90" :disabled="isExamActionDisabled(activeExam)" :loading="openingApplicationExamId === activeExam.id" @click="handleRegistration(activeExam)">
+                  {{ getExamActionLabel(activeExam) }}
+                </a-button>
+              </div>
             </div>
 
             <div v-if="loading && !exams.length" class="py-10 text-center">
@@ -75,17 +67,13 @@
             </div>
 
             <div v-if="!loading && !exams.length" class="rounded-2xl border border-dashed border-slate-300 bg-slate-50 px-6 py-10 text-center text-slate-500">Chưa có kỳ khảo thí nào để hiển thị.</div>
-
-            <div v-if="examsExpanded && examTotal > expandedPageSize" class="flex justify-center pt-8">
-              <a-pagination v-model:current="pageIndex" :total="examTotal" :page-size="expandedPageSize" :show-size-changer="false" @change="handleExamPageChange" />
-            </div>
           </section>
         </div>
 
         <!-- Right: Sidebar -->
-        <aside class="space-y-8">
+        <aside class="space-y-8 lg:col-start-2">
           <!-- Quick Support -->
-          <div class="rounded-2xl bg-slate-900 p-8 text-white shadow-2xl">
+          <!-- <div class="rounded-2xl bg-slate-900 p-8 text-white shadow-2xl">
             <h3 class="mb-4 text-xl font-bold">Hỗ trợ thí sinh</h3>
             <p class="mb-6 text-sm text-slate-400">Nếu bạn gặp khó khăn trong quá trình đăng ký, hãy liên hệ với chúng tôi.</p>
             <div class="space-y-4">
@@ -108,8 +96,8 @@
                 </div>
               </div>
             </div>
-            <!-- <a-button block ghost class="mt-8 h-12 rounded-lg border-white/20 font-bold hover:bg-white hover:text-slate-900">GỬI YÊU CẦU HỖ TRỢ</a-button> -->
-          </div>
+            <a-button block ghost class="mt-8 h-12 rounded-lg border-white/20 font-bold hover:bg-white hover:text-slate-900">GỬI YÊU CẦU HỖ TRỢ</a-button>
+          </div> -->
         </aside>
       </div>
     </div>
@@ -287,6 +275,8 @@ const EXAM_STATUS = Object.freeze({
 });
 const VIETNAM_TIMEZONE = "Asia/Ho_Chi_Minh";
 const HAS_TIMEZONE_OFFSET = /(?:Z|[+-]\d{2}:?\d{2})$/i;
+const currentTimestamp = ref(Date.now());
+let clockInterval;
 
 const EXAM_STATUS_CONFIG = Object.freeze({
   [EXAM_STATUS.SUBMITTING]: {
@@ -311,7 +301,7 @@ const EXAM_STATUS_CONFIG = Object.freeze({
   },
 });
 
-const nowInVietnam = () => $dayjs().tz(VIETNAM_TIMEZONE);
+const nowInVietnam = () => $dayjs(currentTimestamp.value).tz(VIETNAM_TIMEZONE);
 
 const toVietnamDayjs = value => {
   const normalizedValue = String(value);
@@ -361,7 +351,7 @@ const getStatusLabel = record => {
   const status = getApplicationStatus(record);
   return APPLICATION_STATUS_LABELS[status] || record?.statusName || "Không xác định";
 };
-const INITIAL_PAGE_SIZE = 3;
+const INITIAL_PAGE_SIZE = 1;
 const EXPANDED_PAGE_SIZE = 6;
 const pageIndex = ref(1);
 const examsExpanded = ref(false);
@@ -426,6 +416,8 @@ const mapExamItem = exam => {
     isActionDisabled: status.isActionDisabled,
     hasApplication: Boolean(exam?.hasApplication),
     idExamStatus: Number(exam?.idExamStatus),
+    eligibilityAnnouncementDate: exam?.eligibilityAnnouncementDate || exam?.qualifiedAnnouncementDate || null,
+    resultAnnouncementDate: exam?.resultAnnouncementDate || exam?.admissionAnnouncementDate || null,
   };
 };
 
@@ -442,7 +434,88 @@ const {
 const exams = computed(() => {
   if (!examResponse.value?.success) return [];
   const items = Array.isArray(examResponse.value?.data?.items) ? examResponse.value.data.items : [];
-  return items.map(mapExamItem);
+  return items.slice(0, 1).map(mapExamItem);
+});
+
+const activeExam = computed(() => exams.value[0] || null);
+
+const formatScheduleDate = value => {
+  if (!value) return "Chưa công bố";
+  const date = toVietnamDayjs(value);
+  return date.isValid() ? date.format("DD/MM/YYYY HH:mm") : "Chưa công bố";
+};
+
+const examMilestones = computed(() => {
+  if (!activeExam.value) return [];
+
+  return [
+    {
+      label: "Ngày bắt đầu nhận hồ sơ dự tuyển trực tuyến",
+      value: formatScheduleDate(activeExam.value.startDate),
+      icon: "lucide:calendar-clock",
+      iconClass: "bg-blue-600",
+    },
+    {
+      label: "Ngày hết hạn nộp hồ sơ dự tuyển trực tuyến",
+      value: formatScheduleDate(activeExam.value.endDate),
+      icon: "lucide:calendar-days",
+      iconClass: "bg-amber-400",
+    },
+    {
+      label: "Công bố thí sinh đủ điều kiện đánh giá năng lực",
+      value: "08/07/2026",
+      icon: "lucide:clipboard-check",
+      iconClass: "bg-[#213d8f]",
+    },
+    {
+      label: "Công bố thí sinh trúng tuyển",
+      value: "12/07/2026",
+      icon: "lucide:circle-check",
+      iconClass: "bg-emerald-600",
+    },
+  ];
+});
+
+const formatCountdown = milliseconds => {
+  const totalMinutes = Math.max(0, Math.ceil(milliseconds / 60000));
+  const days = Math.floor(totalMinutes / 1440);
+  const hours = Math.floor((totalMinutes % 1440) / 60);
+  const minutes = totalMinutes % 60;
+  const parts = [];
+
+  if (days) parts.push(`${days} ngày`);
+  if (hours) parts.push(`${hours} giờ`);
+  if (minutes || !parts.length) parts.push(`${minutes} phút`);
+
+  return parts.join(" ");
+};
+
+const examCountdown = computed(() => {
+  if (!activeExam.value) return "";
+
+  const now = nowInVietnam();
+  const startDate = toVietnamDayjs(activeExam.value.startDate);
+  const endDate = toVietnamDayjs(activeExam.value.endDate);
+
+  if (startDate.isValid() && now.isBefore(startDate)) {
+    return `Còn ${formatCountdown(startDate.diff(now))} đến: Mở nhận hồ sơ`;
+  }
+
+  if (endDate.isValid() && now.isBefore(endDate)) {
+    return `Còn ${formatCountdown(endDate.diff(now))} đến: Đóng nhận hồ sơ`;
+  }
+
+  return "";
+});
+
+onMounted(() => {
+  clockInterval = window.setInterval(() => {
+    currentTimestamp.value = Date.now();
+  }, 60000);
+});
+
+onBeforeUnmount(() => {
+  window.clearInterval(clockInterval);
 });
 
 const normalizedApplicationDocuments = computed(() => {
