@@ -548,8 +548,6 @@ const detailFormRules = {
     { required: true, message: "Vui lòng nhập mã học sinh" },
     { pattern: /^\d{10}$/, message: "Mã học sinh phải gồm đúng 10 chữ số" },
   ],
-  // identityIssueDate: [{ required: true, message: "Vui lòng chọn ngày cấp CCCD" }],
-  // identityIssuePlace: [{ required: true, message: "Vui lòng nhập nơi cấp CCCD" }],
   idEthnicity: [{ required: true, message: "Vui lòng chọn dân tộc" }],
   gender: [{ required: true, message: "Vui lòng chọn giới tính" }],
   idPermanentProvince: [{ required: true, message: "Vui lòng chọn tỉnh/thành phố cư trú" }],

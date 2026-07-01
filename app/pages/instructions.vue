@@ -17,7 +17,7 @@
           Hướng Dẫn Sử Dụng
         </h1>
         <p class="mx-auto mt-4 max-w-2xl text-base lg:text-lg text-blue-100/80 leading-relaxed">
-          Tài liệu hướng dẫn chi tiết quy trình đăng ký, nộp hồ sơ, thanh toán lệ phí và phúc khảo trực tuyến dành cho thí sinh tham gia kỳ tuyển sinh.
+          Tài liệu hướng dẫn chi tiết quy trình đăng ký, nộp hồ sơ và phúc khảo trực tuyến dành cho thí sinh tham gia kỳ tuyển sinh.
         </p>
       </div>
     </section>
@@ -183,21 +183,22 @@
 </template>
 
 <script setup>
-import { ref, onMounted, onUnmounted } from 'vue';
+import { computed, ref, onMounted, onUnmounted } from 'vue';
 
 const unitStore = useUnitStore();
+const SHOW_PAYMENT_GUIDANCE = false;
 
 // Setup page meta to set title for SEO
 useHead({
   title: 'Hướng dẫn sử dụng cổng tuyển sinh',
   meta: [
-    { name: 'description', content: 'Hướng dẫn đăng ký tài khoản, nộp hồ sơ, thanh toán và phúc khảo kết quả tuyển sinh trực tuyến.' }
+    { name: 'description', content: 'Hướng dẫn đăng ký tài khoản, nộp hồ sơ và phúc khảo kết quả tuyển sinh trực tuyến.' }
   ]
 });
 
 const activeSectionId = ref('account-reg');
 
-const sections = [
+const allSections = [
   {
     id: "account-reg",
     title: "Đăng ký tài khoản trên cổng thông tin",
@@ -229,6 +230,7 @@ const sections = [
     id: "payment",
     title: "Thanh toán hồ sơ dự thi",
     icon: "lucide:credit-card",
+    paymentRelated: true,
     blocks: [
       { type: "p", content: "Sau khi hồ sơ được xác nhận hợp lệ, thí sinh thực hiện thanh toán lệ phí dự thi theo các bước sau:" },
       { type: "step", number: 1, content: "Chọn mục “Hồ sơ của tôi” để xem danh sách hồ sơ đã đăng ký." },
@@ -259,10 +261,10 @@ const sections = [
       { type: "image", src: "/images/guide/img_11.png", caption: "Chọn Phúc khảo" },
       { type: "step", number: 2, content: "Chọn “Tạo yêu cầu phúc khảo”, chọn môn cần phúc khảo và nhập lý do, nhấn “Gửi yêu cầu”" },
       { type: "image", src: "/images/guide/img_12.png", caption: "Tạo yêu cầu phúc khảo và gửi" },
-      { type: "step", number: 3, content: "Sau khi tạo thành công, thí sinh tiến hành thanh toán lệ phí phúc khảo. Tại danh sách phúc khảo, chọn đơn phúc khảo cần thanh toán, nhấn “Thanh toán”" },
-      { type: "image", src: "/images/guide/img_13.png", caption: "Nhấn Thanh toán đơn phúc khảo" },
-      { type: "p", content: "Thực hiện thanh toán bằng cách quét mã QR trên màn hình, sau đó nhấn “Xác nhận thanh toán” để hoàn tất." },
-      { type: "image", src: "/images/guide/img_14.png", caption: "Mã QR thanh toán lệ phí phúc khảo" },
+      { type: "step", number: 3, content: "Sau khi tạo thành công, thí sinh tiến hành thanh toán lệ phí phúc khảo. Tại danh sách phúc khảo, chọn đơn phúc khảo cần thanh toán, nhấn “Thanh toán”", paymentRelated: true },
+      { type: "image", src: "/images/guide/img_13.png", caption: "Nhấn Thanh toán đơn phúc khảo", paymentRelated: true },
+      { type: "p", content: "Thực hiện thanh toán bằng cách quét mã QR trên màn hình, sau đó nhấn “Xác nhận thanh toán” để hoàn tất.", paymentRelated: true },
+      { type: "image", src: "/images/guide/img_14.png", caption: "Mã QR thanh toán lệ phí phúc khảo", paymentRelated: true },
       { type: "p", content: "Thí sinh theo dõi thông tin điểm phúc khảo qua email thông báo và hệ thống sẽ cập nhật trong mục “Kết quả” của danh sách hồ sơ." },
       { type: "image", src: "/images/guide/img_15.png", caption: "Thông tin cập nhật điểm phúc khảo" },
       { type: "note", content: "Nhà trường sẽ xử lý hồ sơ và gửi thông báo qua email đã đăng ký, vui lòng theo dõi email thường xuyên để nhận thông báo." },
@@ -270,6 +272,15 @@ const sections = [
     ]
   }
 ];
+
+const sections = computed(() =>
+  allSections
+    .filter(section => SHOW_PAYMENT_GUIDANCE || !section.paymentRelated)
+    .map(section => ({
+      ...section,
+      blocks: section.blocks.filter(block => SHOW_PAYMENT_GUIDANCE || !block.paymentRelated),
+    })),
+);
 
 const scrollToSection = (id) => {
   const element = document.getElementById(id);
