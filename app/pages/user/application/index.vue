@@ -52,7 +52,7 @@
                     <div class="flex justify-center gap-3">
                       <a-button type="link" class="px-0" @click="openDetail(record)">Chi tiết</a-button>
                       <a-button v-if="canViewExamResult(record)" type="link" class="px-0" @click="openExamScoreModal(record)">Kết quả</a-button>
-                      <a-button v-if="canCreateReview(record)" type="link" class="px-0" @click="openReviewModal(record)">Phúc khảo</a-button>
+                      <!-- <a-button v-if="canCreateReview(record)" type="link" class="px-0" @click="openReviewModal(record)">Phúc khảo</a-button> -->
                     </div>
                   </template>
                 </template>
@@ -85,7 +85,7 @@
 
               <div class="mt-4 flex flex-wrap justify-end gap-2">
                 <a-button v-if="canViewExamResult(record)" class="rounded-xl" @click="openExamScoreModal(record)">Kết quả thi</a-button>
-                <a-button v-if="canCreateReview(record)" class="rounded-xl" @click="openReviewModal(record)">Phúc khảo</a-button>
+                <!-- <a-button v-if="canCreateReview(record)" class="rounded-xl" @click="openReviewModal(record)">Phúc khảo</a-button> -->
                 <a-button type="primary" class="rounded-xl" @click="openDetail(record)">Xem chi tiết</a-button>
               </div>
             </article>
@@ -134,6 +134,22 @@
         </div>
       </section>
 
+      <!--
+      <section v-if="canDisplayScoreInformation && reviewScoreItems.length">
+        <h3 class="text-base font-bold text-cyan-700">Thông tin điểm sau phúc khảo</h3>
+        <div class="mt-4 grid gap-4 text-sm sm:grid-cols-3">
+          <div v-for="item in reviewScoreItems" :key="item.key">
+            <span>{{ item.label }}:</span>
+            <span class="ml-2 font-semibold text-slate-900">{{ formatScore(item.value) }}</span>
+          </div>
+          <div class="font-semibold sm:col-span-3">
+            <span>Tổng điểm:</span>
+            <span class="ml-2 text-slate-900">{{ totalReviewScore }}</span>
+          </div>
+        </div>
+      </section>
+      -->
+
       <section v-if="canDisplayScoreInformation">
         <h3 class="text-base font-bold text-cyan-700">Thông tin điểm thi</h3>
         <div class="mt-4 grid gap-4 border-b border-slate-200 pb-5 text-sm sm:grid-cols-3">
@@ -152,20 +168,6 @@
           <div class="font-semibold sm:col-span-3">
             <span>Tổng điểm:</span>
             <span class="ml-2 text-slate-900">{{ totalExamScore }}</span>
-          </div>
-        </div>
-      </section>
-
-      <section v-if="canDisplayScoreInformation && reviewScoreItems.length">
-        <h3 class="text-base font-bold text-cyan-700">Thông tin điểm sau phúc khảo</h3>
-        <div class="mt-4 grid gap-4 text-sm sm:grid-cols-3">
-          <div v-for="item in reviewScoreItems" :key="item.key">
-            <span>{{ item.label }}:</span>
-            <span class="ml-2 font-semibold text-slate-900">{{ formatScore(item.value) }}</span>
-          </div>
-          <div class="font-semibold sm:col-span-3">
-            <span>Tổng điểm:</span>
-            <span class="ml-2 text-slate-900">{{ totalReviewScore }}</span>
           </div>
         </div>
       </section>
