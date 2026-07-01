@@ -178,6 +178,16 @@
                       </a-form-item>
                     </div>
                   </section>
+
+                  <a-form-item name="commitmentAccepted" :rules="commitmentRules" class="mt-8">
+                    <div class="select-none rounded-2xl border border-blue-100 bg-blue-50/50 p-5">
+                      <a-checkbox v-model:checked="detailData.commitmentAccepted">
+                        <span class="leading-6 text-slate-700">
+                          Tôi cam kết rằng toàn bộ thông tin tôi cung cấp tại đây là đúng sự thật và tôi xin chịu hoàn toàn trách nhiệm trước pháp luật về tính chính xác của các thông tin này.
+                        </span>
+                      </a-checkbox>
+                    </div>
+                  </a-form-item>
                 </a-form>
 
                 <section v-else>
@@ -463,6 +473,8 @@
         </section>
       </div>
     </a-modal>
+
+    <UserApplicationSubmitSuccessModal :open="submitSuccessVisible" :message="submitSuccessMessage" action-text="Xem hồ sơ" @confirm="submitSuccessVisible = false" />
   </div>
 </template>
 
@@ -496,6 +508,8 @@ const detailFormRef = ref();
 const documentsSectionRef = ref();
 const saveLoading = ref(false);
 const submitLoading = ref(false);
+const submitSuccessVisible = ref(false);
+const submitSuccessMessage = ref("");
 const avatarUploading = ref(false);
 const isAvatarPreviewOpen = ref(false);
 const documentUploadingMap = ref({});
@@ -561,6 +575,12 @@ const detailFormRules = {
   idCurrentCommune: [{ required: true, message: "Vui lòng chọn phường/xã hiện tại" }],
   currentAddress: [{ required: true, message: "Vui lòng nhập địa chỉ nơi ở hiện tại" }],
 };
+const commitmentRules = [
+  {
+    validator: (_, value) => (value ? Promise.resolve() : Promise.reject(new Error("Vui lòng xác nhận cam kết trước khi tiếp tục"))),
+    trigger: "change",
+  },
+];
 const {
   data: detailResponse,
   error: detailResponseError,
@@ -660,6 +680,7 @@ const normalizeApplicationDetail = detail => {
     idCurrentProvince: detail.idCurrentProvince !== undefined ? detail.idCurrentProvince : null,
     dateOfBirth: dateOfBirth?.isValid() ? dateOfBirth : null,
     identityIssueDate: identityIssueDate?.isValid() ? identityIssueDate : null,
+    commitmentAccepted: false,
     documents: Array.isArray(detail.documents) ? detail.documents : [],
   };
 };
@@ -1145,7 +1166,8 @@ const submitApplication = async () => {
       throw new Error(error.value?.data?.message || data.value?.message || "Nộp hồ sơ thất bại");
     }
 
-    message.success(data.value?.message || "Nộp hồ sơ thành công");
+    submitSuccessMessage.value = data.value?.message || "Hồ sơ của bạn đã được gửi thành công và đang chờ nhà trường xác nhận.";
+    submitSuccessVisible.value = true;
     await fetchDetailData();
   } catch (error) {
     message.error(error?.message || "Nộp hồ sơ thất bại");

@@ -313,6 +313,16 @@
                 </div>
               </section>
 
+              <a-form-item name="commitmentAccepted" :rules="commitmentRules" class="mt-8">
+                <div class="select-none rounded-2xl border border-blue-100 bg-blue-50/50 p-5">
+                  <a-checkbox v-model:checked="formState.commitmentAccepted">
+                    <span class="leading-6 text-slate-700">
+                      Tôi cam kết rằng toàn bộ thông tin tôi cung cấp tại đây là đúng sự thật và tôi xin chịu hoàn toàn trách nhiệm trước pháp luật về tính chính xác của các thông tin này.
+                    </span>
+                  </a-checkbox>
+                </div>
+              </a-form-item>
+
               <!-- Footer Actions -->
               <div class="mt-10 flex flex-wrap items-center justify-between gap-4 border-t border-slate-100 pt-8">
                 <a-button class="h-12 rounded-2xl px-6 font-semibold" danger type="text" :disabled="isProcessing" @click="handleCancel">Hủy</a-button>
@@ -390,6 +400,8 @@
         </aside>
       </div>
     </div>
+
+    <UserApplicationSubmitSuccessModal :open="submitSuccessVisible" :message="submitSuccessMessage" action-text="Về trang chủ" @confirm="handleSubmitSuccessConfirm" />
   </div>
 </template>
 
@@ -410,6 +422,8 @@ const examDetail = ref(null);
 const loading = ref(true);
 const saveLoading = ref(false);
 const submitLoading = ref(false);
+const submitSuccessVisible = ref(false);
+const submitSuccessMessage = ref("");
 const avatarUploading = ref(false);
 const isAvatarPreviewOpen = ref(false);
 const loadError = ref("");
@@ -440,9 +454,16 @@ const createDefaultFormState = () => ({
   currentProvinceId: DEFAULT_PROVINCE_ID,
   idCurrentCommune: undefined,
   currentAddress: "",
+  commitmentAccepted: false,
 });
 
 const formState = reactive(createDefaultFormState());
+const commitmentRules = [
+  {
+    validator: (_, value) => (value ? Promise.resolve() : Promise.reject(new Error("Vui lòng xác nhận cam kết trước khi tiếp tục"))),
+    trigger: "change",
+  },
+];
 
 const genderValue = computed({
   get() {
@@ -983,13 +1004,18 @@ const submitApplication = async () => {
       throw new Error(error.value?.data?.message || data.value?.message || "Nộp hồ sơ thất bại");
     }
 
-    message.success(data.value?.message || `Nộp hồ sơ thành công, trạng thái: ${APPLICATION_STATUS_LABELS[APPLICATION_STATUS.PENDING_REVIEW]}`);
-    navigateTo("/");
+    submitSuccessMessage.value = data.value?.message || `Hồ sơ đã được gửi thành công và chuyển sang trạng thái ${APPLICATION_STATUS_LABELS[APPLICATION_STATUS.PENDING_REVIEW].toLowerCase()}.`;
+    submitSuccessVisible.value = true;
   } catch (error) {
     message.error(error?.message || "Nộp hồ sơ thất bại");
   } finally {
     submitLoading.value = false;
   }
+};
+
+const handleSubmitSuccessConfirm = () => {
+  submitSuccessVisible.value = false;
+  navigateTo("/");
 };
 
 const handleCancel = () => {
