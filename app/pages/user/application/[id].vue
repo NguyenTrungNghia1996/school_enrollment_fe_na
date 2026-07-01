@@ -473,6 +473,8 @@
         </section>
       </div>
     </a-modal>
+
+    <UserApplicationSubmitSuccessModal :open="submitSuccessVisible" :message="submitSuccessMessage" action-text="Xem hồ sơ" @confirm="submitSuccessVisible = false" />
   </div>
 </template>
 
@@ -506,6 +508,8 @@ const detailFormRef = ref();
 const documentsSectionRef = ref();
 const saveLoading = ref(false);
 const submitLoading = ref(false);
+const submitSuccessVisible = ref(false);
+const submitSuccessMessage = ref("");
 const avatarUploading = ref(false);
 const isAvatarPreviewOpen = ref(false);
 const documentUploadingMap = ref({});
@@ -1162,7 +1166,8 @@ const submitApplication = async () => {
       throw new Error(error.value?.data?.message || data.value?.message || "Nộp hồ sơ thất bại");
     }
 
-    message.success(data.value?.message || "Nộp hồ sơ thành công");
+    submitSuccessMessage.value = data.value?.message || "Hồ sơ của bạn đã được gửi thành công và đang chờ nhà trường xác nhận.";
+    submitSuccessVisible.value = true;
     await fetchDetailData();
   } catch (error) {
     message.error(error?.message || "Nộp hồ sơ thất bại");

@@ -400,6 +400,8 @@
         </aside>
       </div>
     </div>
+
+    <UserApplicationSubmitSuccessModal :open="submitSuccessVisible" :message="submitSuccessMessage" action-text="Về trang chủ" @confirm="handleSubmitSuccessConfirm" />
   </div>
 </template>
 
@@ -420,6 +422,8 @@ const examDetail = ref(null);
 const loading = ref(true);
 const saveLoading = ref(false);
 const submitLoading = ref(false);
+const submitSuccessVisible = ref(false);
+const submitSuccessMessage = ref("");
 const avatarUploading = ref(false);
 const isAvatarPreviewOpen = ref(false);
 const loadError = ref("");
@@ -1000,13 +1004,18 @@ const submitApplication = async () => {
       throw new Error(error.value?.data?.message || data.value?.message || "Nộp hồ sơ thất bại");
     }
 
-    message.success(data.value?.message || `Nộp hồ sơ thành công, trạng thái: ${APPLICATION_STATUS_LABELS[APPLICATION_STATUS.PENDING_REVIEW]}`);
-    navigateTo("/");
+    submitSuccessMessage.value = data.value?.message || `Hồ sơ đã được gửi thành công và chuyển sang trạng thái ${APPLICATION_STATUS_LABELS[APPLICATION_STATUS.PENDING_REVIEW].toLowerCase()}.`;
+    submitSuccessVisible.value = true;
   } catch (error) {
     message.error(error?.message || "Nộp hồ sơ thất bại");
   } finally {
     submitLoading.value = false;
   }
+};
+
+const handleSubmitSuccessConfirm = () => {
+  submitSuccessVisible.value = false;
+  navigateTo("/");
 };
 
 const handleCancel = () => {
