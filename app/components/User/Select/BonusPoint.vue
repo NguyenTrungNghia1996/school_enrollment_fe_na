@@ -1,6 +1,18 @@
 <template>
   <a-form-item :label="label" :name="name" :rules="rules" :label-col="labelCol" :wrapper-col="wrapperCol">
-    <a-select :value="modelValue" :mode="multiple ? 'multiple' : undefined" :placeholder="placeholder" :size="size" :loading="loading" :disabled="disabled" :options="options" show-search allow-clear class="w-full" option-filter-prop="label" @update:value="handleUpdateValue" @clear="onClear" />
+    <div class="flex flex-col gap-2 sm:flex-row sm:items-center">
+      <a-select :value="modelValue" :mode="multiple ? 'multiple' : undefined" :placeholder="placeholder" :size="size" :loading="loading" :disabled="disabled" :options="options" show-search allow-clear class="min-w-0 flex-1" option-filter-prop="label" @update:value="handleUpdateValue" @clear="onClear">
+        <template #option="{ label, pointLabel }">
+          <div class="flex items-center justify-between gap-3">
+            <span>{{ label }}</span>
+            <span v-if="pointLabel" class="shrink-0 font-semibold text-emerald-600">+{{ pointLabel }} điểm</span>
+          </div>
+        </template>
+      </a-select>
+      <div class="flex h-10 min-w-28 shrink-0 items-center justify-center rounded-xl border px-4 text-sm font-bold transition-colors" :class="selectedPointLabel ? 'border-emerald-200 bg-emerald-50 text-emerald-700' : 'border-slate-200 bg-slate-50 text-slate-400'">
+        {{ selectedPointLabel ? `+${selectedPointLabel} điểm` : "Chưa chọn" }}
+      </div>
+    </div>
   </a-form-item>
 </template>
 
@@ -28,6 +40,13 @@ const { data: response, pending: loading } = await applicationUser.getByRest("bo
   key: asyncDataKey,
 });
 
+const formatPoint = point => {
+  const numericPoint = Number(point);
+  if (!Number.isFinite(numericPoint)) return null;
+
+  return new Intl.NumberFormat("vi-VN", { maximumFractionDigits: 2 }).format(numericPoint);
+};
+
 const options = computed(() => {
   if (!response.value?.success) return [];
 
@@ -35,7 +54,18 @@ const options = computed(() => {
   return items.map(item => ({
     label: item.bonus_point_name,
     value: item.id,
+    point: item.bonus_point,
+    pointLabel: formatPoint(item.bonus_point),
   }));
+});
+
+const selectedPointLabel = computed(() => {
+  const selectedValues = Array.isArray(props.modelValue) ? props.modelValue : [props.modelValue];
+  const selectedOptions = options.value.filter(option => selectedValues.some(value => value == option.value));
+  if (!selectedOptions.length) return null;
+
+  const total = selectedOptions.reduce((sum, option) => sum + (Number(option.point) || 0), 0);
+  return formatPoint(total);
 });
 
 const onClear = () => {

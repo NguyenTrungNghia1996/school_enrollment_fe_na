@@ -187,9 +187,14 @@
                       </div>
                       <h2 class="text-xl font-bold text-slate-900">Thông tin điểm cộng</h2>
                     </div>
-                    <div class="grid gap-x-6 gap-y-5 md:grid-cols-2">
-                      <UserSelectPriorityPoint v-model="detailData.id_priority_point" name="id_priority_point" size="large" class="rounded-xl" />
-                      <UserSelectBonusPoint v-model="detailData.id_bonus_point" name="id_bonus_point" size="large" class="rounded-xl" />
+                    <p class="mb-5 text-sm leading-6 text-slate-500">Chọn đối tượng áp dụng nếu thí sinh thuộc diện được cộng điểm. Số điểm tương ứng sẽ hiển thị bên cạnh lựa chọn.</p>
+                    <div class="grid gap-4 lg:grid-cols-1">
+                      <div class="rounded-2xl border border-amber-100 bg-amber-50/40 p-5">
+                        <UserSelectPriorityPoint v-model="detailData.id_priority_point" name="id_priority_point" size="large" />
+                      </div>
+                      <div class="rounded-2xl border border-emerald-100 bg-emerald-50/40 p-5">
+                        <UserSelectBonusPoint v-model="detailData.id_bonus_point" name="id_bonus_point" size="large" />
+                      </div>
                     </div>
                   </section>
 
