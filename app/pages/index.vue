@@ -442,7 +442,7 @@ const activeExam = computed(() => exams.value[0] || null);
 const formatScheduleDate = value => {
   if (!value) return "Chưa công bố";
   const date = toVietnamDayjs(value);
-  return date.isValid() ? date.format("DD/MM/YYYY HH:mm") : "Chưa công bố";
+  return date.isValid() ? date.format("DD/MM/YYYY") : "Chưa công bố";
 };
 
 const examMilestones = computed(() => {
