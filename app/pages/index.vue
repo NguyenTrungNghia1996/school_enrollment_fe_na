@@ -149,8 +149,8 @@
           <a-descriptions-item label="Ngày sinh">{{ formatDate(applicationDetail.dateOfBirth) }}</a-descriptions-item>
           <a-descriptions-item label="Số CCCD">{{ applicationDetail.identityNumber || "-" }}</a-descriptions-item>
           <a-descriptions-item label="Mã học sinh">{{ applicationDetail.student_code || "-" }}</a-descriptions-item>
-          <!-- <a-descriptions-item label="Ngày cấp CCCD">{{ formatDate(applicationDetail.identityIssueDate) }}</a-descriptions-item> -->
-          <!-- <a-descriptions-item label="Nơi cấp CCCD">{{ applicationDetail.identityIssuePlace || "-" }}</a-descriptions-item> -->
+          <a-descriptions-item label="Ngày cấp CCCD">{{ formatDate(applicationDetail.identityIssueDate) }}</a-descriptions-item>
+          <a-descriptions-item label="Nơi cấp CCCD">{{ applicationDetail.identityIssuePlace || "-" }}</a-descriptions-item>
           <a-descriptions-item label="Giới tính">{{ formatGender(applicationDetail.gender) }}</a-descriptions-item>
           <a-descriptions-item label="Dân tộc">{{ applicationDetail.ethnicityName || `#${applicationDetail.idEthnicity || "-"}` }}</a-descriptions-item>
           <a-descriptions-item label="Nơi sinh">{{ applicationDetail.provinceName || `#${applicationDetail.idProvince || "-"}` }}</a-descriptions-item>
