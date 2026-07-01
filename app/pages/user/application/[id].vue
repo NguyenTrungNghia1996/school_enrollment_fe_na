@@ -301,11 +301,11 @@
                     </div>
                     <div class="rounded-xl border border-slate-100 bg-white p-4 shadow-sm">
                       <div class="text-[11px] font-bold uppercase tracking-widest text-slate-400">Điểm ưu tiên</div>
-                      <div class="mt-1.5 font-medium text-slate-900">{{ detailData.name_priority_point || "-" }}</div>
+                      <div class="mt-1.5 font-medium text-slate-900">{{ detailData.priority_point_name || "-" }}</div>
                     </div>
                     <div class="rounded-xl border border-slate-100 bg-white p-4 shadow-sm">
                       <div class="text-[11px] font-bold uppercase tracking-widest text-slate-400">Điểm khuyến khích</div>
-                      <div class="mt-1.5 font-medium text-slate-900">{{ detailData.name_bonus_point || "-" }}</div>
+                      <div class="mt-1.5 font-medium text-slate-900">{{ detailData.bonus_point_name || "-" }}</div>
                     </div>
                     <a-alert v-if="detailData.note" type="warning" show-icon class="!rounded-2xl !border-amber-200 !bg-amber-50 md:col-span-3">
                       <template #message>
