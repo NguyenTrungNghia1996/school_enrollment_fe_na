@@ -130,20 +130,7 @@
           <a-descriptions-item label="Phường/xã hiện tại" :span="2">{{ detailData.currentCommuneName || `#${detailData.idCurrentCommune || "-"}` }}</a-descriptions-item>
           <a-descriptions-item label="Địa chỉ hiện tại" :span="2">{{ detailData.currentAddress || "-" }}</a-descriptions-item>
           <a-descriptions-item label="Ghi chú" :span="2">{{ detailData.note || "-" }}</a-descriptions-item>
-          <a-descriptions-item v-if="isCompletedDetail" label="Đối tượng ưu tiên">{{ approvalForm.priority_group || "-" }}</a-descriptions-item>
-          <a-descriptions-item v-if="isCompletedDetail" label="Điểm ưu tiên">{{ approvalForm.priority_points ?? "-" }}</a-descriptions-item>
         </a-descriptions>
-
-        <a-form v-if="isPendingApprovalDetail" layout="vertical" class="rounded-xl border border-slate-200 bg-slate-50 p-4">
-          <div class="grid gap-4 md:grid-cols-2">
-            <a-form-item label="Đối tượng ưu tiên">
-              <a-input v-model:value="approvalForm.priority_group" placeholder="Nhập đối tượng ưu tiên" />
-            </a-form-item>
-            <a-form-item label="Điểm ưu tiên">
-              <a-input-number v-model:value="approvalForm.priority_points" class="w-full" :min="0" :precision="2" placeholder="Nhập điểm ưu tiên" />
-            </a-form-item>
-          </div>
-        </a-form>
 
         <div>
           <h3 class="mb-3 text-base font-semibold text-slate-900">Hồ sơ đính kèm</h3>
@@ -239,10 +226,6 @@ const exportLoading = ref(false);
 const detailVisible = ref(false);
 const detailLoading = ref(false);
 const detailData = ref(null);
-const approvalForm = reactive({
-  priority_group: "",
-  priority_points: null,
-});
 const rejectVisible = ref(false);
 const rejectLoading = ref(false);
 const rejectNote = ref("");
@@ -365,9 +348,6 @@ const normalizedDocuments = computed(() => {
     })
     .filter(document => document.links.length);
 });
-
-const isPendingApprovalDetail = computed(() => getApplicationStatus(detailData.value) === APPLICATION_STATUS.PENDING_REVIEW);
-const isCompletedDetail = computed(() => getApplicationStatus(detailData.value) === APPLICATION_STATUS.COMPLETED);
 
 watch(
   () => applicationResponse.value,
@@ -634,9 +614,6 @@ const openDetail = async recordOrId => {
     }
 
     detailData.value = normalizeApplicationDetail(data.value.data, selectedRecord.value);
-    approvalForm.priority_group = detailData.value?.priority_group ?? detailData.value?.priorityGroup ?? "";
-    const priorityPoints = detailData.value?.priority_points ?? detailData.value?.priorityPoints;
-    approvalForm.priority_points = priorityPoints === null || priorityPoints === undefined || priorityPoints === "" ? null : Number(priorityPoints);
   } catch (error) {
     detailVisible.value = false;
     message.error(error?.message || "Không thể tải thông tin chi tiết");
@@ -649,8 +626,6 @@ const closeDetail = () => {
   detailVisible.value = false;
   detailLoading.value = false;
   detailData.value = null;
-  approvalForm.priority_group = "";
-  approvalForm.priority_points = null;
   selectedRecord.value = null;
 };
 
@@ -723,13 +698,6 @@ const submitCompletePayment = async record => {
 const approveItem = async (record, keepModal = false) => {
   try {
     const params = { id: record.id };
-    const pGroup = approvalForm.priority_group?.trim();
-    if (pGroup) {
-      params.priority_group = pGroup;
-    }
-    if (approvalForm.priority_points !== null && approvalForm.priority_points !== "" && approvalForm.priority_points !== undefined) {
-      params.priority_points = approvalForm.priority_points;
-    }
 
     const { data, error } = await adminApplication.putByRest("approve", {
       params,
