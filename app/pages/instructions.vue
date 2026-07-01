@@ -17,7 +17,8 @@
           Hướng Dẫn Sử Dụng
         </h1>
         <p class="mx-auto mt-4 max-w-2xl text-base lg:text-lg text-blue-100/80 leading-relaxed">
-          Tài liệu hướng dẫn chi tiết quy trình đăng ký, nộp hồ sơ và phúc khảo trực tuyến dành cho thí sinh tham gia kỳ tuyển sinh.
+          <!-- Tài liệu hướng dẫn chi tiết quy trình đăng ký, nộp hồ sơ và phúc khảo trực tuyến dành cho thí sinh tham gia kỳ tuyển sinh. -->
+          Tài liệu hướng dẫn chi tiết quy trình đăng ký và nộp hồ sơ trực tuyến dành cho thí sinh tham gia kỳ tuyển sinh.
         </p>
       </div>
     </section>
@@ -192,7 +193,8 @@ const SHOW_PAYMENT_GUIDANCE = false;
 useHead({
   title: 'Hướng dẫn sử dụng cổng tuyển sinh',
   meta: [
-    { name: 'description', content: 'Hướng dẫn đăng ký tài khoản, nộp hồ sơ và phúc khảo kết quả tuyển sinh trực tuyến.' }
+    // { name: 'description', content: 'Hướng dẫn đăng ký tài khoản, nộp hồ sơ và phúc khảo kết quả tuyển sinh trực tuyến.' }
+    { name: 'description', content: 'Hướng dẫn đăng ký tài khoản và nộp hồ sơ tuyển sinh trực tuyến.' }
   ]
 });
 
@@ -250,8 +252,9 @@ const allSections = [
       { type: "p", content: "Khi muốn xem kết quả thi, thí sinh truy cập vào danh sách hồ sơ, chọn hồ sơ cần xem, nhấn “Kết quả” để xem thông tin và kết quả tuyển sinh." },
       { type: "image", src: "/images/guide/img_10.png", caption: "Xem kết quả tuyển sinh" }
     ]
-  },
-  {
+  }
+  /*
+  ,{
     id: "review-request",
     title: "Nộp đơn đề nghị phúc khảo",
     icon: "lucide:clipboard-signature",
@@ -271,6 +274,7 @@ const allSections = [
       { type: "p", content: "Nếu gặp sự cố, vui lòng liên hệ bộ phận hỗ trợ của nhà trường." }
     ]
   }
+  */
 ];
 
 const sections = computed(() =>

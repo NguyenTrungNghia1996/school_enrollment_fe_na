@@ -24,13 +24,13 @@
         <div class="space-y-16">
           <!-- Active Exams Section -->
           <section>
-            <div class="mb-8 flex items-center justify-between border-b border-slate-200 pb-4">
+            <!-- <div class="mb-8 flex items-center justify-between border-b border-slate-200 pb-4">
               <h2 class="flex items-center gap-3 text-2xl font-bold text-slate-800">
                 <Icon name="lucide:book-open" class="text-primary" />
                 Các Đợt Khảo Thí Đang Mở
               </h2>
               <a-button v-if="showViewMoreButton" type="link" class="font-semibold text-primary" :loading="loading" @click="handleViewMore">Xem thêm</a-button>
-            </div>
+            </div> -->
 
             <div v-if="examsExpanded" class="mb-6">
               <a-input-search v-model:value="examSearchText" placeholder="Tìm kiếm kỳ khảo thí..." allow-clear @search="handleExamSearch" @change="onExamSearchChange" />
@@ -49,14 +49,14 @@
                     <div class="flex items-center gap-2">
                       <Icon name="lucide:calendar-check" class="text-slate-400" />
                       <span>
-                        Ngày bắt đầu:
+                        Ngày bắt đầu nộp hồ sơ trực tuyến:
                         <strong>{{ exam.start }}</strong>
                       </span>
                     </div>
                     <div class="flex items-center gap-2 text-error">
                       <Icon name="lucide:alert-circle" />
                       <span>
-                        Hết hạn:
+                        Hết hạn nộp hồ sơ trực tuyến:
                         <strong>{{ exam.end }}</strong>
                       </span>
                     </div>
