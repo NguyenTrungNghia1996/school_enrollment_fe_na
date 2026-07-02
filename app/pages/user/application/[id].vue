@@ -151,7 +151,7 @@
                         <a-input v-model:value="detailData.identityIssuePlace" placeholder="Nhập nơi cấp CCCD" size="large" class="rounded-xl" />
                       </a-form-item>
                       <div class="grid gap-x-6 gap-y-5 md:col-span-3 md:grid-cols-3">
-                        <UserSelectProvince v-model="detailData.idPermanentProvince" label="Tỉnh/thành phố cư trú" name="idPermanentProvince" placeholder="Chọn tỉnh thành phố" :rules="detailFormRules.idPermanentProvince" size="large" class="rounded-xl" />
+                        <UserSelectProvince v-model="detailData.idPermanentProvince" label="Tỉnh/thành phố cư trú" name="idPermanentProvince" placeholder="Chọn tỉnh thành phố" :rules="detailFormRules.idPermanentProvince" size="large" disabled class="rounded-xl" />
                         <UserSelectCommune v-model="detailData.idCommune" :id-province="detailData.idPermanentProvince" label="Phường/xã thường trú" name="idCommune" placeholder="Chọn phường/xã" :rules="detailFormRules.idCommune" size="large" class="rounded-xl" />
                         <a-form-item label="Địa chỉ thường trú" name="permanentAddress" :rules="detailFormRules.permanentAddress">
                           <a-input v-model:value="detailData.permanentAddress" placeholder="Nhập địa chỉ thường trú" size="large" class="rounded-xl" />
@@ -699,8 +699,8 @@ const normalizeApplicationDetail = detail => {
     statusName: detail.statusName || null,
     fullName: detail.fullName || detail.fullname || null,
     examName: detail.examName || null,
-    idPermanentProvince: detail.idPermanentProvince !== undefined ? detail.idPermanentProvince : null, // Force reset to null to avoid mismatch with province list when loading detail for the first time
-    idCurrentProvince: detail.idCurrentProvince !== undefined ? detail.idCurrentProvince : null,
+    idPermanentProvince: DEFAULT_PROVINCE_ID,
+    idCurrentProvince: DEFAULT_PROVINCE_ID,
     dateOfBirth: dateOfBirth?.isValid() ? dateOfBirth : null,
     identityIssueDate: identityIssueDate?.isValid() ? identityIssueDate : null,
     commitmentAccepted: false,
