@@ -34,6 +34,10 @@
             {{ formatDate(record.dateOfBirth) }}
           </template>
 
+          <template v-if="column.key === 'submit_date'">
+            {{ formatDateTime(record.submit_date) }}
+          </template>
+
           <template v-if="column.key === 'idExam'">
             <span class="font-medium text-slate-700">#{{ record.idExam }}</span>
           </template>
@@ -251,6 +255,7 @@ const pagination = reactive({
 const columns = [
   { title: "STT", key: "stt", width: 60, align: "center" },
   { title: "Mã hồ sơ", dataIndex: "applicationCode", key: "applicationCode", width: 140 },
+  { title: "Ngày nộp", dataIndex: "submit_date", key: "submit_date", width: 130 },
   { title: "Kỳ tuyển sinh", dataIndex: "examName", key: "examName", width: 120, align: "center" },
   { title: "Họ tên", dataIndex: "fullname", key: "fullname", ellipsis: true },
   { title: "Ngày sinh", dataIndex: "dateOfBirth", key: "dateOfBirth", width: 130 },
@@ -499,6 +504,11 @@ const publishDirectApplications = async () => {
 const formatDate = value => {
   if (!value) return "-";
   return dayjs(value).format("DD/MM/YYYY");
+};
+
+const formatDateTime = value => {
+  if (!value) return "-";
+  return dayjs(value).format("DD/MM/YYYY HH:mm");
 };
 
 const formatGender = value => {
