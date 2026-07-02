@@ -22,10 +22,10 @@ const instance = getCurrentInstance();
 
 const props = defineProps({
   modelValue: [Array, Number, String],
-  label: { type: String, default: "Điểm khuyến khích" },
+  label: { type: String, default: "Điểm ưu tiên" },
   name: { type: String, default: "bonusPointId" },
   multiple: { type: Boolean, default: false },
-  placeholder: { type: String, default: "Chọn điểm khuyến khích" },
+  placeholder: { type: String, default: "Chọn điểm ưu tiên" },
   size: { type: String, default: "middle" },
   rules: { type: Array, default: () => [] },
   disabled: { type: Boolean, default: false },
