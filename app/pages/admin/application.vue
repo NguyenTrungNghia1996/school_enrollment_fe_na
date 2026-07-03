@@ -259,7 +259,7 @@ const columns = [
   { title: "Kỳ tuyển sinh", dataIndex: "examName", key: "examName", width: 120, align: "center" },
   { title: "Họ tên", dataIndex: "fullname", key: "fullname", ellipsis: true },
   { title: "Ngày sinh", dataIndex: "dateOfBirth", key: "dateOfBirth", width: 130 },
-  { title: "Số CCCD", dataIndex: "identityNumber", key: "identityNumber", width: 150 },
+  { title: "Mã học sinh", dataIndex: "student_code", key: "student_code", width: 150 },
   { title: "Trạng thái", dataIndex: "statusName", key: "statusName", width: 190, align: "center" },
   { title: "Thao tác", key: "action", width: 150, align: "center", fixed: "right" },
 ];
