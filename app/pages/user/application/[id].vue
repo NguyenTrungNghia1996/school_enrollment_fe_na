@@ -198,13 +198,6 @@
                     </div>
                   </section>
 
-                  <a-form-item name="commitmentAccepted" :rules="commitmentRules" class="mt-8">
-                    <div class="select-none rounded-2xl border border-blue-100 bg-blue-50/50 p-5">
-                      <a-checkbox v-model:checked="detailData.commitmentAccepted">
-                        <span class="leading-6 text-slate-700">Tôi cam kết rằng toàn bộ thông tin tôi cung cấp tại đây là đúng sự thật và tôi xin chịu hoàn toàn trách nhiệm trước pháp luật về tính chính xác của các thông tin này.</span>
-                      </a-checkbox>
-                    </div>
-                  </a-form-item>
                 </a-form>
 
                 <section v-else>
@@ -412,6 +405,15 @@
                   </div>
                 </section>
 
+                <div v-if="showEditAction" ref="commitmentSectionRef" class="mt-8">
+                  <div class="select-none rounded-2xl border bg-blue-50/50 p-5" :class="commitmentError ? 'border-rose-400' : 'border-blue-100'">
+                    <a-checkbox v-model:checked="detailData.commitmentAccepted" @change="commitmentError = false">
+                      <span class="leading-6 text-slate-700">Tôi cam kết rằng toàn bộ thông tin tôi cung cấp tại đây là đúng sự thật và tôi xin chịu hoàn toàn trách nhiệm trước pháp luật về tính chính xác của các thông tin này.</span>
+                    </a-checkbox>
+                  </div>
+                  <p v-if="commitmentError" class="mb-0 mt-2 text-sm text-rose-500">Vui lòng xác nhận cam kết trước khi tiếp tục</p>
+                </div>
+
                 <div class="mt-10 flex flex-wrap items-center justify-between gap-4 border-t border-slate-100 pt-8">
                   <a-button class="h-12 rounded-2xl px-6 font-semibold" @click="goBack">Quay lại</a-button>
                   <div class="flex flex-wrap gap-3">
@@ -531,6 +533,8 @@ const detailData = ref(null);
 const detailLoading = ref(false);
 const detailFormRef = ref();
 const documentsSectionRef = ref();
+const commitmentSectionRef = ref();
+const commitmentError = ref(false);
 const saveLoading = ref(false);
 const submitLoading = ref(false);
 const submitSuccessVisible = ref(false);
@@ -596,12 +600,6 @@ const detailFormRules = {
   idCurrentCommune: [{ required: true, message: "Vui lòng chọn phường/xã hiện tại" }],
   currentAddress: [{ required: true, message: "Vui lòng nhập địa chỉ nơi ở hiện tại" }],
 };
-const commitmentRules = [
-  {
-    validator: (_, value) => (value ? Promise.resolve() : Promise.reject(new Error("Vui lòng xác nhận cam kết trước khi tiếp tục"))),
-    trigger: "change",
-  },
-];
 const {
   data: detailResponse,
   error: detailResponseError,
@@ -787,12 +785,25 @@ const focusFirstInvalidField = async () => {
 const validateFormAndFocusError = async () => {
   try {
     await detailFormRef.value?.validate();
-    return true;
   } catch {
     await focusFirstInvalidField();
     message.warning("Vui lòng kiểm tra lại thông tin hồ sơ");
     return false;
   }
+
+  if (!detailData.value?.commitmentAccepted) {
+    commitmentError.value = true;
+    await nextTick();
+    commitmentSectionRef.value?.scrollIntoView({
+      behavior: "smooth",
+      block: "center",
+    });
+    message.warning("Vui lòng xác nhận cam kết trước khi tiếp tục");
+    return false;
+  }
+
+  commitmentError.value = false;
+  return true;
 };
 
 const getDisplayName = link => {
