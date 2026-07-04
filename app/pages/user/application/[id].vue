@@ -151,8 +151,8 @@
                         <a-input v-model:value="detailData.identityIssuePlace" placeholder="Nhập nơi cấp CCCD" size="large" class="rounded-xl" />
                       </a-form-item>
                       <div class="grid gap-x-6 gap-y-5 md:col-span-3 md:grid-cols-3">
-                        <UserSelectProvince v-model="detailData.idPermanentProvince" label="Tỉnh/thành phố cư trú" name="idPermanentProvince" placeholder="Chọn tỉnh thành phố" :rules="detailFormRules.idPermanentProvince" size="large" disabled class="rounded-xl" />
-                        <UserSelectCommune v-model="detailData.idCommune" :id-province="detailData.idPermanentProvince" label="Phường/xã thường trú" name="idCommune" placeholder="Chọn phường/xã" :rules="detailFormRules.idCommune" size="large" class="rounded-xl" />
+                        <UserSelectProvince v-model="detailData.idPermanentProvince" label="Tỉnh/thành phố cư trú" name="idPermanentProvince" placeholder="Chọn tỉnh thành phố" :rules="detailFormRules.idPermanentProvince" size="large" class="rounded-xl" />
+                        <UserSelectCommune v-model="detailData.idCommune" :id-province="detailData.idPermanentProvince" label="Phường/xã cư trú" name="idCommune" placeholder="Chọn phường/xã" :rules="detailFormRules.idCommune" size="large" class="rounded-xl" />
                         <a-form-item label="Địa chỉ thường trú" name="permanentAddress" :rules="detailFormRules.permanentAddress">
                           <a-input v-model:value="detailData.permanentAddress" placeholder="Nhập địa chỉ thường trú" size="large" class="rounded-xl" />
                         </a-form-item>
@@ -171,7 +171,7 @@
                       <a-form-item label="Số điện thoại" name="phoneNumber" :rules="detailFormRules.phoneNumber">
                         <a-input v-model:value="detailData.phoneNumber" placeholder="Nhập số điện thoại" size="large" class="rounded-xl" />
                       </a-form-item>
-                      <UserSelectProvince v-model="detailData.idCurrentProvince" label="Tỉnh/thành phố nơi ở hiện tại" name="idCurrentProvince" placeholder="Chọn tỉnh thành phố" :rules="detailFormRules.idCurrentProvince" size="large" disabled class="rounded-xl" />
+                      <UserSelectProvince v-model="detailData.idCurrentProvince" label="Tỉnh/thành phố nơi ở hiện tại" name="idCurrentProvince" placeholder="Chọn tỉnh thành phố" :rules="detailFormRules.idCurrentProvince" size="large" class="rounded-xl" />
                       <UserSelectCommune2 v-model="detailData.idCurrentCommune" :id-province="detailData.idCurrentProvince" label="Phường/xã hiện tại" name="idCurrentCommune" placeholder="Chọn phường/xã" :rules="detailFormRules.idCurrentCommune" size="large" class="rounded-xl" />
                       <a-form-item label="Địa chỉ hiện tại" name="currentAddress" class="md:col-span-3" :rules="detailFormRules.currentAddress">
                         <a-input v-model:value="detailData.currentAddress" placeholder="Nhập địa chỉ hiện tại" size="large" class="rounded-xl" />
@@ -281,7 +281,7 @@
                       <div class="mt-1.5 font-medium text-slate-900">{{ detailData.permanentProvinceName || `#${detailData.idPermanentProvince || "-"}` }}</div>
                     </div>
                     <div class="rounded-xl border border-slate-100 bg-white p-4 shadow-sm">
-                      <div class="text-[11px] font-bold uppercase tracking-widest text-slate-400">Phường/xã thường trú</div>
+                      <div class="text-[11px] font-bold uppercase tracking-widest text-slate-400">Phường/xã cư trú</div>
                       <div class="mt-1.5 font-medium text-slate-900">{{ detailData.permanentCommuneName || `#${detailData.idCommune || "-"}` }}</div>
                     </div>
                     <div class="rounded-xl border border-slate-100 bg-white p-4 shadow-sm md:col-span-3">
@@ -554,8 +554,6 @@ const genderOptions = [
   { label: "Nữ", value: "female" },
 ];
 
-const DEFAULT_PROVINCE_ID = 3;
-
 const genderValue = computed({
   get() {
     if (detailData.value?.gender === true) return "male";
@@ -699,8 +697,6 @@ const normalizeApplicationDetail = detail => {
     statusName: detail.statusName || null,
     fullName: detail.fullName || detail.fullname || null,
     examName: detail.examName || null,
-    idPermanentProvince: DEFAULT_PROVINCE_ID,
-    idCurrentProvince: DEFAULT_PROVINCE_ID,
     dateOfBirth: dateOfBirth?.isValid() ? dateOfBirth : null,
     identityIssueDate: identityIssueDate?.isValid() ? identityIssueDate : null,
     commitmentAccepted: false,
