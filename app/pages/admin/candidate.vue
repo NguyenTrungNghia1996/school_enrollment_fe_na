@@ -12,7 +12,7 @@
         <a-popconfirm v-if="adminStore.canEditCurrentPage" title="Bạn chắc chắn muốn công bố kết quả cho kỳ tuyển sinh đã chọn?" ok-text="Công bố" cancel-text="Hủy" @confirm="publishCandidates">
           <a-button type="primary" class="w-full whitespace-nowrap xl:w-auto" :loading="publishLoading">Công bố</a-button>
         </a-popconfirm>
-        <a-button type="primary" ghost class="w-full whitespace-nowrap xl:w-auto" :loading="exportLoading" @click="exportCandidates">Export</a-button>
+        <a-button type="primary" ghost class="w-full whitespace-nowrap xl:w-auto" :loading="exportLoading || exportImageLoading" @click="openExportModal">Export</a-button>
         <a-button v-if="adminStore.canEditCurrentPage" type="primary" ghost class="w-full whitespace-nowrap xl:w-auto" @click="openImportModal">Import</a-button>
         <a-button class="w-full whitespace-nowrap xl:w-auto" @click="resetFilters">Đặt lại</a-button>
       </div>
@@ -43,6 +43,36 @@
         </a-table>
       </div>
     </ClientOnly>
+
+    <a-modal v-model:open="exportVisible" title="Xuất danh sách thí sinh" :footer="null" :closable="!exportLoading && !exportImageLoading" :mask-closable="!exportLoading && !exportImageLoading">
+      <div class="space-y-3">
+        <div class="rounded-xl border border-slate-200 bg-white p-4">
+          <div class="mb-3 font-medium text-slate-900">Kỳ tuyển sinh</div>
+          <AdminSelectEnrollment v-model="selectedExamId" no-form-item :inline-label="false" placeholder="Chọn kỳ tuyển sinh" label="" :disabled="exportLoading || exportImageLoading" />
+        </div>
+
+        <a-button class="flex h-auto w-full items-center justify-start p-4 text-left" :loading="exportType === 'candidate'" :disabled="exportLoading && exportType !== 'candidate'" @click="exportCandidates">
+          <div>
+            <div class="font-medium text-slate-900">Xuất danh sách thí sinh</div>
+            <div class="mt-1 whitespace-normal text-sm font-normal text-slate-500">Tải danh sách thí sinh của kỳ tuyển sinh đã chọn.</div>
+          </div>
+        </a-button>
+
+        <a-button class="flex h-auto w-full items-center justify-start p-4 text-left" :loading="exportType === 'signature'" :disabled="exportLoading && exportType !== 'signature'" @click="exportSignatureList">
+          <div>
+            <div class="font-medium text-slate-900">Xuất danh sách điểm danh</div>
+            <div class="mt-1 whitespace-normal text-sm font-normal text-slate-500">Tải danh sách thí sinh có phần ký xác nhận để điểm danh.</div>
+          </div>
+        </a-button>
+
+        <a-button class="flex h-auto w-full items-center justify-start p-4 text-left" :loading="exportImageLoading" :disabled="exportLoading" @click="exportSignatureImageList">
+          <div>
+            <div class="font-medium text-slate-900">Xuất danh sách điểm danh hình ảnh</div>
+            <div class="mt-1 whitespace-normal text-sm font-normal text-slate-500">Tạo danh sách điểm danh kèm hình ảnh thí sinh.</div>
+          </div>
+        </a-button>
+      </div>
+    </a-modal>
 
     <a-modal v-model:open="importVisible" title="Import danh sách thí sinh" :confirm-loading="importLoading" ok-text="Import" cancel-text="Đóng" @ok="submitImport" @cancel="closeImportModal">
       <div class="space-y-4">
@@ -76,13 +106,17 @@ definePageMeta({
 const config = useRuntimeConfig();
 const { adminCandidate } = useApi();
 const adminStore = useAdminStore();
+const signatureImageExportStore = useSignatureImageExportStore();
 
 const searchText = ref("");
 const selectedExamId = ref(null);
+const exportVisible = ref(false);
+const exportType = ref(null);
 const importVisible = ref(false);
 const importInputRef = ref(null);
 const importLoading = ref(false);
 const exportLoading = ref(false);
+const exportImageLoading = ref(false);
 const publishLoading = ref(false);
 const selectedImportFile = ref(null);
 const selectedImportFileName = ref("");
@@ -196,7 +230,11 @@ const getFileNameFromContentDisposition = (contentDisposition, fallbackFileName)
   return fallbackFileName;
 };
 
-const exportCandidates = async () => {
+const openExportModal = () => {
+  exportVisible.value = true;
+};
+
+const downloadCandidateExport = async ({ path, type, fallbackFileName, successMessage, errorMessage }) => {
   if (!selectedExamId.value) {
     message.warning("Vui lòng chọn kỳ tuyển sinh");
     return;
@@ -208,27 +246,28 @@ const exportCandidates = async () => {
   }
 
   exportLoading.value = true;
+  exportType.value = type;
 
   try {
-    const { data, error } = await adminCandidate.getByRest("export", {
-      params: {
-        idExam: selectedExamId.value,
+    const exportUrl = new URL(`/api/admin/examList/${path}`, config.public.baseURL);
+    exportUrl.searchParams.set("idExam", String(selectedExamId.value));
+
+    const response = await fetch(exportUrl.toString(), {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${adminStore.token}`,
       },
-      key: `admin-candidate-export-${selectedExamId.value}-${Date.now()}`,
     });
 
-    if (error.value) {
-      throw new Error(error.value.data.message || "Xuất dữ liệu danh sách thí sinh thất bại");
+    if (!response.ok) {
+      throw new Error(errorMessage);
     }
 
-    const blob = data.value;
-    if (!blob) {
-      throw new Error("Không nhận được dữ liệu file");
-    }
-
+    const blob = await response.blob();
     const downloadUrl = window.URL.createObjectURL(blob);
     const link = document.createElement("a");
-    const fileName = getFileNameFromContentDisposition("", `danh-sach-thi-sinh-${selectedExamId.value}.xlsx`);
+    const contentDisposition = response.headers.get("content-disposition") || "";
+    const fileName = getFileNameFromContentDisposition(contentDisposition, fallbackFileName);
 
     link.href = downloadUrl;
     link.download = fileName;
@@ -237,11 +276,81 @@ const exportCandidates = async () => {
     link.remove();
     window.URL.revokeObjectURL(downloadUrl);
 
-    message.success("Xuất dữ liệu danh sách thí sinh thành công");
+    message.success(successMessage);
+    exportVisible.value = false;
   } catch (error) {
-    message.error(error?.message || "Xuất dữ liệu danh sách thí sinh thất bại");
+    message.error(error?.message || errorMessage);
   } finally {
     exportLoading.value = false;
+    exportType.value = null;
+  }
+};
+
+const exportCandidates = () =>
+  downloadCandidateExport({
+    path: "export",
+    type: "candidate",
+    fallbackFileName: `danh-sach-thi-sinh-${selectedExamId.value}.xlsx`,
+    successMessage: "Xuất dữ liệu danh sách thí sinh thành công",
+    errorMessage: "Xuất dữ liệu danh sách thí sinh thất bại",
+  });
+
+const exportSignatureList = () =>
+  downloadCandidateExport({
+    path: "export-signature-list",
+    type: "signature",
+    fallbackFileName: `danh-sach-diem-danh-${selectedExamId.value}.xlsx`,
+    successMessage: "Xuất danh sách điểm danh thành công",
+    errorMessage: "Xuất danh sách điểm danh thất bại",
+  });
+
+const fetchAdminJson = async (path, params = {}) => {
+  const requestUrl = new URL(`/api/admin/examList/${path}`, config.public.baseURL);
+  Object.entries(params).forEach(([key, value]) => requestUrl.searchParams.set(key, String(value)));
+
+  const response = await fetch(requestUrl.toString(), {
+    method: "GET",
+    headers: {
+      Authorization: `Bearer ${adminStore.token}`,
+    },
+  });
+  const responseData = await response.json().catch(() => null);
+
+  if (!response.ok || responseData?.success === false) {
+    throw new Error(responseData?.message || "Không thể xử lý yêu cầu xuất file");
+  }
+
+  return responseData;
+};
+
+const exportSignatureImageList = async () => {
+  if (!selectedExamId.value) {
+    message.warning("Vui lòng chọn kỳ tuyển sinh");
+    return;
+  }
+
+  if (!adminStore.token) {
+    message.error("Không tìm thấy phiên đăng nhập quản trị");
+    return;
+  }
+
+  exportImageLoading.value = true;
+  try {
+    const responseData = await fetchAdminJson("export-signature-list-image", {
+      idExam: selectedExamId.value,
+    });
+    const trackId = responseData?.data?.trackId;
+    if (!trackId) {
+      throw new Error("Không nhận được mã theo dõi file");
+    }
+
+    signatureImageExportStore.start(trackId);
+    exportVisible.value = false;
+    message.success(responseData?.message || "Yêu cầu xuất Excel đang được xử lý.");
+  } catch (error) {
+    message.error(error?.message || "Không thể tạo danh sách điểm danh hình ảnh");
+  } finally {
+    exportImageLoading.value = false;
   }
 };
 
