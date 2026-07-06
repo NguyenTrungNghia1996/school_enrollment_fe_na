@@ -3,7 +3,42 @@
     <div class="flex items-center">
       <img :src="unitStore.logo" alt="Logo" class="h-16 cursor-pointer rounded-xl p-2 transition-all duration-300 ease-out hover:scale-105 hover:shadow-xl hover:shadow-primary/20 active:scale-95 active:shadow-none" @click="() => navigateTo(`/admin`)" />
     </div>
-    <div class="flex items-center">
+    <div class="flex items-center gap-2">
+      <a-popover trigger="click" placement="bottomRight" overlay-class-name="admin-notification-popover">
+        <template #content>
+          <div class="w-[360px] max-w-[calc(100vw-32px)]">
+            <div class="border-b border-slate-100 px-1 pb-3 font-semibold text-slate-900">Thông báo</div>
+
+            <div v-if="signatureImageExportStore.trackId" class="mt-3 rounded-lg border border-slate-200 bg-slate-50 p-3">
+              <div class="flex items-start gap-3">
+                <div class="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-full" :class="signatureImageExportStore.status === 'done' ? 'bg-emerald-100 text-emerald-600' : 'bg-blue-100 text-blue-600'">
+                  <CheckCircleOutlined v-if="signatureImageExportStore.status === 'done'" />
+                  <LoadingOutlined v-else />
+                </div>
+
+                <div class="min-w-0 flex-1">
+                  <div class="font-medium text-slate-900">
+                    {{ signatureImageExportStore.status === "done" ? "Danh sách điểm danh hình ảnh đã sẵn sàng" : "Đang xuất danh sách điểm danh hình ảnh" }}
+                  </div>
+                  <div class="mt-1 text-sm text-slate-500">
+                    {{ signatureImageExportStore.status === "done" ? "File Excel đã xử lý xong." : `Đang kiểm tra trạng thái (${signatureImageExportStore.attempts}/60).` }}
+                  </div>
+                  <a-button v-if="signatureImageExportStore.status === 'done' && signatureImageExportStore.fileUrl" type="primary" size="small" class="mt-3" @click="downloadSignatureImageFile">Tải file</a-button>
+                </div>
+              </div>
+            </div>
+
+            <a-empty v-else :image="simpleImage" class="my-5" description="Không có thông báo mới" />
+          </div>
+        </template>
+
+        <a-badge :dot="Boolean(signatureImageExportStore.trackId)">
+          <button type="button" class="flex h-10 w-10 items-center justify-center rounded-full text-xl text-gray-300 transition-colors hover:bg-gray-700/70 hover:text-white" aria-label="Thông báo">
+            <BellOutlined />
+          </button>
+        </a-badge>
+      </a-popover>
+
       <a-dropdown>
         <div class="group flex cursor-pointer items-center rounded-lg p-1.5 transition-all duration-200 ease-out hover:bg-gray-700/50" @click.prevent>
           <div class="flex items-center gap-3">
@@ -93,9 +128,13 @@
   </div>
 </template>
 <script setup>
+import { Empty, notification } from "ant-design-vue";
+
 const unitStore = useUnitStore();
 const adminStore = useAdminStore();
+const signatureImageExportStore = useSignatureImageExportStore();
 const { authAdmin } = useApi();
+const simpleImage = Empty.PRESENTED_IMAGE_SIMPLE;
 
 const changePasswordOpen = ref(false);
 const changePasswordLoading = ref(false);
@@ -122,6 +161,22 @@ const showChangePasswordModal = () => {
 const closeChangePasswordModal = () => {
   changePasswordOpen.value = false;
   resetChangePasswordForm();
+};
+
+const downloadSignatureImageFile = () => {
+  if (!signatureImageExportStore.fileUrl) return;
+
+  const link = document.createElement("a");
+  link.href = signatureImageExportStore.fileUrl;
+  link.target = "_blank";
+  link.rel = "noopener noreferrer";
+  link.download = "";
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+
+  notification.destroy("signature-image-export");
+  signatureImageExportStore.clear();
 };
 
 const submitChangePassword = async () => {
