@@ -12,7 +12,7 @@ const signatureImageExportStore = useSignatureImageExportStore();
 
 const notificationKey = "signature-image-export";
 const maxAttempts = 60;
-const maxNotifications = 3;
+const maxNotifications = 1;
 let pollTimer = null;
 
 const clearPollTimer = () => {
@@ -81,9 +81,9 @@ const showReadyNotification = () => {
       ),
   });
 
-  if (signatureImageExportStore.notificationCount >= maxNotifications) {
-    signatureImageExportStore.clear();
-  }
+  // if (signatureImageExportStore.notificationCount >= maxNotifications) {
+  //   signatureImageExportStore.clear();
+  // }
 };
 
 const failExport = errorMessage => {
