@@ -1,5 +1,8 @@
 <template>
   <div class="flex h-screen w-full flex-col overflow-auto bg-gray-200">
+    <ClientOnly>
+      <AdminSignatureImageExportTracker />
+    </ClientOnly>
     <div class="h-14">
       <AdminHeader />
     </div>
