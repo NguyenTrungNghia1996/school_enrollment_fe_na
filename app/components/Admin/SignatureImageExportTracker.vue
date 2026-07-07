@@ -6,8 +6,7 @@
 import { Button, notification } from "ant-design-vue";
 import { h } from "vue";
 
-const config = useRuntimeConfig();
-const adminStore = useAdminStore();
+const { adminSignatureImageStatus } = useApi();
 const signatureImageExportStore = useSignatureImageExportStore();
 
 const notificationKey = "signature-image-export";
@@ -23,22 +22,18 @@ const clearPollTimer = () => {
 };
 
 const fetchStatus = async trackId => {
-  const requestUrl = new URL("/api/admin/examList/export-signature-list-image-status", config.public.baseURL);
-  requestUrl.searchParams.set("trackId", trackId);
-
-  const response = await fetch(requestUrl.toString(), {
-    method: "GET",
-    headers: {
-      Authorization: `Bearer ${adminStore.token}`,
+  const { data, error } = await adminSignatureImageStatus.get({
+    params: {
+      trackId,
     },
+    key: `admin-signature-image-status-${trackId}-${Date.now()}`,
   });
-  const responseData = await response.json().catch(() => null);
 
-  if (!response.ok || responseData?.success === false) {
-    throw new Error(responseData?.message || "Không thể kiểm tra trạng thái xuất file");
+  if (error.value || data.value?.success === false) {
+    throw new Error(error.value?.data?.message || data.value?.message || "Không thể kiểm tra trạng thái xuất file");
   }
 
-  return responseData;
+  return data.value;
 };
 
 const downloadFile = fileUrl => {
