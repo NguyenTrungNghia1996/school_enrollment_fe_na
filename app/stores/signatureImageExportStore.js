@@ -2,30 +2,52 @@ import { defineStore } from "pinia";
 
 export const useSignatureImageExportStore = defineStore("signature-image-export", {
   state: () => ({
-    trackId: null,
-    status: null,
-    fileUrl: null,
-    attempts: 0,
-    notificationCount: 0,
+    jobs: [],
   }),
 
   actions: {
-    start(trackId) {
-      this.trackId = trackId;
-      this.status = "processing";
-      this.fileUrl = null;
-      this.attempts = 0;
-      this.notificationCount = 0;
+    start(trackId, fileName = null) {
+      const existingJob = this.jobs.find(job => job.trackId === trackId);
+      const nextJob = {
+        trackId,
+        status: "processing",
+        fileUrl: null,
+        fileName,
+        attempts: 0,
+        notificationCount: 0,
+      };
+
+      if (existingJob) {
+        Object.assign(existingJob, nextJob);
+        return;
+      }
+
+      this.jobs.unshift(nextJob);
     },
-    incrementAttempts() {
-      this.attempts += 1;
+    incrementAttempts(trackId) {
+      const job = this.jobs.find(item => item.trackId === trackId);
+      if (job) {
+        job.attempts += 1;
+      }
     },
-    complete(fileUrl) {
-      this.status = "done";
-      this.fileUrl = fileUrl;
+    complete(trackId, fileUrl, fileName = null) {
+      const job = this.jobs.find(item => item.trackId === trackId);
+      if (!job) return;
+
+      job.status = "done";
+      job.fileUrl = fileUrl;
+      if (fileName) {
+        job.fileName = fileName;
+      }
     },
-    incrementNotificationCount() {
-      this.notificationCount += 1;
+    incrementNotificationCount(trackId) {
+      const job = this.jobs.find(item => item.trackId === trackId);
+      if (job) {
+        job.notificationCount += 1;
+      }
+    },
+    remove(trackId) {
+      this.jobs = this.jobs.filter(job => job.trackId !== trackId);
     },
     clear() {
       this.$reset();

@@ -9,21 +9,29 @@
           <div class="w-[360px] max-w-[calc(100vw-32px)]">
             <div class="border-b border-slate-100 px-1 pb-3 font-semibold text-slate-900">Thông báo</div>
 
-            <div v-if="signatureImageExportStore.trackId" class="mt-3 rounded-lg border border-slate-200 bg-slate-50 p-3">
-              <div class="flex items-start gap-3">
-                <div class="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-full" :class="signatureImageExportStore.status === 'done' ? 'bg-emerald-100 text-emerald-600' : 'bg-blue-100 text-blue-600'">
-                  <CheckCircleOutlined v-if="signatureImageExportStore.status === 'done'" />
-                  <LoadingOutlined v-else />
-                </div>
+            <div v-if="signatureExportJobs.length" class="mt-3 max-h-[360px] space-y-3 overflow-y-auto">
+              <div v-for="job in signatureExportJobs" :key="job.trackId" class="rounded-lg border border-slate-200 bg-slate-50 p-3">
+                <div class="flex items-start gap-3">
+                  <div class="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-full" :class="job.status === 'done' ? 'bg-emerald-100 text-emerald-600' : 'bg-blue-100 text-blue-600'">
+                    <CheckCircleOutlined v-if="job.status === 'done'" />
+                    <LoadingOutlined v-else />
+                  </div>
 
-                <div class="min-w-0 flex-1">
-                  <div class="font-medium text-slate-900">
-                    {{ signatureImageExportStore.status === "done" ? "Danh sách điểm danh hình ảnh đã sẵn sàng" : "Đang xuất danh sách điểm danh hình ảnh" }}
+                  <div class="min-w-0 flex-1">
+                    <div class="font-medium text-slate-900">
+                      {{ job.status === "done" ? "Danh sách điểm danh hình ảnh đã sẵn sàng" : "Đang xuất danh sách điểm danh hình ảnh" }}
+                    </div>
+                    <div class="mt-1 truncate text-sm text-slate-500">
+                      {{ job.fileName || "File danh sách điểm danh hình ảnh" }}
+                    </div>
+                    <div class="mt-1 text-sm text-slate-500">
+                      {{ job.status === "done" ? "File Excel đã xử lý xong." : `Đang kiểm tra trạng thái (${job.attempts}/60).` }}
+                    </div>
+                    <div class="mt-3 flex gap-2">
+                      <a-button v-if="job.status === 'done' && job.fileUrl" type="primary" size="small" @click="downloadSignatureImageFile(job)">Tải file</a-button>
+                      <a-button danger size="small" @click="removeSignatureImageJob(job.trackId)">Xóa</a-button>
+                    </div>
                   </div>
-                  <div class="mt-1 text-sm text-slate-500">
-                    {{ signatureImageExportStore.status === "done" ? "File Excel đã xử lý xong." : `Đang kiểm tra trạng thái (${signatureImageExportStore.attempts}/60).` }}
-                  </div>
-                  <a-button v-if="signatureImageExportStore.status === 'done' && signatureImageExportStore.fileUrl" type="primary" size="small" class="mt-3" @click="downloadSignatureImageFile">Tải file</a-button>
                 </div>
               </div>
             </div>
@@ -32,7 +40,7 @@
           </div>
         </template>
 
-        <a-badge :dot="Boolean(signatureImageExportStore.trackId)">
+        <a-badge :dot="Boolean(signatureExportJobs.length)">
           <button type="button" class="flex h-10 w-10 items-center justify-center rounded-full text-xl text-gray-300 transition-colors hover:bg-gray-700/70 hover:text-white" aria-label="Thông báo">
             <BellOutlined />
           </button>
@@ -144,6 +152,7 @@ const changePasswordForm = reactive({
   newPassword: "",
   confirmPassword: "",
 });
+const signatureExportJobs = computed(() => signatureImageExportStore.jobs);
 
 const resetChangePasswordForm = () => {
   Object.assign(changePasswordForm, {
@@ -163,20 +172,24 @@ const closeChangePasswordModal = () => {
   resetChangePasswordForm();
 };
 
-const downloadSignatureImageFile = () => {
-  if (!signatureImageExportStore.fileUrl) return;
+const downloadSignatureImageFile = job => {
+  if (!job?.fileUrl) return;
 
   const link = document.createElement("a");
-  link.href = signatureImageExportStore.fileUrl;
+  link.href = job.fileUrl;
   link.target = "_blank";
   link.rel = "noopener noreferrer";
-  link.download = "";
+  link.download = job.fileName || "";
   document.body.appendChild(link);
   link.click();
   link.remove();
 
-  notification.destroy("signature-image-export");
-  signatureImageExportStore.clear();
+  removeSignatureImageJob(job.trackId);
+};
+
+const removeSignatureImageJob = trackId => {
+  notification.destroy(`signature-image-export-${trackId}`);
+  signatureImageExportStore.remove(trackId);
 };
 
 const submitChangePassword = async () => {

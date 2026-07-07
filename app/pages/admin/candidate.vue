@@ -366,7 +366,8 @@ const exportSignatureImageList = async () => {
       throw new Error("Không nhận được mã theo dõi file");
     }
 
-    signatureImageExportStore.start(trackId);
+    const fileName = responseData?.data?.fileName || `danh-sach-diem-danh-hinh-anh-${selectedExamId.value}.xlsx`;
+    signatureImageExportStore.start(trackId, fileName);
     exportVisible.value = false;
     message.success(responseData?.message || "Yêu cầu xuất Excel đang được xử lý.");
   } catch (error) {
