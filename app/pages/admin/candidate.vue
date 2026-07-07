@@ -104,7 +104,7 @@ definePageMeta({
 });
 
 const config = useRuntimeConfig();
-const { adminCandidate } = useApi();
+const { adminCandidate, adminSignatureList, adminSignatureImageList } = useApi();
 const adminStore = useAdminStore();
 const signatureImageExportStore = useSignatureImageExportStore();
 
@@ -295,32 +295,46 @@ const exportCandidates = () =>
     errorMessage: "Xuất dữ liệu danh sách thí sinh thất bại",
   });
 
-const exportSignatureList = () =>
-  downloadCandidateExport({
-    path: "export-signature-list",
-    type: "signature",
-    fallbackFileName: `danh-sach-diem-danh-${selectedExamId.value}.xlsx`,
-    successMessage: "Xuất danh sách điểm danh thành công",
-    errorMessage: "Xuất danh sách điểm danh thất bại",
-  });
-
-const fetchAdminJson = async (path, params = {}) => {
-  const requestUrl = new URL(`/api/admin/examList/${path}`, config.public.baseURL);
-  Object.entries(params).forEach(([key, value]) => requestUrl.searchParams.set(key, String(value)));
-
-  const response = await fetch(requestUrl.toString(), {
-    method: "GET",
-    headers: {
-      Authorization: `Bearer ${adminStore.token}`,
-    },
-  });
-  const responseData = await response.json().catch(() => null);
-
-  if (!response.ok || responseData?.success === false) {
-    throw new Error(responseData?.message || "Không thể xử lý yêu cầu xuất file");
+const exportSignatureList = async () => {
+  if (!selectedExamId.value) {
+    message.warning("Vui lòng chọn kỳ tuyển sinh");
+    return;
   }
 
-  return responseData;
+  exportLoading.value = true;
+  exportType.value = "signature";
+
+  try {
+    const { data, error } = await adminSignatureList.get({
+      params: {
+        idExam: selectedExamId.value,
+      },
+      responseType: "blob",
+      key: `admin-signature-list-${selectedExamId.value}-${Date.now()}`,
+    });
+
+    if (error.value || !data.value) {
+      throw new Error(error.value?.data?.message || error.value?.message || "Xuất danh sách điểm danh thất bại");
+    }
+
+    const downloadUrl = window.URL.createObjectURL(data.value);
+    const link = document.createElement("a");
+
+    link.href = downloadUrl;
+    link.download = `danh-sach-diem-danh-${selectedExamId.value}.xlsx`;
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    window.URL.revokeObjectURL(downloadUrl);
+
+    message.success("Xuất danh sách điểm danh thành công");
+    exportVisible.value = false;
+  } catch (error) {
+    message.error(error?.message || "Xuất danh sách điểm danh thất bại");
+  } finally {
+    exportLoading.value = false;
+    exportType.value = null;
+  }
 };
 
 const exportSignatureImageList = async () => {
@@ -336,9 +350,17 @@ const exportSignatureImageList = async () => {
 
   exportImageLoading.value = true;
   try {
-    const responseData = await fetchAdminJson("export-signature-list-image", {
-      idExam: selectedExamId.value,
+    const { data, error } = await adminSignatureImageList.get({
+      params: {
+        idExam: selectedExamId.value,
+      },
+      key: `admin-signature-image-list-${selectedExamId.value}-${Date.now()}`,
     });
+    if (error.value || data.value?.success === false) {
+      throw new Error(error.value?.data?.message || data.value?.message || "Không thể tạo danh sách điểm danh hình ảnh");
+    }
+
+    const responseData = data.value;
     const trackId = responseData?.data?.trackId;
     if (!trackId) {
       throw new Error("Không nhận được mã theo dõi file");
