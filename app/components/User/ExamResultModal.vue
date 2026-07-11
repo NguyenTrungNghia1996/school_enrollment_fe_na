@@ -12,31 +12,41 @@
     </div>
 
     <div v-else-if="result" class="space-y-6">
-      <section>
-        <h3 class="text-base font-bold text-cyan-700">Thông tin dự thi</h3>
-        <div class="mt-4 grid gap-4 border-b border-slate-200 pb-5 text-sm sm:grid-cols-2">
+      <section class="rounded-2xl border border-slate-200 p-5">
+        <h3 class="text-base font-bold text-cyan-700">Thông tin học sinh</h3>
+        <div class="mt-4 grid gap-4 text-sm sm:grid-cols-2">
+          <div>
+            <span class="text-slate-500">Họ và tên:</span>
+            <span class="ml-2 font-semibold text-slate-900">{{ result.fullName || "-" }}</span>
+          </div>
+          <div>
+            <span class="text-slate-500">Mã học sinh:</span>
+            <span class="ml-2 font-semibold text-slate-900">{{ studentCode }}</span>
+          </div>
           <div class="sm:col-span-2">
             <span class="text-slate-500">Kỳ tuyển sinh:</span>
             <span class="ml-2 font-semibold text-slate-900">{{ result.examName || "-" }}</span>
           </div>
+        </div>
+      </section>
+
+      <section class="rounded-2xl border border-slate-200 p-5">
+        <h3 class="text-base font-bold text-cyan-700">Phòng kiểm tra</h3>
+        <div class="mt-4 grid gap-4 text-sm sm:grid-cols-2">
           <div>
             <span class="text-slate-500">Số báo danh:</span>
             <span class="ml-2 font-semibold text-slate-900">{{ result.examNumber || "-" }}</span>
           </div>
           <div>
-            <span class="text-slate-500">Phòng thi:</span>
+            <span class="text-slate-500">Phòng kiểm tra:</span>
             <span class="ml-2 font-semibold text-slate-900">{{ result.room || "-" }}</span>
-          </div>
-          <div class="sm:col-span-2">
-            <span class="text-slate-500">Họ tên:</span>
-            <span class="ml-2 font-semibold text-slate-900">{{ result.fullName || "-" }}</span>
           </div>
         </div>
       </section>
 
-      <section v-if="canDisplayScores">
-        <h3 class="text-base font-bold text-cyan-700">Thông tin điểm thi</h3>
-        <div class="mt-4 grid gap-4 border-slate-200 pb-5 text-sm sm:grid-cols-3">
+      <section v-if="canDisplayScores" class="rounded-2xl border border-slate-200 p-5">
+        <h3 class="text-base font-bold text-cyan-700">Kết quả kiểm tra đánh giá năng lực</h3>
+        <div class="mt-4 grid gap-4 text-sm sm:grid-cols-3">
           <div>
             <span>Toán:</span>
             <span class="ml-2 font-semibold text-slate-900">{{ formatScore(result.mathScore) }}</span>
@@ -49,19 +59,28 @@
             <span>Tiếng Anh:</span>
             <span class="ml-2 font-semibold text-slate-900">{{ formatScore(result.englishScore) }}</span>
           </div>
-          <div class="font-semibold sm:col-span-3">
+          <div>
+            <span>Điểm ưu tiên:</span>
+            <span class="ml-2 font-semibold text-slate-900">{{ formatScore(priorityPoint) }}</span>
+          </div>
+          <div>
+            <span>Điểm khuyến khích:</span>
+            <span class="ml-2 font-semibold text-slate-900">{{ formatScore(bonusPoint) }}</span>
+          </div>
+          <div>
+            <span>Điểm chuẩn trúng tuyển:</span>
+            <span class="ml-2 font-semibold text-slate-900">{{ formatScore(admissionScore) }}</span>
+          </div>
+          <div class="border-t border-slate-200 pt-4 font-semibold sm:col-span-3">
             <span>Tổng điểm:</span>
-            <span class="ml-2 text-slate-900">{{ totalScore }}</span>
+            <span class="ml-2 text-lg text-slate-900">{{ formatScore(totalScore) }}</span>
           </div>
         </div>
       </section>
 
-      <section v-if="canDisplayAdmission && admissionResult" class="border-t border-slate-200 pt-5">
-        <h3 class="text-base font-bold text-cyan-700">Thông tin kết quả tuyển sinh</h3>
-        <div class="mt-5 space-y-4 text-sm leading-6 text-slate-800">
-          <div class="text-base font-bold uppercase text-slate-950">[{{ admissionResult.title }}]</div>
-          <p class="mb-0">{{ admissionResult.description }}</p>
-        </div>
+      <section v-if="canDisplayAdmission && admissionResult" class="rounded-2xl border p-5" :class="admissionResult.className">
+        <h3 class="text-base font-bold">Kết quả</h3>
+        <div class="mt-3 text-xl font-extrabold uppercase">{{ admissionResult.title }}</div>
       </section>
 
       <div class="flex justify-end pt-6"><a-button class="min-w-24" @click="emit('close')">Quay lại</a-button></div>
@@ -81,6 +100,10 @@ const EXAM_STATUS = { SUMMARIZED: 3, COMPLETED: 4 };
 const statusId = computed(() => Number(result.value?.idExamStatus));
 const canDisplayScores = computed(() => Number.isFinite(statusId.value) && statusId.value >= EXAM_STATUS.SUMMARIZED);
 const canDisplayAdmission = computed(() => Number.isFinite(statusId.value) && statusId.value >= EXAM_STATUS.COMPLETED);
+const studentCode = computed(() => result.value?.studentCode || result.value?.student_code || result.value?.applicationCode || "-");
+const priorityPoint = computed(() => result.value?.priority_point ?? result.value?.priorityPoint);
+const bonusPoint = computed(() => result.value?.bonus_point ?? result.value?.bonusPoint);
+const admissionScore = computed(() => result.value?.admissionScore ?? result.value?.cutoffScore ?? result.value?.benchmarkScore ?? result.value?.passingScore);
 
 const normalizeScore = value => {
   if (value === null || value === undefined || value === "") return null;
@@ -92,13 +115,15 @@ const formatScore = value => {
   return score === null ? "-" : score.toFixed(2).replace(/\.?0+$/, "");
 };
 const totalScore = computed(() => {
-  const scores = [result.value?.mathScore, result.value?.literatureScore, result.value?.englishScore].map(normalizeScore);
-  return scores.some(score => score === null) ? "-" : formatScore(scores.reduce((sum, score) => sum + score, 0));
+  const subjectScores = [result.value?.mathScore, result.value?.literatureScore, result.value?.englishScore].map(normalizeScore);
+  if (subjectScores.some(score => score === null)) return null;
+
+  const extraScores = [priorityPoint.value, bonusPoint.value].map(normalizeScore);
+  return [...subjectScores, ...extraScores].reduce((total, score) => total + (score ?? 0), 0);
 });
 const admissionResult = computed(() => {
-  if (result.value?.isDirect === true) return { title: "Trúng tuyển thẳng", description: "Chúc mừng thí sinh đã trúng tuyển thẳng." };
-  if (result.value?.isAdmitted === true) return { title: "Trúng tuyển", description: "Chúc mừng thí sinh đã trúng tuyển." };
-  if (result.value?.isAdmitted === false) return { title: "Không trúng tuyển", description: "Thí sinh chưa đạt điều kiện trúng tuyển trong kỳ tuyển sinh này." };
+  if (result.value?.isDirect === true || result.value?.isAdmitted === true) return { title: "Trúng tuyển", className: "border-emerald-200 bg-emerald-50 text-emerald-700" };
+  if (result.value?.isAdmitted === false) return { title: "Không trúng tuyển", className: "border-rose-200 bg-rose-50 text-rose-700" };
   return null;
 });
 

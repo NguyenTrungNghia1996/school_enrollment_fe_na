@@ -19,14 +19,22 @@
 
     <ClientOnly>
       <div class="overflow-x-auto lg:block">
-        <a-table :columns="columns" :data-source="dataSource" :pagination="pagination" :loading="loading" :scroll="{ x: 1000 }" bordered size="small" row-key="_rowKey" @change="handleTableChange">
+        <a-table :columns="columns" :data-source="dataSource" :pagination="pagination" :loading="loading" :scroll="{ x: 1800 }" bordered size="small" row-key="_rowKey" @change="handleTableChange">
           <template #bodyCell="{ column, record, index }">
             <template v-if="column.key === 'stt'">
               {{ record.stt || (pagination.current - 1) * pagination.pageSize + index + 1 }}
             </template>
 
-            <template v-else-if="column.key === 'mathScore' || column.key === 'literatureScore' || column.key === 'englishScore'">
+            <template v-else-if="scoreColumnKeys.includes(column.key)">
               <span class="font-medium text-slate-700">{{ formatScore(record[column.dataIndex]) }}</span>
+            </template>
+
+            <template v-else-if="column.key === 'gender'">
+              {{ formatGender(record.gender) }}
+            </template>
+
+            <template v-else-if="column.key === 'dateOfBirth'">
+              {{ formatDate(record.dateOfBirth) }}
             </template>
           </template>
         </a-table>
@@ -98,11 +106,19 @@ const pagination = reactive({
 const columns = [
   { title: "STT", key: "stt", width: 70, align: "center" },
   { title: "Số báo danh", dataIndex: "examNumber", key: "examNumber", width: 140, align: "center" },
-  { title: "Họ tên", dataIndex: "fullName", key: "fullName", ellipsis: true },
+  { title: "Họ tên", dataIndex: "fullName", key: "fullName", width: 200, ellipsis: true },
+  { title: "Giới tính", dataIndex: "gender", key: "gender", width: 100, align: "center" },
+  { title: "Ngày sinh", dataIndex: "dateOfBirth", key: "dateOfBirth", width: 120, align: "center" },
+  { title: "Dân tộc", dataIndex: "ethnicityName", key: "ethnicityName", width: 120, align: "center" },
   { title: "Điểm Toán", dataIndex: "mathScore", key: "mathScore", width: 130, align: "center" },
   { title: "Điểm Ngữ văn", dataIndex: "literatureScore", key: "literatureScore", width: 140, align: "center" },
   { title: "Điểm Tiếng Anh", dataIndex: "englishScore", key: "englishScore", width: 150, align: "center" },
+  { title: "Điểm ưu tiên", dataIndex: "priority_point", key: "priority_point", width: 140, align: "center" },
+  { title: "Điểm khuyến khích", dataIndex: "bonus_point", key: "bonus_point", width: 170, align: "center" },
+  { title: "Tổng điểm", dataIndex: "totalScore", key: "totalScore", width: 130, align: "center", fixed: "right" },
 ];
+
+const scoreColumnKeys = ["mathScore", "literatureScore", "englishScore", "priority_point", "bonus_point", "totalScore"];
 
 const params = ref({
   pageIndex: 1,
@@ -321,6 +337,19 @@ const formatScore = value => {
   if (value === undefined || value === null || value === "") return "-";
   const numericValue = Number(value);
   return Number.isFinite(numericValue) ? numericValue.toFixed(2) : value;
+};
+
+const formatGender = value => {
+  if (value === 1 || value === true || value === "1") return "Nam";
+  if (value === 0 || value === false || value === "0") return "Nữ";
+  return "-";
+};
+
+const formatDate = value => {
+  if (!value) return "-";
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "-";
+  return new Intl.DateTimeFormat("vi-VN", { timeZone: "Asia/Ho_Chi_Minh" }).format(date);
 };
 
 useHead({
