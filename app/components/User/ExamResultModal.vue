@@ -32,14 +32,20 @@
 
       <section class="rounded-2xl border border-slate-200 p-5">
         <h3 class="text-base font-bold text-cyan-700">Phòng kiểm tra</h3>
-        <div class="mt-4 grid gap-4 text-sm sm:grid-cols-2">
-          <div>
-            <span class="text-slate-500">Số báo danh:</span>
-            <span class="ml-2 font-semibold text-slate-900">{{ result.examNumber || "-" }}</span>
+        <div class="mt-4 grid gap-4 text-sm sm:grid-cols-2 sm:divide-x sm:divide-slate-200">
+          <div class="space-y-4 sm:pr-4">
+            <div>
+              <span class="text-slate-500">Số báo danh:</span>
+              <span class="ml-2 font-semibold text-slate-900">{{ result.examNumber || "-" }}</span>
+            </div>
+            <div>
+              <span class="text-slate-500">Phòng kiểm tra:</span>
+              <span class="ml-2 font-semibold text-slate-900">{{ result.room || "-" }}</span>
+            </div>
           </div>
-          <div>
-            <span class="text-slate-500">Phòng kiểm tra:</span>
-            <span class="ml-2 font-semibold text-slate-900">{{ result.room || "-" }}</span>
+          <div class="sm:pl-4">
+            <span class="text-slate-500">Điểm trúng tuyển:</span>
+            <span class="ml-2 font-semibold text-slate-900">{{ formatScore(admissionScore) }}</span>
           </div>
         </div>
       </section>
@@ -66,10 +72,6 @@
           <div>
             <span>Điểm khuyến khích:</span>
             <span class="ml-2 font-semibold text-slate-900">{{ formatScore(bonusPoint) }}</span>
-          </div>
-          <div>
-            <span>Điểm chuẩn trúng tuyển:</span>
-            <span class="ml-2 font-semibold text-slate-900">{{ formatScore(admissionScore) }}</span>
           </div>
           <div class="border-t border-slate-200 pt-4 font-semibold sm:col-span-3">
             <span>Tổng điểm:</span>
