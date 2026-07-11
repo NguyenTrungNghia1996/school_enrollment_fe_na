@@ -363,7 +363,9 @@ const handlePageChange = (page, pageSize) => {
   params.value.pageSize = pageSize;
 };
 
-const canViewExamResult = record => Boolean(record?.hasRoom);
+// Chỉ hiển thị khi hồ sơ thực sự đã có điểm; có phòng thi chưa đồng nghĩa
+// với việc kết quả của kỳ tuyển sinh đã được công bố.
+const canViewExamResult = record => Boolean(record?.hasScores);
 const canCreateReview = record => Boolean(record?.hasScores);
 const getStatusColor = value => getApplicationStatusColor(value);
 const getStatusLabel = value => getApplicationStatusLabel(value);

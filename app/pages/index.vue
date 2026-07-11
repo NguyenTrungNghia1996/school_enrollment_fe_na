@@ -55,7 +55,8 @@
                 </article>
               </div>
 
-              <div class="flex justify-end border-t border-slate-100 px-5 py-4 sm:px-7">
+              <div class="flex justify-end gap-3 border-t border-slate-100 px-5 py-4 sm:px-7">
+                <a-button v-if="canViewExamResult(activeExam)" class="h-11 rounded-lg px-7 font-bold" :loading="openingResultExamId === activeExam.id" @click="openExamResult(activeExam)">KẾT QUẢ</a-button>
                 <a-button type="primary" class="h-11 rounded-lg bg-primary px-7 font-bold hover:bg-primary/90" :disabled="isExamActionDisabled(activeExam)" :loading="openingApplicationExamId === activeExam.id" @click="handleRegistration(activeExam)">
                   {{ getExamActionLabel(activeExam) }}
                 </a-button>
@@ -181,6 +182,8 @@
         </div>
       </div>
     </a-modal>
+
+    <UserExamResultModal :open="examResultVisible" :application-id="resultApplicationId" @close="closeExamResult" />
 
     <a-modal v-model:open="paymentVisible" title="Thanh toán hồ sơ" style="top: 0px" :width="960" :footer="null" @cancel="closePaymentModal">
       <div v-if="qrLoading" class="py-12 text-center">
@@ -360,6 +363,9 @@ const applicationDetailVisible = ref(false);
 const applicationDetailLoading = ref(false);
 const applicationDetail = ref(null);
 const openingApplicationExamId = ref(null);
+const openingResultExamId = ref(null);
+const examResultVisible = ref(false);
+const resultApplicationId = ref(undefined);
 const paymentVisible = ref(false);
 const qrData = ref(null);
 const qrLoading = ref(false);
@@ -672,6 +678,35 @@ const handleExamPageChange = async page => {
 };
 
 const hasExamApplication = exam => Boolean(exam?.hasApplication);
+const canViewExamResult = exam => userStore.token && hasExamApplication(exam) && Number(exam?.idExamStatus) >= EXAM_STATUS.SUMMARIZED;
+
+const openExamResult = async exam => {
+  if (!canViewExamResult(exam)) return;
+  openingResultExamId.value = exam.id;
+  try {
+    // Tra hồ sơ theo chính id kỳ tuyển sinh đang hiển thị để không lấy nhầm
+    // kết quả khi người dùng tham gia nhiều kỳ khác nhau.
+    const { data, error } = await applicationUser.getByRest("detail/exam", {
+      params: { idExam: Number(exam.id) },
+      key: `home-result-application-${exam.id}-${Date.now()}`,
+    });
+    const applicationId = Number(data.value?.data?.id);
+    if (error.value || data.value?.success === false || !Number.isFinite(applicationId) || applicationId <= 0) {
+      throw new Error(error.value?.data?.message || data.value?.message || "Không xác định được hồ sơ của kỳ tuyển sinh");
+    }
+    resultApplicationId.value = applicationId;
+    examResultVisible.value = true;
+  } catch (error) {
+    safeMessage.error(error?.message || "Không thể tải kết quả kỳ tuyển sinh");
+  } finally {
+    openingResultExamId.value = null;
+  }
+};
+
+const closeExamResult = () => {
+  examResultVisible.value = false;
+  resultApplicationId.value = undefined;
+};
 
 const isExamWithinRegistrationWindow = exam => {
   const startDate = toVietnamDayjs(exam?.startDate);
