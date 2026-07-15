@@ -3,7 +3,7 @@ services:
     #build:
     # context: .
     # dockerfile: Dockerfile
-    image: registry.nguyenanh-est.com/nguyen_anh_est/school_enrollment_fe:latest
+    image: registry.nguyenanhtsc.com/nguyen_anh_est/school_enrollment_fe:latest
     container_name: school_enrollment_fe
     restart: unless-stopped
     environment:
